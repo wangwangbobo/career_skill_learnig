@@ -23,7 +23,7 @@ export async function testClaudePrompt() {
     mode: {
       type: "regular",
     },
-    prompt: [{ role: "user", content: [{ type: "text", text: "你好" }] }],
+    prompt: [{ role: "user", content: [{ type: "text", text: "Hello" }] }],
     maxTokens: 1024,
     temperature: 0.7,
     providerMetadata: {
@@ -47,7 +47,7 @@ export async function testClaudeStream() {
     mode: {
       type: "regular",
     },
-    prompt: [{ role: "user", content: [{ type: "text", text: "你好" }] }],
+    prompt: [{ role: "user", content: [{ type: "text", text: "Hello" }] }],
     maxTokens: 1024,
     temperature: 0.7,
     providerMetadata: {
@@ -110,7 +110,7 @@ export async function testToolsPrompt() {
     },
     prompt: [
       { role: "system", content: "You are a helpful AI assistant" },
-      { role: "user", content: [{ type: "text", text: "搜索最近的国家大事" }] },
+      { role: "user", content: [{ type: "text", text: "Search for recent national affairs" }] },
     ],
     maxTokens: 1024,
     temperature: 0.7,

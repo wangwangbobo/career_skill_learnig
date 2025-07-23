@@ -77,7 +77,7 @@ async function testRetryGenerate() {
   let result = await client.call({
     maxTokens: 1024,
     temperature: 0.7,
-    messages: [{ role: "user", content: [{ type: "text", text: "你好" }] }],
+    messages: [{ role: "user", content: [{ type: "text", text: "Hello" }] }],
   });
 
   console.log(JSON.stringify(result, null, 2));
@@ -91,7 +91,7 @@ async function testOpenaiStream() {
   let result = await client.callStream({
     maxTokens: 1024,
     temperature: 0.7,
-    messages: [{ role: "user", content: [{ type: "text", text: "你好" }] }],
+    messages: [{ role: "user", content: [{ type: "text", text: "Hello" }] }],
   });
 
   console.log(JSON.stringify(result, null, 2));
@@ -154,7 +154,7 @@ export async function testToolsPrompt() {
     },
     messages: [
       { role: "system", content: "You are a helpful AI assistant" },
-      { role: "user", content: [{ type: "text", text: "搜索最近的国家大事" }] },
+      { role: "user", content: [{ type: "text", text: "Search for recent national affairs" }] },
     ],
     maxTokens: 1024,
     temperature: 0.7,
@@ -181,7 +181,7 @@ async function testImage() {
             image: toImage(imageBase64),
             mimeType: "image/jpeg",
           },
-          { type: "text", text: "图片中包含什么？" },
+          { type: "text", text: "What is included in the picture?" },
         ],
       },
     ],
@@ -221,7 +221,7 @@ export async function testImageToolsPrompt(llm: "openai" | "claude") {
       { role: "system", content: "You are a helpful AI assistant" },
       {
         role: "user",
-        content: [{ type: "text", text: "帮我随机生成文字手写图片" }],
+        content: [{ type: "text", text: "Help me randomly generate handwritten text images" }],
       },
       {
         role: "assistant",

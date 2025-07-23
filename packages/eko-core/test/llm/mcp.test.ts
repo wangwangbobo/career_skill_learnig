@@ -12,7 +12,7 @@ async function testMCP() {
     nodeId: "1",
     environment: "browser",
     agent_name: "Browser",
-    prompt: "查找香港AI前端开发工作",
+    prompt: "Search for Hong Kong AI development jobs",
     browser_url: "https://www.linkedin.com/jobs/",
     params: {},
   });
