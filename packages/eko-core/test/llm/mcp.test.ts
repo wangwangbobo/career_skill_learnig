@@ -2,7 +2,7 @@ import Log from "../../src/common/log";
 import { sleep } from "../../src/common/utils";
 import { SimpleSseMcpClient } from "../../src/mcp";
 
-async function testMCP() {
+async function testSseMCP() {
   Log.setLevel(0);
   let sseUrl = "http://localhost:8083/sse";
   let mcpClient = new SimpleSseMcpClient(sseUrl);
@@ -31,5 +31,5 @@ async function testMCP() {
 }
 
 test.only("mcp", async () => {
-  await testMCP();
+  await testSseMCP();
 });

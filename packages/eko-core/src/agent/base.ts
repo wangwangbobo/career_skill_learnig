@@ -25,13 +25,13 @@ import {
   HumanCallback,
 } from "../types";
 import {
-  LanguageModelV1FilePart,
-  LanguageModelV1FunctionTool,
-  LanguageModelV1ImagePart,
-  LanguageModelV1Prompt,
-  LanguageModelV1TextPart,
-  LanguageModelV1ToolCallPart,
-  LanguageModelV1ToolResultPart,
+  LanguageModelV2FilePart,
+  LanguageModelV2FunctionTool,
+  LanguageModelV2Prompt,
+  LanguageModelV2TextPart,
+  LanguageModelV2ToolCallPart,
+  LanguageModelV2ToolResultPart,
+  LanguageModelV2ToolResultOutput,
 } from "@ai-sdk/provider";
 import { callAgentLLM } from "./llm";
 
@@ -71,7 +71,9 @@ export class Agent {
     let agentContext = new AgentContext(context, this, agentChain);
     try {
       this.agentContext = agentContext;
-      mcpClient && !mcpClient.isConnected() && (await mcpClient.connect(context.controller.signal));
+      mcpClient &&
+        !mcpClient.isConnected() &&
+        (await mcpClient.connect(context.controller.signal));
       return this.runWithContext(agentContext, mcpClient, config.maxReactNum);
     } finally {
       mcpClient && (await mcpClient.close());
@@ -82,14 +84,14 @@ export class Agent {
     agentContext: AgentContext,
     mcpClient?: IMcpClient,
     maxReactNum: number = 100,
-    historyMessages: LanguageModelV1Prompt = []
+    historyMessages: LanguageModelV2Prompt = []
   ): Promise<string> {
     let loopNum = 0;
     this.agentContext = agentContext;
     let context = agentContext.context;
     let agentNode = agentContext.agentChain.agent;
     const tools = [...this.tools, ...this.system_auto_tools(agentNode)];
-    const messages: LanguageModelV1Prompt = [
+    const messages: LanguageModelV2Prompt = [
       {
         role: "system",
         content: await this.buildSystemPrompt(agentContext, tools),
@@ -151,9 +153,9 @@ export class Agent {
 
   protected async handleCallResult(
     agentContext: AgentContext,
-    messages: LanguageModelV1Prompt,
+    messages: LanguageModelV2Prompt,
     agentTools: Tool[],
-    results: Array<LanguageModelV1TextPart | LanguageModelV1ToolCallPart>
+    results: Array<LanguageModelV2TextPart | LanguageModelV2ToolCallPart>
   ): Promise<string | null> {
     const forceStop = agentContext.variables.get("forceStop");
     if (forceStop) {
@@ -161,8 +163,8 @@ export class Agent {
     }
     let text: string | null = null;
     let context = agentContext.context;
-    let user_messages: LanguageModelV1Prompt = [];
-    let toolResults: LanguageModelV1ToolResultPart[] = [];
+    let user_messages: LanguageModelV2Prompt = [];
+    let toolResults: LanguageModelV2ToolResultPart[] = [];
     results = memory.removeDuplicateToolUse(results);
     if (results.length == 0) {
       return null;
@@ -181,9 +183,9 @@ export class Agent {
       agentContext.agentChain.push(toolChain);
       try {
         let args =
-          typeof result.args == "string"
-            ? JSON.parse(result.args || "{}")
-            : result.args || {};
+          typeof result.input == "string"
+            ? JSON.parse(result.input || "{}")
+            : result.input || {};
         toolChain.params = args;
         let tool = this.getTool(agentTools, result.toolName);
         if (!tool) {
@@ -193,7 +195,7 @@ export class Agent {
         toolChain.updateToolResult(toolResult);
         agentContext.consecutiveErrorNum = 0;
       } catch (e) {
-        Log.error("tool call error: ", result.toolName, result.args, e);
+        Log.error("tool call error: ", result.toolName, result.input, e);
         toolResult = {
           content: [
             {
@@ -218,7 +220,7 @@ export class Agent {
             type: "tool_result",
             toolId: result.toolCallId,
             toolName: result.toolName,
-            params: result.args || {},
+            params: result.input || {},
             toolResult: toolResult,
           },
           agentContext
@@ -284,13 +286,7 @@ export class Agent {
   protected async buildUserPrompt(
     agentContext: AgentContext,
     tools: Tool[]
-  ): Promise<
-    Array<
-      | LanguageModelV1TextPart
-      | LanguageModelV1ImagePart
-      | LanguageModelV1FilePart
-    >
-  > {
+  ): Promise<Array<LanguageModelV2TextPart | LanguageModelV2FilePart>> {
     return [
       {
         type: "text",
@@ -321,15 +317,18 @@ export class Agent {
       if (!mcpClient.isConnected()) {
         await mcpClient.connect(context.controller.signal);
       }
-      let list = await mcpClient.listTools({
-        taskId: context.taskId,
-        nodeId: agentNode?.id,
-        environment: config.platform,
-        agent_name: agentNode?.name || this.name,
-        params: {},
-        prompt: agentNode?.task || context.chain.taskPrompt,
-        ...(mcpParams || {}),
-      }, context.controller.signal);
+      let list = await mcpClient.listTools(
+        {
+          taskId: context.taskId,
+          nodeId: agentNode?.id,
+          environment: config.platform,
+          agent_name: agentNode?.name || this.name,
+          params: {},
+          prompt: agentNode?.task || context.chain.taskPrompt,
+          ...(mcpParams || {}),
+        },
+        context.controller.signal
+      );
       let mcpTools: Tool[] = [];
       for (let i = 0; i < list.length; i++) {
         let toolSchema: ToolSchema = list[i];
@@ -346,7 +345,7 @@ export class Agent {
 
   protected async controlMcpTools(
     agentContext: AgentContext,
-    messages: LanguageModelV1Prompt,
+    messages: LanguageModelV2Prompt,
     loopNum: number
   ): Promise<{
     mcpTools: boolean;
@@ -360,26 +359,29 @@ export class Agent {
   protected toolExecuter(mcpClient: IMcpClient, name: string): ToolExecuter {
     return {
       execute: async function (args, agentContext): Promise<ToolResult> {
-        return await mcpClient.callTool({
-          name: name,
-          arguments: args,
-          extInfo: {
-            taskId: agentContext.context.taskId,
-            nodeId: agentContext.agentChain.agent.id,
-            environment: config.platform,
-            agent_name: agentContext.agent.Name,
+        return await mcpClient.callTool(
+          {
+            name: name,
+            arguments: args,
+            extInfo: {
+              taskId: agentContext.context.taskId,
+              nodeId: agentContext.agentChain.agent.id,
+              environment: config.platform,
+              agent_name: agentContext.agent.Name,
+            },
           },
-        }, agentContext.context.controller.signal);
+          agentContext.context.controller.signal
+        );
       },
     };
   }
 
-  private convertTools(tools: Tool[]): LanguageModelV1FunctionTool[] {
+  private convertTools(tools: Tool[]): LanguageModelV2FunctionTool[] {
     return tools.map((tool) => ({
       type: "function",
       name: tool.name,
       description: tool.description,
-      parameters: tool.parameters,
+      inputSchema: tool.parameters,
     }));
   }
 
@@ -393,68 +395,98 @@ export class Agent {
   }
 
   protected convertToolResult(
-    toolUse: LanguageModelV1ToolCallPart,
+    toolUse: LanguageModelV2ToolCallPart,
     toolResult: ToolResult,
-    user_messages: LanguageModelV1Prompt
-  ): LanguageModelV1ToolResultPart {
-    let text = "";
-    for (let i = 0; i < toolResult.content.length; i++) {
-      let content = toolResult.content[i];
-      if (content.type == "text") {
-        text += (text.length > 0 ? "\n" : "") + content.text;
-      } else {
-        // Only the calude model supports returning images from tool results, while openai only supports text,
-        // Compatible with other AI models that do not support tool results as images.
-        user_messages.push({
-          role: "user",
-          content: [
-            {
-              type: "image",
-              image: toImage(content.data),
-              mimeType: content.mimeType,
-            },
-            { type: "text", text: `call \`${toolUse.toolName}\` tool result` },
-          ],
-        });
-      }
-    }
-    let isError = toolResult.isError == true;
-    if (isError && !text.startsWith("Error")) {
-      text = "Error: " + text;
-    } else if (!isError && text.length == 0) {
-      text = "Successful";
-    }
-    let contentText: {
-      type: "text";
-      text: string;
-    } | null = {
-      type: "text",
-      text: text,
-    };
-    let result: unknown = text;
+    user_messages: LanguageModelV2Prompt
+  ): LanguageModelV2ToolResultPart {
+    let result: LanguageModelV2ToolResultOutput;
     if (
-      text &&
-      ((text.startsWith("{") && text.endsWith("}")) ||
-        (text.startsWith("[") && text.endsWith("]")))
+      toolResult.content.length == 1 &&
+      toolResult.content[0].type == "text"
     ) {
-      try {
-        result = JSON.parse(text);
-        contentText = null;
-      } catch (e) {}
+      let text = toolResult.content[0].text;
+      result = {
+        type: "text",
+        value: text,
+      };
+      let isError = toolResult.isError == true;
+      if (isError && !text.startsWith("Error")) {
+        text = "Error: " + text;
+        result = {
+          type: "error-text",
+          value: text,
+        };
+      } else if (!isError && text.length == 0) {
+        text = "Successful";
+        result = {
+          type: "text",
+          value: text,
+        };
+      }
+      if (
+        text &&
+        ((text.startsWith("{") && text.endsWith("}")) ||
+          (text.startsWith("[") && text.endsWith("]")))
+      ) {
+        try {
+          result = JSON.parse(text);
+          result = {
+            type: "json",
+            value: result,
+          };
+        } catch (e) {}
+      }
+    } else {
+      result = {
+        type: "content",
+        value: [],
+      };
+      for (let i = 0; i < toolResult.content.length; i++) {
+        let content = toolResult.content[i];
+        if (content.type == "text") {
+          result.value.push({
+            type: "text",
+            text: content.text,
+          });
+        } else {
+          // Only the calude model supports returning images from tool results, while openai only supports text,
+          // Compatible with other AI models that do not support tool results as images.
+          /*
+          user_messages.push({
+            role: "user",
+            content: [
+              {
+                type: "file",
+                data: toImage(content.data),
+                mediaType: content.mimeType || "image/png",
+              },
+              { type: "text", text: `call \`${toolUse.toolName}\` tool result` },
+            ],
+          });
+          */
+          let mediaData = content.data;
+          if (mediaData.startsWith("data:")) {
+            mediaData = mediaData.substring(mediaData.indexOf(",") + 1);
+          }
+          result.value.push({
+            type: "media",
+            data: mediaData,
+            mediaType: content.mimeType || "image/png",
+          });
+        }
+      }
     }
     return {
       type: "tool-result",
       toolCallId: toolUse.toolCallId,
       toolName: toolUse.toolName,
-      result: result,
-      content: contentText ? [contentText] : undefined,
-      isError: isError,
+      output: result,
     };
   }
 
   protected async handleMessages(
     agentContext: AgentContext,
-    messages: LanguageModelV1Prompt,
+    messages: LanguageModelV2Prompt,
     tools: Tool[]
   ): Promise<void> {
     // Only keep the last image / file, large tool-text-result

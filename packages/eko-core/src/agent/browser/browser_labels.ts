@@ -2,8 +2,8 @@ import { AgentContext } from "../../core/context";
 import { run_build_dom_tree } from "./build_dom_tree";
 import { BaseBrowserAgent, AGENT_NAME } from "./browser_base";
 import {
-  LanguageModelV1ImagePart,
-  LanguageModelV1Prompt,
+  LanguageModelV2FilePart,
+  LanguageModelV2Prompt,
 } from "@ai-sdk/provider";
 import { Tool, ToolResult, IMcpClient } from "../../types";
 import { mergeTools, sleep, toImage } from "../../common/utils";
@@ -328,30 +328,6 @@ export default abstract class BaseBrowserLabelsAgent extends BaseBrowserAgent {
           );
         },
       },
-      /*
-      {
-        name: "scroll_to_element",
-        description: "Scroll to the element",
-        parameters: {
-          type: "object",
-          properties: {
-            index: {
-              type: "number",
-              description: "The index of the element to input text into",
-            },
-          },
-          required: ["index"],
-        },
-        execute: async (
-          args: Record<string, unknown>,
-          agentContext: AgentContext
-        ): Promise<ToolResult> => {
-          return await this.callInnerTool(() =>
-            this.scroll_to_element(agentContext, args.index as number)
-          );
-        },
-      },
-      */
       {
         name: "scroll_mouse_wheel",
         description:
@@ -554,7 +530,7 @@ export default abstract class BaseBrowserLabelsAgent extends BaseBrowserAgent {
 
   protected async double_screenshots(
     agentContext: AgentContext,
-    messages: LanguageModelV1Prompt,
+    messages: LanguageModelV2Prompt,
     tools: Tool[]
   ): Promise<boolean> {
     return true;
@@ -562,7 +538,7 @@ export default abstract class BaseBrowserLabelsAgent extends BaseBrowserAgent {
 
   protected async handleMessages(
     agentContext: AgentContext,
-    messages: LanguageModelV1Prompt,
+    messages: LanguageModelV2Prompt,
     tools: Tool[]
   ): Promise<void> {
     const pseudoHtmlDescription =
@@ -575,22 +551,22 @@ export default abstract class BaseBrowserLabelsAgent extends BaseBrowserAgent {
       lastTool.toolName !== "variable_storage"
     ) {
       await sleep(300);
-      let image_contents: LanguageModelV1ImagePart[] = [];
+      let image_contents: LanguageModelV2FilePart[] = [];
       if (await this.double_screenshots(agentContext, messages, tools)) {
         let imageResult = await this.screenshot(agentContext);
         let image = toImage(imageResult.imageBase64);
         image_contents.push({
-          type: "image",
-          image: image,
-          mimeType: imageResult.imageType,
+          type: "file",
+          data: image,
+          mediaType: imageResult.imageType,
         });
       }
       let result = await this.screenshot_and_html(agentContext);
       let image = toImage(result.imageBase64);
       image_contents.push({
-        type: "image",
-        image: image,
-        mimeType: result.imageType,
+        type: "file",
+        data: image,
+        mediaType: result.imageType,
       });
       messages.push({
         role: "user",
@@ -608,7 +584,7 @@ export default abstract class BaseBrowserLabelsAgent extends BaseBrowserAgent {
   }
 
   private handlePseudoHtmlText(
-    messages: LanguageModelV1Prompt,
+    messages: LanguageModelV2Prompt,
     pseudoHtmlDescription: string
   ) {
     for (let i = 0; i < messages.length; i++) {

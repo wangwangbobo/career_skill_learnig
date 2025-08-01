@@ -58,6 +58,7 @@ export {
 export {
   mergeTools,
   toImage,
+  toFile,
   convertToolSchema,
   uuidv4,
   call_timeout,

@@ -1,7 +1,7 @@
 import {
-  LanguageModelV1,
-  LanguageModelV1CallOptions,
-  LanguageModelV1StreamPart,
+  LanguageModelV2,
+  LanguageModelV2CallOptions,
+  LanguageModelV2StreamPart,
 } from "@ai-sdk/provider";
 import Log from "../common/log";
 import config from "../config";
@@ -10,7 +10,7 @@ import { call_timeout } from "../common/utils";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createAmazonBedrock } from "@ai-sdk/amazon-bedrock";
-import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import {
   GenerateResult,
   LLMRequest,
@@ -41,14 +41,10 @@ export class RetryLanguageModel {
 
   async call(request: LLMRequest): Promise<GenerateResult> {
     return await this.doGenerate({
-      inputFormat: "messages",
-      mode: {
-        type: "regular",
-        tools: request.tools,
-        toolChoice: request.toolChoice,
-      },
       prompt: request.messages,
-      maxTokens: request.maxTokens,
+      tools: request.tools,
+      toolChoice: request.toolChoice,
+      maxOutputTokens: request.maxTokens,
       temperature: request.temperature,
       topP: request.topP,
       topK: request.topK,
@@ -58,10 +54,10 @@ export class RetryLanguageModel {
   }
 
   async doGenerate(
-    options: LanguageModelV1CallOptions
+    options: LanguageModelV2CallOptions
   ): Promise<GenerateResult> {
-    const maxTokens = options.maxTokens;
-    const providerMetadata = options.providerMetadata;
+    const maxTokens = options.maxOutputTokens;
+    const providerOptions = options.providerOptions;
     const names = [...this.names, ...this.names];
     let lastError;
     for (let i = 0; i < names.length; i++) {
@@ -72,11 +68,12 @@ export class RetryLanguageModel {
         continue;
       }
       if (!maxTokens) {
-        options.maxTokens = llmConfig.config?.maxTokens || config.maxTokens;
+        options.maxOutputTokens =
+          llmConfig.config?.maxTokens || config.maxTokens;
       }
-      if (!providerMetadata) {
-        options.providerMetadata = {};
-        options.providerMetadata[llm.provider] = llmConfig.options || {};
+      if (!providerOptions) {
+        options.providerOptions = {};
+        options.providerOptions[llm.provider] = llmConfig.options || {};
       }
       let _options = options;
       if (llmConfig.handler) {
@@ -92,6 +89,7 @@ export class RetryLanguageModel {
         }
         result.llm = name;
         result.llmConfig = llmConfig;
+        result.text = result.content.find((c) => c.type === "text")?.text;
         return result;
       } catch (e: any) {
         if (e?.name === "AbortError") {
@@ -100,7 +98,7 @@ export class RetryLanguageModel {
         lastError = e;
         if (Log.isEnableInfo()) {
           Log.info(`LLM nonstream request, name: ${name} => `, {
-            tools: (_options.mode as any)?.tools,
+            tools: _options.tools,
             messages: _options.prompt,
           });
         }
@@ -114,14 +112,10 @@ export class RetryLanguageModel {
 
   async callStream(request: LLMRequest): Promise<StreamResult> {
     return await this.doStream({
-      inputFormat: "messages",
-      mode: {
-        type: "regular",
-        tools: request.tools,
-        toolChoice: request.toolChoice,
-      },
       prompt: request.messages,
-      maxTokens: request.maxTokens,
+      tools: request.tools,
+      toolChoice: request.toolChoice,
+      maxOutputTokens: request.maxTokens,
       temperature: request.temperature,
       topP: request.topP,
       topK: request.topK,
@@ -130,9 +124,9 @@ export class RetryLanguageModel {
     });
   }
 
-  async doStream(options: LanguageModelV1CallOptions): Promise<StreamResult> {
-    const maxTokens = options.maxTokens;
-    const providerMetadata = options.providerMetadata;
+  async doStream(options: LanguageModelV2CallOptions): Promise<StreamResult> {
+    const maxTokens = options.maxOutputTokens;
+    const providerOptions = options.providerOptions;
     const names = [...this.names, ...this.names];
     let lastError;
     for (let i = 0; i < names.length; i++) {
@@ -143,11 +137,12 @@ export class RetryLanguageModel {
         continue;
       }
       if (!maxTokens) {
-        options.maxTokens = llmConfig.config?.maxTokens || config.maxTokens;
+        options.maxOutputTokens =
+          llmConfig.config?.maxTokens || config.maxTokens;
       }
-      if (!providerMetadata) {
-        options.providerMetadata = {};
-        options.providerMetadata[llm.provider] = llmConfig.options || {};
+      if (!providerOptions) {
+        options.providerOptions = {};
+        options.providerOptions[llm.provider] = llmConfig.options || {};
       }
       let _options = options;
       if (llmConfig.handler) {
@@ -184,7 +179,7 @@ export class RetryLanguageModel {
         if (Log.isEnableDebug()) {
           Log.debug(`LLM stream body, name: ${name} => `, result.request?.body);
         }
-        let chunk = value as LanguageModelV1StreamPart;
+        let chunk = value as LanguageModelV2StreamPart;
         if (chunk.type == "error") {
           Log.error(`LLM stream error, name: ${name}`, chunk);
           reader.releaseLock();
@@ -201,7 +196,7 @@ export class RetryLanguageModel {
         lastError = e;
         if (Log.isEnableInfo()) {
           Log.info(`LLM stream request, name: ${name} => `, {
-            tools: (_options.mode as any)?.tools,
+            tools: _options.tools,
             messages: _options.prompt,
           });
         }
@@ -213,7 +208,7 @@ export class RetryLanguageModel {
     );
   }
 
-  private async getLLM(name: string): Promise<LanguageModelV1 | null> {
+  private async getLLM(name: string): Promise<LanguageModelV2 | null> {
     const llm = this.llms[name];
     if (!llm) {
       return null;
@@ -240,7 +235,6 @@ export class RetryLanguageModel {
         organization: llm.config?.organization,
         project: llm.config?.project,
         headers: llm.config?.headers,
-        compatibility: llm.config?.compatibility,
       }).languageModel(llm.model);
     } else if (llm.provider == "anthropic") {
       return createAnthropic({
@@ -268,12 +262,12 @@ export class RetryLanguageModel {
         sessionToken: llm.config?.sessionToken,
       }).languageModel(llm.model);
     } else if (llm.provider == "openrouter") {
-      return createOpenRouter({
+      return createOpenAICompatible({
+        name: llm.model,
         apiKey: apiKey,
-        baseURL: baseURL,
+        baseURL: baseURL || "https://openrouter.ai/api/v1",
         fetch: llm.fetch,
         headers: llm.config?.headers,
-        compatibility: llm.config?.compatibility,
       }).languageModel(llm.model);
     } else {
       return llm.provider.languageModel(llm.model);
@@ -281,12 +275,12 @@ export class RetryLanguageModel {
   }
 
   private streamWrapper(
-    parts: LanguageModelV1StreamPart[],
-    reader: ReadableStreamDefaultReader<LanguageModelV1StreamPart>,
+    parts: LanguageModelV2StreamPart[],
+    reader: ReadableStreamDefaultReader<LanguageModelV2StreamPart>,
     abortController: AbortController
-  ): ReadableStream<LanguageModelV1StreamPart> {
+  ): ReadableStream<LanguageModelV2StreamPart> {
     let timer: any = null;
-    return new ReadableStream<LanguageModelV1StreamPart>({
+    return new ReadableStream<LanguageModelV2StreamPart>({
       start: (controller) => {
         if (parts != null && parts.length > 0) {
           for (let i = 0; i < parts.length; i++) {

@@ -28,8 +28,8 @@ export class SimpleSseMcpClient implements IMcpClient {
   private clientName: string;
   private sseHandler?: SseHandler;
   private msgUrl?: string;
-  private pingTimer?: number;
-  private reconnectTimer?: number;
+  private pingTimer?: any;
+  private reconnectTimer?: any;
   private headers: Record<string, string>;
   private protocolVersion: string = "2024-11-05";
   private requestMap: Map<string, (messageData: any) => void>;

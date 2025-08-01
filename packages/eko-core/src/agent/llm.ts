@@ -12,25 +12,25 @@ import {
   StreamResult,
 } from "../types";
 import {
-  LanguageModelV1FunctionTool,
-  LanguageModelV1Prompt,
-  LanguageModelV1StreamPart,
-  LanguageModelV1TextPart,
-  LanguageModelV1ToolCallPart,
-  LanguageModelV1ToolChoice,
+  LanguageModelV2FunctionTool,
+  LanguageModelV2Prompt,
+  LanguageModelV2StreamPart,
+  LanguageModelV2TextPart,
+  LanguageModelV2ToolCallPart,
+  LanguageModelV2ToolChoice,
 } from "@ai-sdk/provider";
 
 export async function callAgentLLM(
   agentContext: AgentContext,
   rlm: RetryLanguageModel,
-  messages: LanguageModelV1Prompt,
-  tools: LanguageModelV1FunctionTool[],
+  messages: LanguageModelV2Prompt,
+  tools: LanguageModelV2FunctionTool[],
   noCompress?: boolean,
-  toolChoice?: LanguageModelV1ToolChoice,
+  toolChoice?: LanguageModelV2ToolChoice,
   retryNum: number = 0,
   callback?: StreamCallback & HumanCallback,
   requestHandler?: (request: LLMRequest) => void
-): Promise<Array<LanguageModelV1TextPart | LanguageModelV1ToolCallPart>> {
+): Promise<Array<LanguageModelV2TextPart | LanguageModelV2ToolCallPart>> {
   await agentContext.context.checkAborted();
   if (messages.length >= config.compressThreshold && !noCompress) {
     await memory.compressAgentMessages(agentContext, rlm, messages, tools);
@@ -91,25 +91,25 @@ export async function callAgentLLM(
   let streamText = "";
   let thinkText = "";
   let toolArgsText = "";
-  let streamId = uuidv4();
+  const streamId = uuidv4();
   let textStreamDone = false;
-  let toolParts: LanguageModelV1ToolCallPart[] = [];
+  const toolParts: LanguageModelV2ToolCallPart[] = [];
   const reader = result.stream.getReader();
   try {
-    let toolPart: LanguageModelV1ToolCallPart | null = null;
+    let toolPart: LanguageModelV2ToolCallPart | null = null;
     while (true) {
       await context.checkAborted();
       const { done, value } = await reader.read();
       if (done) {
         break;
       }
-      let chunk = value as LanguageModelV1StreamPart;
+      const chunk = value as LanguageModelV2StreamPart;
       switch (chunk.type) {
         case "text-delta": {
-          if (toolPart && !chunk.textDelta) {
+          if (toolPart && !chunk.delta) {
             continue;
           }
-          streamText += chunk.textDelta || "";
+          streamText += chunk.delta || "";
           await streamCallback.onMessage(
             {
               taskId: context.taskId,
@@ -131,7 +131,7 @@ export async function callAgentLLM(
                 type: "tool_use",
                 toolId: toolPart.toolCallId,
                 toolName: toolPart.toolName,
-                params: toolPart.args || {},
+                params: toolPart.input || {},
               },
               agentContext
             );
@@ -139,8 +139,8 @@ export async function callAgentLLM(
           }
           break;
         }
-        case "reasoning": {
-          thinkText += chunk.textDelta || "";
+        case "reasoning-delta": {
+          thinkText += chunk.delta || "";
           await streamCallback.onMessage(
             {
               taskId: context.taskId,
@@ -155,7 +155,21 @@ export async function callAgentLLM(
           );
           break;
         }
-        case "tool-call-delta": {
+        case "tool-input-start": {
+          if (toolPart && toolPart.toolCallId == chunk.id) {
+            toolPart.toolName = chunk.toolName;
+          } else {
+            toolPart = {
+              type: "tool-call",
+              toolCallId: chunk.id,
+              toolName: chunk.toolName,
+              input: {},
+            };
+            toolParts.push(toolPart);
+          }
+          break;
+        }
+        case "tool-input-delta": {
           if (!textStreamDone) {
             textStreamDone = true;
             await streamCallback.onMessage(
@@ -171,34 +185,25 @@ export async function callAgentLLM(
               agentContext
             );
           }
-          toolArgsText += chunk.argsTextDelta || "";
+          toolArgsText += chunk.delta || "";
           await streamCallback.onMessage(
             {
               taskId: context.taskId,
               agentName: agentNode.name,
               nodeId: agentNode.id,
               type: "tool_streaming",
-              toolId: chunk.toolCallId,
-              toolName: chunk.toolName,
+              toolId: chunk.id,
+              toolName: toolPart?.toolName || "",
               paramsText: toolArgsText,
             },
             agentContext
           );
-          if (toolPart == null) {
-            toolPart = {
-              type: "tool-call",
-              toolCallId: chunk.toolCallId,
-              toolName: chunk.toolName,
-              args: {},
-            };
-            toolParts.push(toolPart);
-          }
           break;
         }
         case "tool-call": {
           toolArgsText = "";
-          let args = chunk.args ? JSON.parse(chunk.args) : {};
-          let message: StreamCallbackMessage = {
+          const args = chunk.input ? JSON.parse(chunk.input) : {};
+          const message: StreamCallbackMessage = {
             taskId: context.taskId,
             agentName: agentNode.name,
             nodeId: agentNode.id,
@@ -213,10 +218,10 @@ export async function callAgentLLM(
               type: "tool-call",
               toolCallId: chunk.toolCallId,
               toolName: chunk.toolName,
-              args: message.params || args,
+              input: message.params || args,
             });
           } else {
-            toolPart.args = message.params || args;
+            toolPart.input = message.params || args;
             toolPart = null;
           }
           break;
@@ -228,7 +233,7 @@ export async function callAgentLLM(
               agentName: agentNode.name,
               nodeId: agentNode.id,
               type: "file",
-              mimeType: chunk.mimeType,
+              mimeType: chunk.mediaType,
               data: chunk.data as string,
             },
             agentContext
@@ -274,7 +279,7 @@ export async function callAgentLLM(
                 type: "tool_use",
                 toolId: toolPart.toolCallId,
                 toolName: toolPart.toolName,
-                params: toolPart.args || {},
+                params: toolPart.input || {},
               },
               agentContext
             );
@@ -287,7 +292,14 @@ export async function callAgentLLM(
               nodeId: agentNode.id,
               type: "finish",
               finishReason: chunk.finishReason,
-              usage: chunk.usage,
+              usage: {
+                promptTokens: chunk.usage.inputTokens || 0,
+                completionTokens: chunk.usage.outputTokens || 0,
+                totalTokens:
+                  chunk.usage.totalTokens ||
+                  (chunk.usage.inputTokens || 0) +
+                    (chunk.usage.outputTokens || 0),
+              },
             },
             agentContext
           );
@@ -341,7 +353,7 @@ export async function callAgentLLM(
   agentChain.agentResult = streamText;
   return streamText
     ? [
-        { type: "text", text: streamText } as LanguageModelV1TextPart,
+        { type: "text", text: streamText } as LanguageModelV2TextPart,
         ...toolParts,
       ]
     : toolParts;
@@ -349,7 +361,7 @@ export async function callAgentLLM(
 
 function appendUserConversation(
   agentContext: AgentContext,
-  messages: LanguageModelV1Prompt
+  messages: LanguageModelV2Prompt
 ) {
   const userPrompts = agentContext.context.conversation
     .splice(0, agentContext.context.conversation.length)
