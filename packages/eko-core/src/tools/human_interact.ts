@@ -155,9 +155,9 @@ request_help: Request assistance from the user; for instance, when an operation 
             role: "user",
             content: [
               {
-                type: "image",
-                image: image,
-                mimeType: imageResult.imageType,
+                type: "file",
+                data: image,
+                mediaType: imageResult.imageType,
               },
               {
                 type: "text",
