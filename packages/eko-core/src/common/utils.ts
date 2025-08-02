@@ -102,6 +102,38 @@ export function toFile(mediaData: string, type: "base64|url" | "binary|url" = "b
   }
 }
 
+export function getMimeType(data: string): string {
+  let mediaType = "image/png";
+  if (data.startsWith("data:")) {
+    mediaType = data.split(";")[0].split(":")[1];
+  } else if (data.indexOf(".") > -1) {
+    if (data.indexOf(".png") > -1) {
+      mediaType = "image/png";
+    } else if (data.indexOf(".jpg") > -1 || data.indexOf(".jpeg") > -1) {
+      mediaType = "image/jpeg";
+    } else if (data.indexOf(".pdf") > -1) {
+      mediaType = "application/pdf";
+    } else if (data.indexOf(".docx") > -1) {
+      mediaType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+    } else if (data.indexOf(".xlsx") > -1) {
+      mediaType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    } else if (data.indexOf(".pptx") > -1) {
+      mediaType = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+    } else if (data.indexOf(".txt") > -1) {
+      mediaType = "text/plain";
+    } else if (data.indexOf(".md") > -1) {
+      mediaType = "text/markdown";
+    } else if (data.indexOf(".json") > -1) {
+      mediaType = "application/json";
+    } else if (data.indexOf(".xml") > -1) {
+      mediaType = "application/xml";
+    } else if (data.indexOf(".csv") > -1) {
+      mediaType = "text/csv";
+    }
+  }
+  return mediaType;
+}
+
 export function mergeTools<T extends Tool | LanguageModelV2FunctionTool>(tools1: T[], tools2: T[]): T[] {
   let tools: T[] = [];
   let toolMap2 = tools2.reduce((map, tool) => {

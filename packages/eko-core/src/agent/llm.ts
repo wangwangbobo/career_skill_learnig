@@ -3,13 +3,16 @@ import Log from "../common/log";
 import * as memory from "../memory";
 import { RetryLanguageModel } from "../llm";
 import { AgentContext } from "../core/context";
-import { uuidv4, sleep } from "../common/utils";
+import { uuidv4, sleep, toFile, getMimeType } from "../common/utils";
 import {
   LLMRequest,
   StreamCallbackMessage,
   StreamCallback,
   HumanCallback,
   StreamResult,
+  Tool,
+  ToolResult,
+  DialogueTool,
 } from "../types";
 import {
   LanguageModelV2FunctionTool,
@@ -18,7 +21,124 @@ import {
   LanguageModelV2TextPart,
   LanguageModelV2ToolCallPart,
   LanguageModelV2ToolChoice,
+  LanguageModelV2ToolResultOutput,
+  LanguageModelV2ToolResultPart,
 } from "@ai-sdk/provider";
+
+export function convertTools(
+  tools: Tool[] | DialogueTool[]
+): LanguageModelV2FunctionTool[] {
+  return tools.map((tool) => ({
+    type: "function",
+    name: tool.name,
+    description: tool.description,
+    inputSchema: tool.parameters,
+  }));
+}
+
+export function getTool<T extends Tool | DialogueTool>(
+  tools: T[],
+  name: string
+): T | null {
+  for (let i = 0; i < tools.length; i++) {
+    if (tools[i].name == name) {
+      return tools[i];
+    }
+  }
+  return null;
+}
+
+export function convertToolResult(
+  toolUse: LanguageModelV2ToolCallPart,
+  toolResult: ToolResult,
+  user_messages: LanguageModelV2Prompt
+): LanguageModelV2ToolResultPart {
+  let result: LanguageModelV2ToolResultOutput;
+  if (toolResult.content.length == 1 && toolResult.content[0].type == "text") {
+    let text = toolResult.content[0].text;
+    result = {
+      type: "text",
+      value: text,
+    };
+    let isError = toolResult.isError == true;
+    if (isError && !text.startsWith("Error")) {
+      text = "Error: " + text;
+      result = {
+        type: "error-text",
+        value: text,
+      };
+    } else if (!isError && text.length == 0) {
+      text = "Successful";
+      result = {
+        type: "text",
+        value: text,
+      };
+    }
+    if (
+      text &&
+      ((text.startsWith("{") && text.endsWith("}")) ||
+        (text.startsWith("[") && text.endsWith("]")))
+    ) {
+      try {
+        result = JSON.parse(text);
+        result = {
+          type: "json",
+          value: result,
+        };
+      } catch (e) {}
+    }
+  } else {
+    result = {
+      type: "content",
+      value: [],
+    };
+    for (let i = 0; i < toolResult.content.length; i++) {
+      let content = toolResult.content[i];
+      if (content.type == "text") {
+        result.value.push({
+          type: "text",
+          text: content.text,
+        });
+      } else {
+        if (config.toolResultMultimodal) {
+          // Support returning images from tool results
+          let mediaData = content.data;
+          if (mediaData.startsWith("data:")) {
+            mediaData = mediaData.substring(mediaData.indexOf(",") + 1);
+          }
+          result.value.push({
+            type: "media",
+            data: mediaData,
+            mediaType: content.mimeType || "image/png",
+          });
+        } else {
+          // Only the claude model supports returning images from tool results, while openai only supports text,
+          // Compatible with other AI models that do not support tool results as images.
+          user_messages.push({
+            role: "user",
+            content: [
+              {
+                type: "file",
+                data: toFile(content.data),
+                mediaType: content.mimeType || getMimeType(content.data),
+              },
+              {
+                type: "text",
+                text: `call \`${toolUse.toolName}\` tool result`,
+              },
+            ],
+          });
+        }
+      }
+    }
+  }
+  return {
+    type: "tool-result",
+    toolCallId: toolUse.toolCallId,
+    toolName: toolUse.toolName,
+    output: result,
+  };
+}
 
 export async function callAgentLLM(
   agentContext: AgentContext,

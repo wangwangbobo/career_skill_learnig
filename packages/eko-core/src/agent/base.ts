@@ -11,8 +11,7 @@ import {
   VariableStorageTool,
   WatchTriggerTool,
 } from "../tools";
-import { toImage, mergeTools } from "../common/utils";
-import { getAgentSystemPrompt, getAgentUserPrompt } from "../prompt/agent";
+import { mergeTools } from "../common/utils";
 import {
   WorkflowAgent,
   IMcpClient,
@@ -26,14 +25,13 @@ import {
 } from "../types";
 import {
   LanguageModelV2FilePart,
-  LanguageModelV2FunctionTool,
   LanguageModelV2Prompt,
   LanguageModelV2TextPart,
   LanguageModelV2ToolCallPart,
   LanguageModelV2ToolResultPart,
-  LanguageModelV2ToolResultOutput,
 } from "@ai-sdk/provider";
-import { callAgentLLM } from "./llm";
+import { getAgentSystemPrompt, getAgentUserPrompt } from "../prompt/agent";
+import { callAgentLLM, convertTools, getTool, convertToolResult } from "./llm";
 
 export type AgentParams = {
   name: string;
@@ -88,8 +86,8 @@ export class Agent {
   ): Promise<string> {
     let loopNum = 0;
     this.agentContext = agentContext;
-    let context = agentContext.context;
-    let agentNode = agentContext.agentChain.agent;
+    const context = agentContext.context;
+    const agentNode = agentContext.agentChain.agent;
     const tools = [...this.tools, ...this.system_auto_tools(agentNode)];
     const messages: LanguageModelV2Prompt = [
       {
@@ -103,41 +101,41 @@ export class Agent {
       },
     ];
     agentContext.messages = messages;
-    let rlm = new RetryLanguageModel(context.config.llms, this.llms);
+    const rlm = new RetryLanguageModel(context.config.llms, this.llms);
     let agentTools = tools;
     while (loopNum < maxReactNum) {
       await context.checkAborted();
       if (mcpClient) {
-        let controlMcp = await this.controlMcpTools(
+        const controlMcp = await this.controlMcpTools(
           agentContext,
           messages,
           loopNum
         );
         if (controlMcp.mcpTools) {
-          let mcpTools = await this.listTools(
+          const mcpTools = await this.listTools(
             context,
             mcpClient,
             agentNode,
             controlMcp.mcpParams
           );
-          let usedTools = memory.extractUsedTool(messages, agentTools);
-          let _agentTools = mergeTools(tools, usedTools);
+          const usedTools = memory.extractUsedTool(messages, agentTools);
+          const _agentTools = mergeTools(tools, usedTools);
           agentTools = mergeTools(_agentTools, mcpTools);
         }
       }
       await this.handleMessages(agentContext, messages, tools);
-      let results = await callAgentLLM(
+      const results = await callAgentLLM(
         agentContext,
         rlm,
         messages,
-        this.convertTools(agentTools),
+        convertTools(agentTools),
         false,
         undefined,
         0,
         this.callback,
         this.requestHandler
       );
-      let finalResult = await this.handleCallResult(
+      const finalResult = await this.handleCallResult(
         agentContext,
         messages,
         agentTools,
@@ -187,7 +185,7 @@ export class Agent {
             ? JSON.parse(result.input || "{}")
             : result.input || {};
         toolChain.params = args;
-        let tool = this.getTool(agentTools, result.toolName);
+        let tool = getTool(agentTools, result.toolName);
         if (!tool) {
           throw new Error(result.toolName + " tool does not exist");
         }
@@ -226,7 +224,7 @@ export class Agent {
           agentContext
         );
       }
-      let llmToolResult = this.convertToolResult(
+      const llmToolResult = convertToolResult(
         result,
         toolResult,
         user_messages
@@ -373,114 +371,6 @@ export class Agent {
           agentContext.context.controller.signal
         );
       },
-    };
-  }
-
-  private convertTools(tools: Tool[]): LanguageModelV2FunctionTool[] {
-    return tools.map((tool) => ({
-      type: "function",
-      name: tool.name,
-      description: tool.description,
-      inputSchema: tool.parameters,
-    }));
-  }
-
-  private getTool(tools: Tool[], name: string): Tool | null {
-    for (let i = 0; i < tools.length; i++) {
-      if (tools[i].name == name) {
-        return tools[i];
-      }
-    }
-    return null;
-  }
-
-  protected convertToolResult(
-    toolUse: LanguageModelV2ToolCallPart,
-    toolResult: ToolResult,
-    user_messages: LanguageModelV2Prompt
-  ): LanguageModelV2ToolResultPart {
-    let result: LanguageModelV2ToolResultOutput;
-    if (
-      toolResult.content.length == 1 &&
-      toolResult.content[0].type == "text"
-    ) {
-      let text = toolResult.content[0].text;
-      result = {
-        type: "text",
-        value: text,
-      };
-      let isError = toolResult.isError == true;
-      if (isError && !text.startsWith("Error")) {
-        text = "Error: " + text;
-        result = {
-          type: "error-text",
-          value: text,
-        };
-      } else if (!isError && text.length == 0) {
-        text = "Successful";
-        result = {
-          type: "text",
-          value: text,
-        };
-      }
-      if (
-        text &&
-        ((text.startsWith("{") && text.endsWith("}")) ||
-          (text.startsWith("[") && text.endsWith("]")))
-      ) {
-        try {
-          result = JSON.parse(text);
-          result = {
-            type: "json",
-            value: result,
-          };
-        } catch (e) {}
-      }
-    } else {
-      result = {
-        type: "content",
-        value: [],
-      };
-      for (let i = 0; i < toolResult.content.length; i++) {
-        let content = toolResult.content[i];
-        if (content.type == "text") {
-          result.value.push({
-            type: "text",
-            text: content.text,
-          });
-        } else {
-          // Only the calude model supports returning images from tool results, while openai only supports text,
-          // Compatible with other AI models that do not support tool results as images.
-          /*
-          user_messages.push({
-            role: "user",
-            content: [
-              {
-                type: "file",
-                data: toImage(content.data),
-                mediaType: content.mimeType || "image/png",
-              },
-              { type: "text", text: `call \`${toolUse.toolName}\` tool result` },
-            ],
-          });
-          */
-          let mediaData = content.data;
-          if (mediaData.startsWith("data:")) {
-            mediaData = mediaData.substring(mediaData.indexOf(",") + 1);
-          }
-          result.value.push({
-            type: "media",
-            data: mediaData,
-            mediaType: content.mimeType || "image/png",
-          });
-        }
-      }
-    }
-    return {
-      type: "tool-result",
-      toolCallId: toolUse.toolCallId,
-      toolName: toolUse.toolName,
-      output: result,
     };
   }
 
