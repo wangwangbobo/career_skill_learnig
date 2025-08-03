@@ -1,15 +1,16 @@
 import { JSONSchema7 } from "json-schema";
-import { AgentContext } from "../core/context";
-import { Tool, ToolResult } from "../types/tools.types";
+import { EkoDialogue } from "../dialogue";
+import { DialogueTool, ToolResult } from "../../types";
 
-export const TOOL_NAME = "variable_storage";
+export const TOOL_NAME = "taskVariableStorage";
 
-export default class VariableStorageTool implements Tool {
+export default class TaskVariableStorageTool implements DialogueTool {
   readonly name: string = TOOL_NAME;
   readonly description: string;
   readonly parameters: JSONSchema7;
+  private ekoDialogue: EkoDialogue;
 
-  constructor() {
+  constructor(ekoDialogue: EkoDialogue) {
     this.description = `Used for storing, reading, and retrieving variable data, and maintaining input/output variables in task nodes.`;
     this.parameters = {
       type: "object",
@@ -31,12 +32,10 @@ export default class VariableStorageTool implements Tool {
       },
       required: ["operation"],
     };
+    this.ekoDialogue = ekoDialogue;
   }
 
-  async execute(
-    args: Record<string, unknown>,
-    agentContext: AgentContext
-  ): Promise<ToolResult> {
+  async execute(args: Record<string, unknown>): Promise<ToolResult> {
     let operation = args.operation as string;
     let resultText = "";
     switch (operation) {
@@ -49,7 +48,7 @@ export default class VariableStorageTool implements Tool {
           let keys = name.split(",");
           for (let i = 0; i < keys.length; i++) {
             let key = keys[i].trim();
-            let value = agentContext.context.variables.get(key);
+            let value = this.ekoDialogue.getGlobalContext().get(key);
             result[key] = value;
           }
           resultText = JSON.stringify(result);
@@ -66,12 +65,12 @@ export default class VariableStorageTool implements Tool {
           break;
         }
         let key = args.name as string;
-        agentContext.context.variables.set(key.trim(), args.value);
+        this.ekoDialogue.getGlobalContext().set(key.trim(), args.value);
         resultText = "success";
         break;
       }
       case "list_all_variable": {
-        resultText = JSON.stringify([...agentContext.context.variables.keys()]);
+        resultText = JSON.stringify([...this.ekoDialogue.getGlobalContext().keys()]);
         break;
       }
     }
@@ -86,4 +85,4 @@ export default class VariableStorageTool implements Tool {
   }
 }
 
-export { VariableStorageTool };
+export { TaskVariableStorageTool as ActionVariableStorageTool };
