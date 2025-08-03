@@ -211,7 +211,8 @@ export async function callAgentLLM(
   let streamText = "";
   let thinkText = "";
   let toolArgsText = "";
-  const streamId = uuidv4();
+  let textStreamId = uuidv4();
+  let thinkStreamId = uuidv4();
   let textStreamDone = false;
   const toolParts: LanguageModelV2ToolCallPart[] = [];
   const reader = result.stream.getReader();
@@ -225,6 +226,10 @@ export async function callAgentLLM(
       }
       const chunk = value as LanguageModelV2StreamPart;
       switch (chunk.type) {
+        case "text-start": {
+          textStreamId = uuidv4();
+          break;
+        }
         case "text-delta": {
           if (toolPart && !chunk.delta) {
             continue;
@@ -236,7 +241,7 @@ export async function callAgentLLM(
               agentName: agentNode.name,
               nodeId: agentNode.id,
               type: "text",
-              streamId,
+              streamId: textStreamId,
               streamDone: false,
               text: streamText,
             },
@@ -259,6 +264,28 @@ export async function callAgentLLM(
           }
           break;
         }
+        case "text-end": {
+          textStreamDone = true;
+          if (streamText) {
+            await streamCallback.onMessage(
+              {
+                taskId: context.taskId,
+                agentName: agentNode.name,
+                nodeId: agentNode.id,
+                type: "text",
+                streamId: textStreamId,
+                streamDone: true,
+                text: streamText,
+              },
+              agentContext
+            );
+          }
+          break;
+        }
+        case "reasoning-start": {
+          thinkStreamId = uuidv4();
+          break;
+        }
         case "reasoning-delta": {
           thinkText += chunk.delta || "";
           await streamCallback.onMessage(
@@ -267,12 +294,29 @@ export async function callAgentLLM(
               agentName: agentNode.name,
               nodeId: agentNode.id,
               type: "thinking",
-              streamId,
+              streamId: thinkStreamId,
               streamDone: false,
               text: thinkText,
             },
             agentContext
           );
+          break;
+        }
+        case "reasoning-end": {
+          if (thinkText) {
+            await streamCallback.onMessage(
+              {
+                taskId: context.taskId,
+                agentName: agentNode.name,
+                nodeId: agentNode.id,
+                type: "thinking",
+                streamId: thinkStreamId,
+                streamDone: true,
+                text: thinkText,
+              },
+              agentContext
+            );
+          }
           break;
         }
         case "tool-input-start": {
@@ -298,7 +342,7 @@ export async function callAgentLLM(
                 agentName: agentNode.name,
                 nodeId: agentNode.id,
                 type: "text",
-                streamId,
+                streamId: textStreamId,
                 streamDone: true,
                 text: streamText,
               },
@@ -383,7 +427,7 @@ export async function callAgentLLM(
                 agentName: agentNode.name,
                 nodeId: agentNode.id,
                 type: "text",
-                streamId,
+                streamId: textStreamId,
                 streamDone: true,
                 text: streamText,
               },

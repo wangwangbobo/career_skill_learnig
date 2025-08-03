@@ -6,12 +6,13 @@ export * from "./mcp.types";
 
 export type {
   JSONSchema7,
-  LanguageModelV2FilePart,
-  LanguageModelV2FunctionTool,
   LanguageModelV2Prompt,
   LanguageModelV2TextPart,
+  LanguageModelV2FilePart,
+  LanguageModelV2StreamPart,
   LanguageModelV2ToolCallPart,
   LanguageModelV2ToolChoice,
+  LanguageModelV2FunctionTool,
   LanguageModelV2ToolResultPart,
   LanguageModelV2ToolResultOutput,
 } from "@ai-sdk/provider";
