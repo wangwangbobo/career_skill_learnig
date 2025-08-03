@@ -70,9 +70,7 @@ export default class TaskVariableStorageTool implements DialogueTool {
         break;
       }
       case "list_all_variable": {
-        resultText = JSON.stringify(
-          Object.keys(this.ekoDialogue.getGlobalContext())
-        );
+        resultText = JSON.stringify([...this.ekoDialogue.getGlobalContext().keys()]);
         break;
       }
     }

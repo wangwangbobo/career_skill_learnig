@@ -87,7 +87,8 @@ export class Eko {
         taskId,
         success: false,
         stopReason: e?.name == "AbortError" ? "abort" : "error",
-        result: e,
+        result: e ? e.name + ": " + e.message : "Error",
+        error: e,
       };
     }
   }
@@ -193,7 +194,10 @@ export class Eko {
         } else {
           // serial execution
           for (let i = 0; i < parallelAgents.length; i++) {
-            const { result, agentChain } = await doRunAgent(parallelAgents[i], i);
+            const { result, agentChain } = await doRunAgent(
+              parallelAgents[i],
+              i
+            );
             context.chain.push(agentChain);
             agent_results.push(result);
           }
@@ -209,8 +213,8 @@ export class Eko {
     return {
       success: true,
       stopReason: "done",
-      result: results[results.length - 1],
       taskId: context.taskId,
+      result: results[results.length - 1] || "",
     };
   }
 
@@ -233,26 +237,32 @@ export class Eko {
       agentNode.result = await agent.run(context, agentChain);
       agentNode.agent.status = "done";
       this.config.callback &&
-        (await this.config.callback.onMessage({
-          taskId: context.taskId,
-          agentName: agentNode.agent.name,
-          nodeId: agentNode.agent.id,
-          type: "agent_result",
-          agentNode: agentNode.agent,
-          result: agentNode.result,
-        }, agent.AgentContext));
+        (await this.config.callback.onMessage(
+          {
+            taskId: context.taskId,
+            agentName: agentNode.agent.name,
+            nodeId: agentNode.agent.id,
+            type: "agent_result",
+            agentNode: agentNode.agent,
+            result: agentNode.result,
+          },
+          agent.AgentContext
+        ));
       return agentNode.result;
     } catch (e) {
       agentNode.agent.status = "error";
       this.config.callback &&
-        (await this.config.callback.onMessage({
-          taskId: context.taskId,
-          agentName: agentNode.agent.name,
-          nodeId: agentNode.agent.id,
-          type: "agent_result",
-          agentNode: agentNode.agent,
-          error: e,
-        }, agent.AgentContext));
+        (await this.config.callback.onMessage(
+          {
+            taskId: context.taskId,
+            agentName: agentNode.agent.name,
+            nodeId: agentNode.agent.id,
+            type: "agent_result",
+            agentNode: agentNode.agent,
+            error: e,
+          },
+          agent.AgentContext
+        ));
       throw e;
     }
   }

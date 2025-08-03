@@ -61,7 +61,8 @@ async function run() {
     new SimpleComputerAgent(),
     new SimpleFileAgent(),
   ];
-  const dialogue = new EkoDialogue({ llms, agents });
+  const segmentedExecution: boolean = true;
+  const dialogue = new EkoDialogue({ llms, agents, segmentedExecution });
   const result1 = await dialogue.chat({
     user: "Hello",
     callback: {
@@ -78,6 +79,23 @@ async function run() {
     },
   });
   console.log("=================>\nresult2: ", result2);
+  if (segmentedExecution) {
+    const result3 = await dialogue.chat({
+      user: "Modify the plan: search on X and focus on Tesla information",
+      callback: {
+        chatCallback,
+        taskCallback,
+      },
+    });
+    console.log("=================>\nresult3: ", result3);
+    const result4 = await dialogue.segmentedExecution({
+      callback: {
+        chatCallback,
+        taskCallback,
+      },
+    });
+    console.log("=================>\nresult4: ", result4);
+  }
 }
 
 test.only("dialogue", async () => {

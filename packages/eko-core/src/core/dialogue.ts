@@ -1,30 +1,32 @@
 import Log from "../common/log";
 import {
-  DialogueCallback,
-  DialogueParams,
-  DialogueTool,
-  EkoDialogueConfig,
   EkoMessage,
+  ToolResult,
+  DialogueTool,
+  DialogueParams,
+  DialogueCallback,
+  EkoDialogueConfig,
   EkoMessageUserPart,
   LanguageModelV2Prompt,
   LanguageModelV2TextPart,
   LanguageModelV2ToolCallPart,
   LanguageModelV2ToolResultPart,
-  ToolResult,
 } from "../types";
 import {
   callChatLLM,
-  convertAssistantToolResults,
   convertToolResults,
   convertUserContent,
+  convertAssistantToolResults,
 } from "./dialogue/llm";
 import { Eko } from "./eko";
+import TaskPlannerTool, {
+  TOOL_NAME as task_planner,
+} from "./dialogue/task_planner";
 import { RetryLanguageModel } from "../llm";
 import { EkoMemory } from "../memory/memory";
 import ExecuteTaskTool from "./dialogue/execute_task";
-import TaskPlannerTool from "./dialogue/task_planner";
-import TaskVariableStorageTool from "./dialogue/variable_storage";
 import { getDialogueSystemPrompt } from "../prompt/dialogue";
+import TaskVariableStorageTool from "./dialogue/variable_storage";
 import { convertTools, getTool, convertToolResult } from "../agent/llm";
 
 export class EkoDialogue {
@@ -47,14 +49,51 @@ export class EkoDialogue {
   }
 
   public async chat(params: DialogueParams): Promise<string> {
-    params.messageId = params.messageId ?? this.memory.genMessageId();
-    await this.addUserMessage(params.user, params.messageId);
+    return this.doChat(params, false);
+  }
+
+  public async segmentedExecution(
+    params: Omit<DialogueParams, "user">
+  ): Promise<string> {
+    const messages = this.memory.getMessages();
+    const lastMessage = messages[messages.length - 1];
+    if (
+      lastMessage.role !== "tool" ||
+      !lastMessage.content.some((part) => part.toolName === task_planner)
+    ) {
+      throw new Error("No task planner tool call found");
+    }
+    const userMessages = messages.filter((message) => message.role === "user");
+    const lastUserMessage = userMessages[userMessages.length - 1];
+    if (!lastUserMessage) {
+      throw new Error("No user message found");
+    }
+    return this.doChat(
+      {
+        ...params,
+        user: lastUserMessage.content as string | EkoMessageUserPart[],
+        callback: params.callback,
+        messageId: params.messageId || lastUserMessage.id,
+        signal: params.signal,
+      },
+      true
+    );
+  }
+
+  private async doChat(
+    params: DialogueParams,
+    segmentedExecution: boolean
+  ): Promise<string> {
+    if (!segmentedExecution) {
+      params.messageId = params.messageId ?? this.memory.genMessageId();
+      await this.addUserMessage(params.user, params.messageId);
+    }
     const rlm = new RetryLanguageModel(this.config.llms, this.config.chatLlms);
     for (let i = 0; i < 15; i++) {
       const messages = this.memory.buildMessages();
       const chatTools = [...this.buildInnerTools(params), ...this.tools];
       const results = await callChatLLM(
-        params.messageId,
+        params.messageId as string,
         rlm,
         messages,
         convertTools(chatTools),
@@ -70,6 +109,12 @@ export class EkoDialogue {
       );
       if (finalResult) {
         return finalResult;
+      }
+      if (
+        this.config.segmentedExecution &&
+        results.some((r) => r.type == "tool-call" && r.toolName == task_planner)
+      ) {
+        return "segmentedExecution";
       }
     }
     return "Unfinished";
@@ -119,24 +164,24 @@ export class EkoDialogue {
     dialogueCallback?: DialogueCallback
   ): Promise<string | null> {
     let text: string | null = null;
-    let user_messages: LanguageModelV2Prompt = [];
-    let toolResults: LanguageModelV2ToolResultPart[] = [];
+    const user_messages: LanguageModelV2Prompt = [];
+    const toolResults: LanguageModelV2ToolResultPart[] = [];
     if (results.length == 0) {
       return null;
     }
     for (let i = 0; i < results.length; i++) {
-      let result = results[i];
+      const result = results[i];
       if (result.type == "text") {
         text = result.text;
         continue;
       }
       let toolResult: ToolResult;
       try {
-        let args =
+        const args =
           typeof result.input == "string"
             ? JSON.parse(result.input || "{}")
             : result.input || {};
-        let tool = getTool(chatTools, result.toolName);
+        const tool = getTool(chatTools, result.toolName);
         if (!tool) {
           throw new Error(result.toolName + " tool does not exist");
         }

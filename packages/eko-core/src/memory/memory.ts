@@ -247,6 +247,11 @@ export class EkoMemory {
     return this.messages.filter((message) => message.role === "user")[0];
   }
 
+  public getLastUserMessage(): EkoMessage | undefined {
+    const userMessages = this.messages.filter((message) => message.role === "user");
+    return userMessages[userMessages.length - 1];
+  }
+
   public hasMessage(id: string): boolean {
     return this.messages.some((message) => message.id === id);
   }

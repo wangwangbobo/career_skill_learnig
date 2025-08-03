@@ -72,6 +72,7 @@ export interface DialogueTool {
 
 export type EkoDialogueConfig = Omit<EkoConfig, "callback"> & {
   chatLlms?: string[];
+  segmentedExecution?: boolean;
 };
 
 export type DialogueParams = {

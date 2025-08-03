@@ -171,7 +171,8 @@ export type EkoResult = {
   taskId: string;
   success: boolean;
   stopReason: "abort" | "error" | "done";
-  result?: any;
+  result: string;
+  error?: unknown;
 };
 
 export type NormalAgentNode = {

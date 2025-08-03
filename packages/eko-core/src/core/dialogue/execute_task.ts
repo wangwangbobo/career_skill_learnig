@@ -1,7 +1,9 @@
 import { JSONSchema7 } from "json-schema";
 import { EkoDialogue } from "../dialogue";
-import { DialogueTool, ToolResult } from "../../types";
+import Context from "../context";
+import { sub } from "../../common/utils";
 import { TOOL_NAME as task_planner } from "./task_planner";
+import { DialogueTool, EkoResult, ToolResult } from "../../types";
 
 export const TOOL_NAME = "executeTask";
 
@@ -40,11 +42,45 @@ export default class ExecuteTaskTool implements DialogueTool {
       };
     }
     const result = await eko.execute(taskId);
+    const context = eko.getTask(taskId);
+    const variables = context?.variables;
+    if (variables) {
+      for (const key of variables.keys()) {
+        this.ekoDialogue.getGlobalContext().set(key, variables.get(key));
+      }
+    }
+    if (context) {
+      return this.getTaskResult(context, result);
+    } else {
+      return {
+        content: [
+          {
+            type: "text",
+            text: result.result,
+          },
+        ],
+      };
+    }
+  }
+
+  private getTaskResult(context: Context, ekoResult: EkoResult): ToolResult {
+    let result =
+      "# Task execution result\n" + JSON.stringify(ekoResult, null, 2);
+    if (context.chain.agents.length > 1) {
+      result += "\n\n## Subtask execution results";
+      for (let i = 0; i < context.chain.agents.length; i++) {
+        let agentChain = context.chain.agents[i];
+        if (agentChain.agentResult) {
+          const task = agentChain.agent.task || agentChain.agent.name;
+          result += `\n### ${task}\n${sub(agentChain.agentResult, 800, true)}`;
+        }
+      }
+    }
     return {
       content: [
         {
           type: "text",
-          text: result.success ? result.result : "Error: " + result.result,
+          text: result,
         },
       ],
     };
