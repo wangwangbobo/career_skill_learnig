@@ -51,6 +51,7 @@ const OptionsPage = () => {
     { value: "anthropic", label: "Claude (default)" },
     { value: "openai", label: "OpenAI" },
     { value: "openrouter", label: "OpenRouter" },
+    { value: "openai-compatible", label: "OpenAI Compatible" },
   ];
 
   const modelOptions = {
@@ -72,13 +73,17 @@ const OptionsPage = () => {
       { value: "openai/gpt-4.1-mini", label: "gpt-4.1-mini" },
       { value: "x-ai/grok-4", label: "grok-4" },
     ],
+    "openai-compatible": [
+      { value: "doubao-seed-1-6-250615", label: "doubao-seed-1-6-250615" },
+    ],
   };
 
   const handleLLMChange = (value: string) => {
     const baseURLMap = {
       openai: "https://api.openai.com/v1",
       anthropic: "https://api.anthropic.com/v1",
-      openrouter: "https://openrouter.ai/api/v1"
+      openrouter: "https://openrouter.ai/api/v1",
+      "openai-compatible": "https://openrouter.ai/api/v1",
     };
     const newConfig = {
       llm: value,

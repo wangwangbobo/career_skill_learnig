@@ -31,7 +31,7 @@ import {
   LanguageModelV2ToolResultPart,
 } from "@ai-sdk/provider";
 import { getAgentSystemPrompt, getAgentUserPrompt } from "../prompt/agent";
-import { callAgentLLM, convertTools, getTool, convertToolResult } from "./llm";
+import { callAgentLLM, convertTools, getTool, convertToolResult, defaultMessageProviderOptions } from "./llm";
 
 export type AgentParams = {
   name: string;
@@ -93,11 +93,13 @@ export class Agent {
       {
         role: "system",
         content: await this.buildSystemPrompt(agentContext, tools),
+        providerOptions: defaultMessageProviderOptions()
       },
       ...historyMessages,
       {
         role: "user",
         content: await this.buildUserPrompt(agentContext, tools),
+        providerOptions: defaultMessageProviderOptions()
       },
     ];
     agentContext.messages = messages;
