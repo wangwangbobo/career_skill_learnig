@@ -284,6 +284,19 @@ export class RetryLanguageModel {
         fetch: llm.fetch,
         headers: llm.config?.headers,
       }).languageModel(llm.model);
+    } else if (llm.provider == "alibaba-dashscope") {
+      return createOpenAICompatible({
+        name: llm.model,
+        apiKey: apiKey,
+        baseURL: baseURL || "https://dashscope.aliyuncs.com/compatible-mode/v1",
+        fetch: llm.fetch,
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "X-DashScope-SSE": "enable",
+          "Content-Type": "application/json",
+          ...llm.config?.headers,
+        },
+      }).languageModel(llm.model);
     } else {
       return llm.provider.languageModel(llm.model);
     }

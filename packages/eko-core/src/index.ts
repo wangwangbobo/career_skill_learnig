@@ -74,3 +74,12 @@ export {
 
 export { buildAgentTree } from "./common/tree";
 export { extract_page_content } from "./agent/browser/utils";
+
+export {
+  DASHSCOPE_MODELS,
+  createAlibabaDashScopeConfig,
+  createQwenMaxConfig,
+  createQwenTurboConfig,
+  createQwenPlusConfig,
+  createQwenCoderConfig,
+} from "./llm/alibaba-dashscope";
