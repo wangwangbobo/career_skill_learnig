@@ -3,6 +3,25 @@
  * 模拟使用Eko框架的核心功能与百炼API集成
  */
 
+// 加载环境变量
+import { readFileSync, existsSync } from 'fs';
+
+try {
+  if (existsSync('.env')) {
+    const envContent = readFileSync('.env', 'utf8');
+    envContent.split('\n').forEach(line => {
+      if (line.trim() && !line.startsWith('#') && line.includes('=')) {
+        const [key, value] = line.split('=', 2);
+        if (key && value) {
+          process.env[key.trim()] = value.trim();
+        }
+      }
+    });
+  }
+} catch (error) {
+  console.warn('Warning: Could not read .env file:', error.message);
+}
+
 console.log('🚀 Eko + 阿里云百炼集成演示');
 console.log('=====================================');
 
@@ -44,8 +63,13 @@ class MockEko {
   }
 
   async callLLM(prompt) {
-    const apiKey = 'sk-b646fbdd790e46ff80bf5f3d6f67c46b';
-    const baseURL = 'https://dashscope.aliyuncs.com/compatible-mode/v1';
+    // 从环境变量读取API密钥
+    const apiKey = process.env.ALIBABA_DASHSCOPE_API_KEY;
+    const baseURL = process.env.ALIBABA_DASHSCOPE_BASE_URL || 'https://dashscope.aliyuncs.com/compatible-mode/v1';
+
+    if (!apiKey || apiKey === 'your_dashscope_api_key_here') {
+      throw new Error('未找到有效的ALIBABA_DASHSCOPE_API_KEY环境变量');
+    }
 
     console.log('🧠 [LLM调用] 请求百炼API...');
 
@@ -91,8 +115,8 @@ const demoConfig = {
     default: {
       provider: 'alibaba-dashscope',
       model: 'qwen-turbo',
-      apiKey: 'sk-b646fbdd790e46ff80bf5f3d6f67c46b',
-      baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+      apiKey: process.env.ALIBABA_DASHSCOPE_API_KEY,
+      baseURL: process.env.ALIBABA_DASHSCOPE_BASE_URL || 'https://dashscope.aliyuncs.com/compatible-mode/v1',
       temperature: 0.7,
       maxTokens: 500,
     }

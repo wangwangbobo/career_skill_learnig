@@ -3,12 +3,39 @@
  * 展示如何在真实项目中使用阿里云百炼
  */
 
+// 加载环境变量
+import { readFileSync, existsSync } from 'fs';
+
+try {
+  if (existsSync('.env')) {
+    const envContent = readFileSync('.env', 'utf8');
+    envContent.split('\n').forEach(line => {
+      if (line.trim() && !line.startsWith('#') && line.includes('=')) {
+        const [key, value] = line.split('=', 2);
+        if (key && value) {
+          process.env[key.trim()] = value.trim();
+        }
+      }
+    });
+  }
+} catch (error) {
+  console.warn('Warning: Could not read .env file:', error.message);
+}
+
 console.log('🚀 真实 Eko + 阿里云百炼示例');
 console.log('=====================================');
 
-// API 配置
-const API_KEY = 'sk-b646fbdd790e46ff80bf5f3d6f67c46b';
-const BASE_URL = 'https://dashscope.aliyuncs.com/compatible-mode/v1';
+// API 配置 - 从环境变量读取
+const API_KEY = process.env.ALIBABA_DASHSCOPE_API_KEY;
+const BASE_URL = process.env.ALIBABA_DASHSCOPE_BASE_URL || 'https://dashscope.aliyuncs.com/compatible-mode/v1';
+
+// 检查API密钥
+if (!API_KEY || API_KEY === 'your_dashscope_api_key_here') {
+  console.error('❌ 错误: 未找到有效的 ALIBABA_DASHSCOPE_API_KEY 环境变量');
+  console.log('请在 .env 文件中设置您的API密钥:');
+  console.log('ALIBABA_DASHSCOPE_API_KEY=your_actual_api_key_here');
+  process.exit(1);
+}
 
 // 模拟阿里云百炼配置函数
 function createAlibabaDashScopeConfig(config) {

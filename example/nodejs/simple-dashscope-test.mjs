@@ -1,18 +1,39 @@
 /**
  * 阿里云百炼 API 简化测试
- * 直接使用配置的API密钥进行测试
+ * 从环境变量读取API密钥进行测试
  */
+
+// 加载环境变量
+import { readFileSync, existsSync } from 'fs';
+
+try {
+  if (existsSync('.env')) {
+    const envContent = readFileSync('.env', 'utf8');
+    envContent.split('\n').forEach(line => {
+      if (line.trim() && !line.startsWith('#') && line.includes('=')) {
+        const [key, value] = line.split('=', 2);
+        if (key && value) {
+          process.env[key.trim()] = value.trim();
+        }
+      }
+    });
+  }
+} catch (error) {
+  // 如果无法读取.env文件，继续执行检查
+  console.warn('Warning: Could not read .env file:', error.message);
+}
 
 console.log('🚀 阿里云百炼 API 连接测试开始');
 console.log('=====================================');
 
 async function testDashScopeAPI() {
-  // 请手动设置您的API密钥
-  const apiKey = 'sk-b646fbdd790e46ff80bf5f3d6f67c46b'; // 从.env文件中读取的密钥
-  const baseURL = 'https://dashscope.aliyuncs.com/compatible-mode/v1';
+  // 从环境变量读取API密钥
+  const apiKey = process.env.ALIBABA_DASHSCOPE_API_KEY;
+  const baseURL = process.env.ALIBABA_DASHSCOPE_BASE_URL || 'https://dashscope.aliyuncs.com/compatible-mode/v1';
 
-  if (!apiKey) {
+  if (!apiKey || apiKey === 'your_dashscope_api_key_here') {
     console.error('❌ 未找到有效的API密钥');
+    console.log('请确保在 .env 文件中正确设置了 ALIBABA_DASHSCOPE_API_KEY');
     return;
   }
 
