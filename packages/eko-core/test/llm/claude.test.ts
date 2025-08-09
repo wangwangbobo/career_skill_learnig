@@ -1,6 +1,7 @@
-import { createAnthropic } from "@ai-sdk/anthropic";
-import { LanguageModelV2, LanguageModelV2StreamPart } from "@ai-sdk/provider";
 import dotenv from "dotenv";
+import { createAnthropic } from "@ai-sdk/anthropic";
+import { defaultMessageProviderOptions } from "../../src/agent/llm";
+import { LanguageModelV2, LanguageModelV2StreamPart } from "@ai-sdk/provider";
 
 dotenv.config();
 
@@ -22,9 +23,7 @@ export async function testClaudePrompt() {
     prompt: [{ role: "user", content: [{ type: "text", text: "Hello" }] }],
     maxOutputTokens: 1024,
     temperature: 0.7,
-    providerOptions: {
-      anthropic: {},
-    },
+    providerOptions: defaultMessageProviderOptions(),
   });
 
   console.log(JSON.stringify(result, null, 2));
@@ -42,9 +41,7 @@ export async function testClaudeStream() {
     prompt: [{ role: "user", content: [{ type: "text", text: "Hello" }] }],
     maxOutputTokens: 1024,
     temperature: 0.7,
-    providerOptions: {
-      anthropic: {},
-    },
+    providerOptions: defaultMessageProviderOptions(),
   });
 
   console.log(JSON.stringify(result, null, 2));
@@ -102,9 +99,7 @@ export async function testToolsPrompt() {
     ],
     maxOutputTokens: 1024,
     temperature: 0.7,
-    providerOptions: {
-      anthropic: {},
-    },
+    providerOptions: defaultMessageProviderOptions(),
   });
 
   const reader = result.stream.getReader();

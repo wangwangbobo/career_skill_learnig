@@ -10,6 +10,7 @@ import { call_timeout } from "../common/utils";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createAmazonBedrock } from "@ai-sdk/amazon-bedrock";
+import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import {
   GenerateResult,
@@ -17,6 +18,7 @@ import {
   LLMs,
   StreamResult,
 } from "../types/llm.types";
+import { defaultLLMProviderOptions } from "../agent/llm";
 
 export class RetryLanguageModel {
   private llms: LLMs;
@@ -72,7 +74,7 @@ export class RetryLanguageModel {
           llmConfig.config?.maxTokens || config.maxTokens;
       }
       if (!providerOptions) {
-        options.providerOptions = {};
+        options.providerOptions = defaultLLMProviderOptions();
         options.providerOptions[llm.provider] = llmConfig.options || {};
       }
       let _options = options;
@@ -141,7 +143,7 @@ export class RetryLanguageModel {
           llmConfig.config?.maxTokens || config.maxTokens;
       }
       if (!providerOptions) {
-        options.providerOptions = {};
+        options.providerOptions = defaultLLMProviderOptions();
         options.providerOptions[llm.provider] = llmConfig.options || {};
       }
       let _options = options;
@@ -276,13 +278,21 @@ export class RetryLanguageModel {
         headers: llm.config?.headers,
         sessionToken: llm.config?.sessionToken,
       }).languageModel(llm.model);
-    } else if (llm.provider == "openrouter") {
+    } else if (llm.provider == "openai-compatible") {
       return createOpenAICompatible({
-        name: llm.model,
+        name: llm.config?.name || llm.model.split("/")[0],
         apiKey: apiKey,
         baseURL: baseURL || "https://openrouter.ai/api/v1",
         fetch: llm.fetch,
         headers: llm.config?.headers,
+      }).languageModel(llm.model);
+    } else if (llm.provider == "openrouter") {
+      return createOpenRouter({
+        apiKey: apiKey,
+        baseURL: baseURL || "https://openrouter.ai/api/v1",
+        fetch: llm.fetch,
+        headers: llm.config?.headers,
+        compatibility: llm.config?.compatibility,
       }).languageModel(llm.model);
     } else {
       return llm.provider.languageModel(llm.model);
