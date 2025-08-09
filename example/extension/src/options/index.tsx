@@ -51,6 +51,7 @@ const OptionsPage = () => {
     { value: "anthropic", label: "Claude (default)" },
     { value: "openai", label: "OpenAI" },
     { value: "openrouter", label: "OpenRouter" },
+    { value: "alibaba-dashscope", label: "阿里云百炼 (Alibaba DashScope)" },
   ];
 
   const modelOptions = {
@@ -72,13 +73,22 @@ const OptionsPage = () => {
       { value: "openai/gpt-4.1-mini", label: "gpt-4.1-mini" },
       { value: "x-ai/grok-4", label: "grok-4" },
     ],
+    "alibaba-dashscope": [
+      { value: "qwen-max", label: "通义千问-Max (推荐)" },
+      { value: "qwen-plus", label: "通义千问-Plus" },
+      { value: "qwen-turbo", label: "通义千问-Turbo (default)" },
+      { value: "qwen2.5-coder-32b-instruct", label: "通义千问代码-32B" },
+      { value: "qwen2.5-coder-7b-instruct", label: "通义千问代码-7B" },
+      { value: "qwen2.5-math-72b-instruct", label: "通义千问数学-72B" },
+    ],
   };
 
   const handleLLMChange = (value: string) => {
     const baseURLMap = {
       openai: "https://api.openai.com/v1",
       anthropic: "https://api.anthropic.com/v1",
-      openrouter: "https://openrouter.ai/api/v1"
+      openrouter: "https://openrouter.ai/api/v1",
+      "alibaba-dashscope": "https://dashscope.aliyuncs.com/compatible-mode/v1"
     };
     const newConfig = {
       llm: value,

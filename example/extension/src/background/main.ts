@@ -1,6 +1,7 @@
 import { Eko, LLMs, StreamCallbackMessage } from "@eko-ai/eko";
 import { StreamCallback, HumanCallback } from "@eko-ai/eko/types";
 import { BrowserAgent } from "@eko-ai/eko-extension";
+import { createAlibabaDashScopeConfig } from "@eko-ai/eko";
 
 export async function getLLMConfig(name: string = "llmConfig"): Promise<any> {
   let result = await chrome.storage.sync.get([name]);
@@ -17,15 +18,29 @@ export async function main(prompt: string): Promise<Eko> {
     return;
   }
 
-  const llms: LLMs = {
-    default: {
+  // Create LLM configuration based on provider type
+  let llmConfig;
+  if (config.llm === "alibaba-dashscope") {
+    // Use specialized DashScope configuration
+    llmConfig = createAlibabaDashScopeConfig({
+      apiKey: config.apiKey,
+      model: config.modelName,
+      baseURL: config.options.baseURL,
+    });
+  } else {
+    // Use generic configuration for other providers
+    llmConfig = {
       provider: config.llm as any,
       model: config.modelName,
       apiKey: config.apiKey,
       config: {
         baseURL: config.options.baseURL,
       },
-    },
+    };
+  }
+
+  const llms: LLMs = {
+    default: llmConfig,
   };
 
   let callback: StreamCallback & HumanCallback = {
