@@ -63,7 +63,7 @@ export function convertTools(
     name: tool.name,
     description: tool.description,
     inputSchema: tool.parameters,
-    providerOptions: defaultMessageProviderOptions()
+    // providerOptions: defaultMessageProviderOptions()
   }));
 }
 
