@@ -569,7 +569,7 @@ app.post('/api/test-api-key', async (req, res) => {
 // API路由 - AI聊天接口
 app.post('/api/chat', async (req, res) => {
     try {
-        const { messages, apiKey, stream = true } = req.body;
+        const { messages, apiKey, stream = false } = req.body;
         
         if (!messages || !Array.isArray(messages) || messages.length === 0) {
             return res.status(400).json({
@@ -645,6 +645,160 @@ app.post('/api/chat', async (req, res) => {
         });
     }
 });
+
+// 存储流式聊天会话
+const chatSessions = new Map();
+
+// API路由 - 初始化流式聊天会话
+app.post('/api/chat-stream-init', async (req, res) => {
+    try {
+        const { messages, apiKey } = req.body;
+        
+        if (!messages || !Array.isArray(messages) || messages.length === 0) {
+            return res.status(400).json({
+                error: '请提供有效的消息列表'
+            });
+        }
+        
+        const effectiveApiKey = apiKey || process.env.ALIBABA_DASHSCOPE_API_KEY;
+        
+        if (!effectiveApiKey) {
+            return res.status(400).json({
+                error: '未配置API密钥，请在界面中配置API密钥'
+            });
+        }
+        
+        // 生成会话ID
+        const sessionId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+        
+        // 存储会话数据
+        chatSessions.set(sessionId, {
+            messages,
+            apiKey: effectiveApiKey,
+            timestamp: Date.now()
+        });
+        
+        console.log(`🎯 创建流式聊天会话: ${sessionId}`);
+        
+        res.json({
+            success: true,
+            sessionId: sessionId
+        });
+        
+    } catch (error) {
+        console.error('❌ 初始化流式聊天失败:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+// API路由 - EventSource流式聊天
+app.get('/api/chat-stream/:sessionId', async (req, res) => {
+    const sessionId = req.params.sessionId;
+    const session = chatSessions.get(sessionId);
+    
+    console.log(`🔍 检查会话: ${sessionId}`);
+    console.log(`📊 当前活跃会话数: ${chatSessions.size}`);
+    
+    if (!session) {
+        console.error(`❌ 会话不存在: ${sessionId}`);
+        console.log('📋 所有活跃会话:', Array.from(chatSessions.keys()));
+        return res.status(404).json({
+            error: '会话不存在或已过期',
+            sessionId: sessionId,
+            activeSessions: Array.from(chatSessions.keys())
+        });
+    }
+    
+    console.log(`🌊 开始EventSource流式聊天: ${sessionId}`);
+    
+    // 设置SSE头部
+    res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'Access-Control-Allow-Origin': '*',
+        'X-Accel-Buffering': 'no', // 禁用Nginx缓冲
+        'Transfer-Encoding': 'chunked' // 启用分块传输
+    });
+    
+    // 强制禁用响应缓冲
+    res.socket.setTimeout(0);
+    res.socket.setNoDelay(true);
+    res.socket.setKeepAlive(true);
+    
+    const sendSSE = (event, data) => {
+        const message = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
+        console.log(`📡 发送SSE消息:`, message.replace(/\n/g, '\\n'));
+        res.write(message);
+        
+        // 强制刷新缓冲区
+        if (res.flush) {
+            res.flush();
+        }
+        // 额外的刷新机制
+        res.socket.write('');
+    };
+    
+    // 立即发送初始化心跳
+    res.write(': connection established\n\n');
+    if (res.flush) res.flush();
+    
+    try {
+        // 检查是否有有效的API密钥
+        if (!session.apiKey || session.apiKey === 'sk-test') {
+            console.log('⚠️ 使用模拟流式响应（无效API密钥）');
+            
+            // 立即发送状态消息
+            sendSSE('status', { message: '正在生成回复...' });
+            
+            // 模拟流式响应
+            const mockResponse = '你好！我是智能助手，很高兴与您交流。请问有什么可以帮助您的吗？';
+            const words = mockResponse.split('');
+            
+            for (let i = 0; i < words.length; i++) {
+                await new Promise(resolve => setTimeout(resolve, 100)); // 减少到100ms延迟
+                sendSSE('message', {
+                    content: words[i],
+                    done: false,
+                    chunk: i + 1
+                });
+                console.log(`📡 发送模拟流式数据 ${i + 1}/${words.length}: "${words[i]}"`);
+            }
+            
+            sendSSE('done', { message: '对话完成' });
+        } else {
+            console.log('✅ 使用真实百炼 API');
+            
+            // 立即发送状态消息
+            sendSSE('status', { message: 'AI正在思考中...' });
+            
+            await callDashScopeChatStream(session.messages, session.apiKey, sendSSE);
+            sendSSE('done', { message: '对话完成' });
+        }
+    } catch (error) {
+        console.error('❌ EventSource流式聊天失败:', error);
+        sendSSE('error', { error: error.message });
+    }
+    
+    // 不立即删除会话，让定时清理机制处理
+    // chatSessions.delete(sessionId); // 注释掉立即删除
+    console.log(`🏁 EventSource流式聊天结束: ${sessionId}`);
+    res.end();
+});
+
+// 定时清理过期会话
+setInterval(() => {
+    const now = Date.now();
+    for (const [sessionId, session] of chatSessions.entries()) {
+        if (now - session.timestamp > 10 * 60 * 1000) { // 10分钟过期
+            chatSessions.delete(sessionId);
+            console.log(`🧹 清理过期会话: ${sessionId}`);
+        }
+    }
+}, 60 * 1000); // 每分钟检查一次
 
 // 调用百炼聊天API
 async function callDashScopeChat(messages, apiKey) {
@@ -771,6 +925,7 @@ async function callDashScopeChatStream(messages, apiKey, sendSSE) {
             }
             
             let buffer = '';
+            let chunkCount = 0;
             
             res.on('data', (chunk) => {
                 buffer += chunk.toString();
@@ -792,11 +947,17 @@ async function callDashScopeChatStream(messages, apiKey, sendSSE) {
                             if (parsed.choices && parsed.choices[0] && parsed.choices[0].delta) {
                                 const delta = parsed.choices[0].delta;
                                 if (delta.content) {
+                                    chunkCount++;
+                                    console.log(`🔥 发送流式数据块 ${chunkCount}:`, delta.content.substring(0, 50) + '...');
+                                    
                                     // 发送流式数据到前端
                                     sendSSE('message', {
                                         content: delta.content,
-                                        done: false
+                                        done: false,
+                                        chunk: chunkCount
                                     });
+                                    
+                                    console.log(`📡 SSE数据已发送: chunk ${chunkCount}`);
                                 }
                             }
                         } catch (parseError) {
@@ -807,7 +968,7 @@ async function callDashScopeChatStream(messages, apiKey, sendSSE) {
             });
             
             res.on('end', () => {
-                console.log('✅ 流式响应结束');
+                console.log(`✅ 流式响应结束，共发送 ${chunkCount} 个数据块`);
                 resolve();
             });
             

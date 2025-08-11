@@ -1145,22 +1145,46 @@ class SimpleJobAssistant {
         this.addChatMessage('user', message);
         
         // 创建AI回复消息容器（用于流式更新）
-        const aiMessageDiv = this.addChatMessage('assistant', '🤔 正在思考中...', false);
+        const aiMessageDiv = this.addChatMessage('assistant', '🤔 正在思考中...', true);
         let streamContent = '';
         
         try {
             // 调用流式百炼 API
-            await this.callDashScopeAPIStream(message, (content) => {
+            await this.callDashScopeAPIStream(message, aiMessageDiv, (content) => {
                 // 流式更新AI回复内容
+                console.log('🔥 接收到流式内容:', JSON.stringify(content), '当前总长度:', streamContent.length);
                 streamContent += content;
-                // 实时渲染Markdown内容
-                aiMessageDiv.innerHTML = this.renderMarkdown(streamContent);
+                console.log('📝 更新后总内容长度:', streamContent.length, '内容预览:', streamContent.substring(0, 50) + '...');
                 
-                // 滚动到底部
-                this.chatContent.scrollTop = this.chatContent.scrollHeight;
+                // 实时渲染Markdown内容
+                const renderedContent = this.renderMarkdown(streamContent);
+                aiMessageDiv.innerHTML = renderedContent;
+                
+                // 优化后的滚动机制，使用防抖减少频繁滚动
+                if (!this.scrollTimeout) {
+                    this.scrollTimeout = setTimeout(() => {
+                        this.chatContent.scrollTop = this.chatContent.scrollHeight;
+                        this.scrollTimeout = null;
+                    }, 50); // 50ms防抖
+                }
             });
             
-            // 更新对话历史
+            console.log('✅ 流式对话完成，最终内容长度:', streamContent.length);
+            
+            // 清除防抖定时器并最终滚动
+            if (this.scrollTimeout) {
+                clearTimeout(this.scrollTimeout);
+                this.scrollTimeout = null;
+            }
+            this.chatContent.scrollTop = this.chatContent.scrollHeight;
+            
+            // 移除streaming类，恢复正常样式
+            if (aiMessageDiv) {
+                aiMessageDiv.classList.remove('streaming');
+                aiMessageDiv.classList.remove('thinking');
+            }
+            
+            // 手动更新对话历史（因为流式消息创建时isThinking=true）
             this.chatHistory.push({
                 role: 'assistant',
                 content: streamContent
@@ -1222,7 +1246,7 @@ class SimpleJobAssistant {
         return result.content || result.message || '抱歉，我无法理解您的问题。';
     }
     
-    async callDashScopeAPIStream(message, onContent) {
+    async callDashScopeAPIStream(message, aiMessageDiv, onContent) {
         console.log('🚀 调用流式百炼 API...');
         
         // 获取API密钥
@@ -1237,92 +1261,132 @@ class SimpleJobAssistant {
                 role: 'system',
                 content: '你是一个专业的职业发展顾问，擅长提供技能学习、职业规划、面试指导等建议。请用中文回答，语言友好、专业。'
             },
-            ...this.chatHistory.slice(-10), // 只保畐10条历史消息
+            ...this.chatHistory.slice(-10), // 只保留10条历史消息
             {
                 role: 'user',
                 content: message
             }
         ];
         
-        const response = await fetch('/api/chat', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                messages: messages,
-                apiKey: apiKey,
-                stream: true // 启用流式模式
-            })
-        });
-        
-        if (!response.ok) {
-            throw new Error(`流式API调用失败: ${response.status}`);
-        }
-        
-        // 使用fetch流式处理SSE响应
+        // 使用流式聊天接口
         return new Promise((resolve, reject) => {
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let buffer = '';
+            let streamContent = ''; // 在这里定义streamContent
             
-            const processStream = async () => {
-                try {
-                    while (true) {
-                        const { done, value } = await reader.read();
-                        
-                        if (done) {
-                            console.log('✅ 流式响应完成');
-                            resolve();
-                            break;
-                        }
-                        
-                        buffer += decoder.decode(value, { stream: true });
-                        const lines = buffer.split('\n');
-                        buffer = lines.pop(); // 保留未完整的行
-                        
-                        for (const line of lines) {
-                            if (line.trim() === '') continue;
-                            
-                            if (line.startsWith('event: ')) {
-                                const event = line.slice(7);
-                                continue;
-                            }
-                            
-                            if (line.startsWith('data: ')) {
-                                const data = line.slice(6);
-                                console.log('📊 收到SSE数据:', data.substring(0, 100) + '...');
-                                
-                                try {
-                                    const parsed = JSON.parse(data);
-                                    console.log('🔍 解析的数据:', parsed);
-                                    
-                                    if (parsed.content && !parsed.done) {
-                                        console.log('🔥 流式内容:', parsed.content);
-                                        // 调用回调函数更新内容
-                                        onContent(parsed.content);
-                                    } else if (parsed.message === '对话完成') {
-                                        console.log('✅ 流式对话完成');
-                                        resolve();
-                                        return;
-                                    } else if (parsed.error) {
-                                        console.error('❌ 流式错误:', parsed.error);
-                                        reject(new Error(parsed.error));
-                                        return;
-                                    }
-                                } catch (parseError) {
-                                    console.warn('⚠️ 解析SSE数据失败:', parseError.message, '原始数据:', data);
-                                }
-                            }
-                        }
-                    }
-                } catch (error) {
-                    console.error('❌ 流式处理错误:', error);
-                    reject(error);
+            // 发送POST请求数据
+            fetch('/api/chat-stream-init', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    messages: messages,
+                    apiKey: apiKey
+                })
+            }).then(response => {
+                if (!response.ok) {
+                    throw new Error(`初始化流式API失败: ${response.status}`);
                 }
-            };
-            
-            processStream();
+                return response.json();
+            }).then(data => {
+                const sessionId = data.sessionId;
+                
+                // 使用EventSource处理SSE
+                const eventSource = new EventSource(`/api/chat-stream/${sessionId}`);
+                
+                console.log('🌊 建立SSE连接:', sessionId);
+                
+                let hasReceivedFirstMessage = false;
+                let connectionStartTime = Date.now();
+                
+                // 显示连接状态
+                if (aiMessageDiv) {
+                    aiMessageDiv.innerHTML = '🔄 正在连接AI服务...';
+                }
+                
+                // 设置连接超时检查
+                const connectionTimeout = setTimeout(() => {
+                    if (!hasReceivedFirstMessage && aiMessageDiv) {
+                        aiMessageDiv.innerHTML = '⏳ AI正在思考中，请稍等...';
+                    }
+                }, 2000); // 2秒后显示思考中
+                
+                eventSource.onopen = () => {
+                    console.log('✅ EventSource连接已建立');
+                    if (aiMessageDiv) {
+                        aiMessageDiv.innerHTML = '🤖 AI已连接，等待响应...';
+                    }
+                };
+                
+                eventSource.onmessage = (event) => {
+                    try {
+                        console.log('📊 收到原始SSE数据:', event.data);
+                        const data = JSON.parse(event.data);
+                        console.log('🔍 解析后SSE数据:', data);
+                        
+                        if (data.content && !data.done) {
+                            // 第一次接收到消息
+                            if (!hasReceivedFirstMessage) {
+                                hasReceivedFirstMessage = true;
+                                clearTimeout(connectionTimeout);
+                                const responseTime = Date.now() - connectionStartTime;
+                                console.log(`✅ 首次响应时间: ${responseTime}ms`);
+                                streamContent = ''; // 清空之前的状态文本
+                            }
+                            
+                            console.log('🔥 流式内容块:', data.chunk || 'unknown', data.content);
+                            streamContent += data.content;
+                            onContent(data.content);
+                        }
+                    } catch (parseError) {
+                        console.warn('⚠️ 解析SSE数据失败:', parseError.message, '原始数据:', event.data);
+                    }
+                };
+                
+                eventSource.addEventListener('status', (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        console.log('📊 收到状态消息:', data.message);
+                        if (!hasReceivedFirstMessage && aiMessageDiv) {
+                            aiMessageDiv.innerHTML = '🤖 ' + data.message;
+                        }
+                    } catch (parseError) {
+                        console.warn('⚠️ 解析状态消息失败:', parseError.message);
+                    }
+                });
+                
+                eventSource.addEventListener('done', (event) => {
+                    console.log('✅ 流式对话完成:', event.data);
+                    clearTimeout(connectionTimeout);
+                    eventSource.close();
+                    resolve();
+                });
+                
+                eventSource.addEventListener('error', (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        console.error('❌ 流式错误:', data.error);
+                        clearTimeout(connectionTimeout);
+                        eventSource.close();
+                        reject(new Error(data.error));
+                    } catch (e) {
+                        console.error('❌ 流式错误事件:', event);
+                        clearTimeout(connectionTimeout);
+                        eventSource.close();
+                        reject(new Error('流式连接错误'));
+                    }
+                });
+                
+                eventSource.onerror = (error) => {
+                    console.error('❌ EventSource连接错误:', error);
+                    clearTimeout(connectionTimeout);
+                    eventSource.close();
+                    reject(new Error('EventSource连接失败'));
+                };
+                
+            }).catch(error => {
+                console.error('❌ 初始化流式API失败:', error);
+                reject(error);
+            });
         });
     }
     
@@ -1414,7 +1478,7 @@ class SimpleJobAssistant {
         
         // 添加消息
         const messageDiv = document.createElement('div');
-        messageDiv.className = `chat-message ${role}${isThinking ? ' thinking' : ''}`;
+        messageDiv.className = `chat-message ${role}${isThinking ? ' thinking streaming' : ''}`;
         
         // 对AI消息进行Markdown渲染，用户消息保持纯文本
         if (role === 'assistant' && !isThinking) {

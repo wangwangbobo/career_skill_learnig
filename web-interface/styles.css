@@ -711,6 +711,12 @@ body {
     line-height: 1.4;
 }
 
+/* 禁用流式消息的动画以防止闪烁 */
+.chat-message.streaming {
+    animation: none;
+    transition: none;
+}
+
 @keyframes messageSlideIn {
     from {
         opacity: 0;
@@ -2734,7 +2740,6 @@ body {
     .hero-subtitle {
         font-size: 1rem;
     }
-}
 }
 
 @media (max-width: 768px) {
