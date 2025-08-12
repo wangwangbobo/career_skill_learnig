@@ -130,7 +130,9 @@ export class SimpleSseMcpClient implements IMcpClient {
       const callback = new Promise<any>((resolve, reject) => {
         if (signal) {
           signal.addEventListener("abort", () => {
-            reject(new Error("AbortError"));
+            const error = new Error("Operation was interrupted");
+            error.name = "AbortError";
+            reject(error);
           });
         }
         this.requestMap.set(id, resolve);
