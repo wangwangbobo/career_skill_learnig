@@ -1,0 +1,89 @@
+{
+  "name": "设计系统示例",
+  "type": "DOCUMENT",
+  "lastModified": "2024-01-15T10:30:00Z",
+  "version": "1.2.3",
+  "thumbnailUrl": "https://figma-alpha-api.s3.us-west-2.amazonaws.com/...",
+  "document": {
+    "id": "0:0",
+    "name": "Document",
+    "type": "DOCUMENT",
+    "children": [
+      {
+        "id": "1:1",
+        "name": "Welcome Page",
+        "type": "CANVAS",
+        "backgroundColor": {
+          "r": 0.95,
+          "g": 0.95,
+          "b": 0.95,
+          "a": 1
+        },
+        "prototypeStartNodeID": null,
+        "children": [
+          {
+            "id": "1:2",
+            "name": "Header Component",
+            "type": "FRAME",
+            "absoluteBoundingBox": {
+              "x": 0,
+              "y": 0,
+              "width": 375,
+              "height": 64
+            },
+            "children": [
+              {
+                "id": "1:3",
+                "name": "App Logo",
+                "type": "IMAGE",
+                "fills": [
+                  {
+                    "type": "IMAGE",
+                    "imageRef": "abc123def456"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "1:4",
+            "name": "Hero Section",
+            "type": "FRAME",
+            "absoluteBoundingBox": {
+              "x": 0,
+              "y": 64,
+              "width": 375,
+              "height": 240
+            }
+          }
+        ]
+      },
+      {
+        "id": "2:1",
+        "name": "Components Library",
+        "type": "CANVAS",
+        "backgroundColor": {
+          "r": 1,
+          "g": 1,
+          "b": 1,
+          "a": 1
+        },
+        "children": [
+          {
+            "id": "2:2",
+            "name": "Button/Primary",
+            "type": "COMPONENT",
+            "absoluteBoundingBox": {
+              "x": 100,
+              "y": 100,
+              "width": 120,
+              "height": 40
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "components": {},
+  "styles": {}
+}

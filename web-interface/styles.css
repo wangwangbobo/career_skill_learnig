@@ -887,84 +887,109 @@ body {
 .chat-input-area {
     border-top: 1px solid var(--border-color);
     background: var(--bg-secondary);
-    padding: 16px;
+    padding: 20px;
 }
 
 .chat-input-wrapper {
-    display: flex;
-    gap: 12px;
-    align-items: flex-end;
+    position: relative; /* 为内部按钮定位 */
+    width: 100%; /* 占满容器宽度 */
     margin-bottom: 12px;
 }
 
 #chatInput {
-    flex: 1;
+    width: 100%; /* 占满包装器宽度 */
     border: 2px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 12px 16px;
-    font-size: 0.9rem;
+    border-radius: 20px; /* 增大圆角使其更现代 */
+    padding: 16px 60px 16px 20px; /* 左边20px，右边60px为按钮留空间 */
+    font-size: 1rem; /* 增大字体 */
     resize: none;
     font-family: inherit;
-    transition: all 0.2s ease;
-    min-height: 44px;
-    max-height: 120px;
+    transition: all 0.3s ease;
+    height: 64px; /* 增大输入框高度 */
+    max-height: 64px;
+    min-height: 64px;
+    line-height: 1.4;
+    background: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    box-sizing: border-box; /* 确保padding不影响总宽度 */
 }
 
 #chatInput:focus {
     outline: none;
     border-color: #10b981;
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12), 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
 }
 
 #chatInput::placeholder {
     color: #9ca3af;
+    font-style: italic; /* 添加斜体效果 */
 }
 
 .chat-send-btn {
+    position: absolute; /* 绝对定位到输入框内部 */
+    right: 8px; /* 距离右边8px */
+    top: 50%; /* 垂直居中 */
+    transform: translateY(-50%); /* 完全居中 */
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: white;
     border: none;
-    border-radius: 12px;
-    padding: 12px 16px;
+    border-radius: 12px; /* 较小的圆角 */
     cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: 1rem;
-    min-width: 48px;
-    height: 48px;
+    transition: all 0.3s ease;
+    font-size: 0.9rem; /* 较小的图标 */
+    width: 40px; /* 较小的宽度 */
+    height: 40px; /* 较小的高度 */
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
+    flex-shrink: 0;
+    z-index: 10; /* 确保在输入框之上 */
 }
 
 .chat-send-btn:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    transform: translateY(-50%) scale(1.1); /* 保持垂直居中的同时缩放 */
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+.chat-send-btn:active {
+    transform: translateY(-50%) scale(1.05);
+    transition: all 0.1s ease;
 }
 
 .chat-send-btn:disabled {
-    background: #9ca3af;
+    background: #d1d5db;
     cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
+    transform: translateY(-50%); /* 保持居中 */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    opacity: 0.6;
 }
 
 .chat-status {
-    padding: 12px 20px;
+    padding: 16px 20px;
     border-top: 1px solid var(--border-color);
-    background: var(--bg-secondary);
+    background: rgba(249, 250, 251, 0.8); /* 更柔和的背景色 */
+    backdrop-filter: blur(10px); /* 添加模糊效果 */
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.8rem;
+    font-size: 0.85rem; /* 略微增大字体 */
     color: var(--text-secondary);
+    border-radius: 0 0 20px 20px; /* 添加底部圆角 */
 }
 
 .chat-count {
-    font-weight: 500;
+    font-weight: 600; /* 增加字重 */
+    color: var(--primary-color); /* 使用主题色 */
 }
 
 .chat-model {
     font-style: italic;
+    color: #10b981; /* 使用绿色强调AI模型 */
+    font-weight: 500;
 }
 
 /* 对话框隐藏状态 */
@@ -1302,6 +1327,102 @@ body {
 .result-card:hover {
     box-shadow: var(--shadow-lg);
     transform: translateY(-2px);
+}
+
+/* 五个独立模块的容器 */
+.content-modules-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+/* 独立模块卡片 */
+.module-card {
+    background: var(--bg-primary);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    border: 2px solid var(--border-color);
+    overflow: hidden;
+    transition: var(--transition);
+    position: relative;
+}
+
+.module-card:hover {
+    box-shadow: var(--shadow-xl);
+    transform: translateY(-4px);
+    border-color: var(--primary-color);
+}
+
+/* 模块卡片头部 */
+.module-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.module-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(255,255,255,0.1), transparent);
+    pointer-events: none;
+}
+
+.module-header i {
+    font-size: 2rem;
+    opacity: 0.9;
+}
+
+.module-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.module-count {
+    background: rgba(255,255,255,0.2);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-left: auto;
+}
+
+/* 模块内容区域 */
+.module-content {
+    padding: 2rem;
+    min-height: 200px;
+}
+
+/* 不同模块的颜色主题 */
+.module-card.knowledge .module-header {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.module-card.interview .module-header {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+
+.module-card.books .module-header {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.module-card.courses .module-header {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+
+.module-card.certificates .module-header {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
 }
 
 .card-header {
@@ -2854,7 +2975,7 @@ body {
 
 .content-body {
     padding: 2rem;
-    max-height: 60vh;
+    max-height: 70vh; /* 增加最大高度以适应2排布局 */
     overflow-y: auto;
 }
 
@@ -2871,8 +2992,16 @@ body {
 
 .content-options {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(3, 1fr); /* 第一排3个，第二排2个 */
+    grid-template-rows: repeat(2, 1fr);
+    gap: 1.2rem;
+    max-height: 400px; /* 限制最大高度 */
+}
+
+/* 第5个选项（推荐课程）在第二排居中显示 */
+.content-option:nth-child(5) {
+    grid-column: 2 / 3; /* 占据第2列 */
+    grid-row: 2; /* 位于第2排 */
 }
 
 .content-option {
@@ -2890,13 +3019,17 @@ body {
 .option-card {
     background: white;
     border: 2px solid var(--border-color);
-    border-radius: 16px;
-    padding: 1.5rem;
+    border-radius: 12px; /* 稍微减小圆角 */
+    padding: 1rem; /* 减小内边距 */
     text-align: center;
     transition: var(--transition);
     cursor: pointer;
     position: relative;
     overflow: hidden;
+    min-height: 120px; /* 设置最小高度保持一致性 */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .option-card::before {
@@ -2912,6 +3045,28 @@ body {
     z-index: 1;
 }
 
+/* 选中状态的对勾标志 */
+.option-card::after {
+    content: '\2713'; /* Unicode对勾符号 */
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 24px;
+    height: 24px;
+    background: var(--success-color);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.2s ease;
+    z-index: 3;
+}
+
 .content-option input:checked + .option-card {
     border-color: var(--primary-color);
     transform: translateY(-2px);
@@ -2922,23 +3077,29 @@ body {
     opacity: 0.1;
 }
 
+/* 显示选中状态的对勾 */
+.content-option input:checked + .option-card::after {
+    opacity: 1;
+    transform: scale(1);
+}
+
 .option-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
 .option-card i {
-    font-size: 2.5rem;
+    font-size: 2rem; /* 减小图标尺寸 */
     color: var(--primary-color);
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem; /* 减小间距 */
     display: block;
     position: relative;
     z-index: 2;
 }
 
 .option-card h4 {
-    margin: 0 0 0.5rem 0;
-    font-size: 1.2rem;
+    margin: 0 0 0.4rem 0; /* 减小下边距 */
+    font-size: 1.1rem; /* 稍微减小标题 */
     color: var(--text-primary);
     position: relative;
     z-index: 2;
@@ -2947,8 +3108,8 @@ body {
 .option-card p {
     margin: 0;
     color: var(--text-secondary);
-    font-size: 0.9rem;
-    line-height: 1.5;
+    font-size: 0.85rem; /* 稍微减小描述文字 */
+    line-height: 1.4; /* 减小行高 */
     position: relative;
     z-index: 2;
 }
@@ -3245,8 +3406,10 @@ body {
     }
     
     .content-options {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr); /* 移动端显示2列 */
+        grid-template-rows: repeat(3, 1fr); /* 3行，最后一行只有1个 */
         gap: 1rem;
+        max-height: 500px;
     }
     
     .content-footer {
@@ -3356,8 +3519,454 @@ body {
     transition: width 0.8s ease;
 }
 
-/* 知识点样式 */
-.knowledge-section {
+/* 知识点模块样式 */
+.knowledge-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.knowledge-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border-left: 4px solid #f59e0b;
+    transition: var(--transition);
+}
+
+.knowledge-item:hover {
+    background: var(--bg-tertiary);
+    transform: translateX(4px);
+}
+
+.knowledge-number {
+    background: #f59e0b;
+    color: white;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.875rem;
+    flex-shrink: 0;
+}
+
+.knowledge-text {
+    flex: 1;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--text-primary);
+}
+
+/* 面试题模块样式 */
+.interview-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* 面试题头部 */
+.interview-header {
+    background: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.interview-stats {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 1rem;
+}
+
+.stats-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stats-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    line-height: 1;
+}
+
+.stats-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+.interview-description {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+/* 面试题分类 */
+.interview-categories {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.interview-category {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.interview-category:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
+    transform: translateY(-2px);
+}
+
+/* 分类头部 */
+.category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.category-tags {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.category-tag {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.category-tag.primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+.category-tag.secondary {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+}
+
+.category-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.category-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* 问题内容 */
+.question-content {
+    margin-bottom: 1.5rem;
+}
+
+.question-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+}
+
+.question-description {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+/* 问题操作按钮 */
+.question-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.practice-btn {
+    background: #10b981;
+    color: white;
+    border-color: #10b981;
+}
+
+.practice-btn:hover {
+    background: #059669;
+    border-color: #059669;
+}
+
+.ai-btn {
+    background: #f59e0b;
+    color: white;
+    border-color: #f59e0b;
+}
+
+.ai-btn:hover {
+    background: #d97706;
+    border-color: #d97706;
+}
+
+.favorite-btn:hover {
+    color: #ef4444;
+    border-color: #ef4444;
+}
+
+.bookmark-btn:hover {
+    color: #f59e0b;
+    border-color: #f59e0b;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .category-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .category-meta {
+        flex-wrap: wrap;
+    }
+    
+    .question-actions {
+        justify-content: flex-start;
+    }
+    
+    .action-btn {
+        flex: 1;
+        min-width: calc(50% - 0.375rem);
+        justify-content: center;
+    }
+}
+
+/* 旧的面试题样式（保留作为备用） */
+.interview-item {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.interview-question {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: #3b82f6;
+    color: white;
+}
+
+.question-number {
+    background: rgba(255,255,255,0.2);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.875rem;
+    flex-shrink: 0;
+}
+
+.question-text {
+    flex: 1;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.interview-answer {
+    padding: 1.5rem;
+    background: var(--bg-primary);
+}
+
+.answer-label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+/* Toast 提示样式 */
+.toast {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1rem 1.5rem;
+    box-shadow: var(--shadow-xl);
+    z-index: 2000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+    min-width: 300px;
+    max-width: 500px;
+}
+
+.toast.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.toast-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.toast-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.toast-message {
+    flex: 1;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+/* Toast 类型样式 */
+.toast-success {
+    border-color: var(--success-color);
+    background: rgba(16, 185, 129, 0.05);
+}
+
+.toast-success .toast-icon {
+    color: var(--success-color);
+}
+
+.toast-error {
+    border-color: var(--error-color);
+    background: rgba(239, 68, 68, 0.05);
+}
+
+.toast-error .toast-icon {
+    color: var(--error-color);
+}
+
+.toast-warning {
+    border-color: var(--warning-color);
+    background: rgba(245, 158, 11, 0.05);
+}
+
+.toast-warning .toast-icon {
+    color: var(--warning-color);
+}
+
+.toast-info {
+    border-color: var(--primary-color);
+    background: rgba(79, 70, 229, 0.05);
+}
+
+.toast-info .toast-icon {
+    color: var(--primary-color);
+}
+
+@media (max-width: 768px) {
+    .toast {
+        top: 1rem;
+        right: 1rem;
+        left: 1rem;
+        min-width: auto;
+        max-width: none;
+    }
+}
+
+/* 书籍模块样式 */
+.books-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.book-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    transition: var(--transition);
+}
+
+.book-item:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+    border-color: #10b981;
+}
+
+.book-number {
+    background: #10b981;
+    color: white;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.book-info {
+    flex: 1;
+}
+
+.book-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.book-author, .book-rating {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.book-description {
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    line-height: 1.5;
+    font-style: italic;
+}
     margin-top: 2rem;
     padding: 1.5rem;
     background: var(--bg-secondary);
@@ -3376,7 +3985,144 @@ body {
     margin-bottom: 1.5rem;
 }
 
-.knowledge-category h4 {
+/* 课程模块样式 */
+.courses-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.course-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    transition: var(--transition);
+}
+
+.course-item:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+    border-color: #8b5cf6;
+}
+
+.course-number {
+    background: #8b5cf6;
+    color: white;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.course-info {
+    flex: 1;
+}
+
+.course-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+}
+
+.course-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.course-meta span {
+    background: var(--bg-tertiary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.course-description {
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+/* 证书模块样式 */
+.certificates-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.certificate-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    transition: var(--transition);
+}
+
+.certificate-item:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+    border-color: #ef4444;
+}
+
+.certificate-number {
+    background: #ef4444;
+    color: white;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.certificate-info {
+    flex: 1;
+}
+
+.certificate-name {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+}
+
+.certificate-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.certificate-meta span {
+    background: var(--bg-tertiary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.certificate-value {
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    line-height: 1.5;
+    font-style: italic;
+}
     margin-bottom: 0.75rem;
     color: var(--text-secondary);
     font-size: 1rem;
@@ -3450,6 +4196,39 @@ body {
     color: var(--text-primary);
     position: relative;
     padding-left: 2rem;
+    cursor: pointer;
+    transition: var(--transition);
+    border-radius: var(--radius-sm);
+    margin: 0.25rem 0;
+    padding-right: 1rem;
+}
+
+.interview-questions li:hover {
+    background-color: var(--bg-tertiary);
+    color: var(--primary-color);
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.1);
+}
+
+.interview-questions li:active {
+    background-color: #e0e7ff;
+    transform: translateX(2px);
+}
+
+/* 面试题点击提示 */
+.interview-questions li::after {
+    content: '\1F4AC'; /* 对话气泡emoji */
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    font-size: 0.875rem;
+}
+
+.interview-questions li:hover::after {
+    opacity: 1;
 }
 
 .interview-questions li:last-child {
@@ -3619,4 +4398,132 @@ body {
     border-radius: 4px;
     width: 0%;
     transition: width 0.3s ease;
+}
+
+/* =================================
+   聊天输入增强样式
+   ================================= */
+
+/* 输入框获得焦点时的父容器效果 */
+.chat-input-wrapper:focus-within {
+    transform: translateY(-1px);
+    transition: transform 0.3s ease;
+}
+
+/* 发送按钮的加载状态 */
+.chat-send-btn.loading {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+    cursor: wait;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* 输入框字符计数提示 */
+.chat-input-hint {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    text-align: right;
+    margin-top: 4px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.chat-input-wrapper:focus-within .chat-input-hint {
+    opacity: 1;
+}
+
+/* 发送按钮图标旋转动画 */
+.chat-send-btn:hover:not(:disabled) i {
+    transform: rotate(15deg);
+    transition: transform 0.3s ease;
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+    .chat-input-area {
+        padding: 16px;
+    }
+    
+    .chat-input-wrapper {
+        /* 移除gap设置，因为按钮现在在内部 */
+    }
+    
+    #chatInput {
+        height: 56px; /* 移动端略微减少高度 */
+        min-height: 56px;
+        max-height: 56px;
+        font-size: 16px; /* 防止iOS缩放 */
+        border-radius: 18px;
+        padding: 14px 54px 14px 18px; /* 调整内边距 */
+    }
+    
+    .chat-send-btn {
+        width: 36px; /* 移动端更小的按钮 */
+        height: 36px;
+        border-radius: 10px;
+        font-size: 0.85rem;
+        right: 6px; /* 调整位置 */
+    }
+}
+
+/* 深色模式适配 */
+@media (prefers-color-scheme: dark) {
+    #chatInput {
+        background: #1f2937;
+        border-color: #374151;
+        color: #f9fafb;
+    }
+    
+    #chatInput::placeholder {
+        color: #6b7280;
+    }
+    
+    #chatInput:focus {
+        border-color: #10b981;
+        background: #1f2937;
+    }
+    
+    .chat-status {
+        background: rgba(31, 41, 55, 0.8);
+        color: #d1d5db;
+    }
+}
+
+/* 输入框平滑展开动画 */
+#chatInput {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 移除focus状态的scale效果，防止影响内部按钮 */
+#chatInput:focus {
+    /* 不再使用transform，因为会影响内部按钮定位 */
+}
+
+/* 发送按钮成功发送后的短暂变色效果 */
+.chat-send-btn.sent {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    animation: sent-pulse 0.6s ease-out;
+}
+
+@keyframes sent-pulse {
+    0% {
+        transform: translateY(-50%) scale(1); /* 保持垂直居中 */
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+    }
+    50% {
+        transform: translateY(-50%) scale(1.15); /* 保持垂直居中 */
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+    100% {
+        transform: translateY(-50%) scale(1); /* 保持垂直居中 */
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+    }
 }

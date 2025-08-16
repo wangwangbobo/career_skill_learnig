@@ -1,0 +1,50 @@
+{
+  "timestamp": 1755261024596,
+  "fileKey": "example_file_2",
+  "options": {
+    "depth": 3
+  },
+  "data": {
+    "name": "设计文件_example_",
+    "type": "DOCUMENT",
+    "version": "1.0.0",
+    "lastModified": "2025-08-15T12:30:24.596Z",
+    "document": {
+      "id": "0:0",
+      "name": "Document",
+      "type": "DOCUMENT",
+      "children": [
+        {
+          "id": "1:1",
+          "name": "主页面",
+          "type": "CANVAS",
+          "children": [
+            {
+              "id": "1:2",
+              "name": "Header",
+              "type": "FRAME",
+              "children": [
+                {
+                  "id": "1:3",
+                  "name": "Logo",
+                  "type": "IMAGE"
+                },
+                {
+                  "id": "1:4",
+                  "name": "标题",
+                  "type": "TEXT"
+                }
+              ]
+            },
+            {
+              "id": "1:5",
+              "name": "Button组件",
+              "type": "COMPONENT",
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

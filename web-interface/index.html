@@ -54,20 +54,289 @@
         }
     </style>
     
-    <!-- 异步加载外部字体，不阻塞渲染 -->
+    <!-- 异步加载外部字体，设置超时降级 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'; this.onload=null;">
     
-    <!-- 异步加载字体图标，提供降级方案 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'; this.onload=null;">
+    <script>
+        // 字体加载超时处理
+        (function() {
+            let fontLoaded = false;
+            let iconLoaded = false;
+            
+            // 设置2秒超时
+            setTimeout(() => {
+                if (!fontLoaded) {
+                    console.warn('⏰ Google Fonts 加载超时，使用系统字体');
+                    document.body.classList.add('font-fallback');
+                }
+                if (!iconLoaded) {
+                    console.warn('⏰ FontAwesome 加载超时，使用文本图标');
+                    document.body.classList.add('icon-fallback');
+                }
+            }, 2000);
+            
+            // 动态加载字体
+            const fontLink = document.createElement('link');
+            fontLink.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap';
+            fontLink.rel = 'stylesheet';
+            fontLink.onload = () => { fontLoaded = true; console.log('✅ Google Fonts 加载完成'); };
+            fontLink.onerror = () => { console.warn('❌ Google Fonts 加载失败'); };
+            document.head.appendChild(fontLink);
+            
+            // 动态加载图标
+            const iconLink = document.createElement('link');
+            iconLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
+            iconLink.rel = 'stylesheet';
+            iconLink.onload = () => { iconLoaded = true; console.log('✅ FontAwesome 加载完成'); };
+            iconLink.onerror = () => { console.warn('❌ FontAwesome 加载失败'); };
+            document.head.appendChild(iconLink);
+        })();
+    </script>
     
-    <!-- 异步加载 Markmap 相关库，确保正确初始化 -->
-    <script src="https://cdn.jsdelivr.net/npm/d3@7" async></script>
-    <script src="https://cdn.jsdelivr.net/npm/markmap-view" async></script>
-    <script src="https://cdn.jsdelivr.net/npm/markmap-lib" async></script>
+    <!-- 思维导图Markmap库和样式 -->
+    <script>
+        // 动态加载Markmap相关库
+        window.markmapLibsLoading = true;
+        window.markmapLibsLoadFailed = false;
+        window.markmapLibsLoaded = false;
+        
+        // 创建script标签加载D3和Markmap
+        function loadMarkmapLibs() {
+            console.log('🧠 开始加载Markmap库...');
+            
+            // 直接加载markmap-autoloader，它会自动处理依赖
+            const autoLoaderScript = document.createElement('script');
+            autoLoaderScript.src = 'https://cdn.jsdelivr.net/npm/markmap-autoloader@0.14.3';
+            autoLoaderScript.onload = () => {
+                console.log('✅ Markmap autoloader加载完成');
+                window.markmapLibsLoaded = true;
+                window.markmapLibsLoading = false;
+                
+                // 等待autoloader初始化
+                setTimeout(() => {
+                    if (window.markmap) {
+                        console.log('✅ Markmap库初始化完成');
+                    }
+                }, 500);
+            };
+            autoLoaderScript.onerror = () => {
+                console.warn('❌ Markmap autoloader加载失败，尝试备用方案');
+                loadMarkmapFallback();
+            };
+            document.head.appendChild(autoLoaderScript);
+        }
+        
+        // 备用加载方案
+        function loadMarkmapFallback() {
+            console.log('🔄 使用备用加载方案...');
+            
+            // 加载D3
+            const d3Script = document.createElement('script');
+            d3Script.src = 'https://cdn.jsdelivr.net/npm/d3@7';
+            d3Script.onload = () => {
+                console.log('✅ D3库加载完成');
+                
+                // D3加载完成后加载Markmap
+                const markmapScript = document.createElement('script');
+                markmapScript.src = 'https://cdn.jsdelivr.net/npm/markmap-view@0.14.3';
+                markmapScript.onload = () => {
+                    console.log('✅ Markmap库加载完成');
+                    window.markmapLibsLoaded = true;
+                    window.markmapLibsLoading = false;
+                    
+                    // 加载Markmap工具栏
+                    const toolbarScript = document.createElement('script');
+                    toolbarScript.src = 'https://cdn.jsdelivr.net/npm/markmap-toolbar@0.14.3';
+                    toolbarScript.onload = () => console.log('✅ Markmap工具栏加载完成');
+                    document.head.appendChild(toolbarScript);
+                };
+                markmapScript.onerror = () => {
+                    console.warn('❌ Markmap库加载失败，使用降级方案');
+                    window.markmapLibsLoadFailed = true;
+                    window.markmapLibsLoading = false;
+                };
+                document.head.appendChild(markmapScript);
+            };
+            d3Script.onerror = () => {
+                console.warn('❌ D3库加载失败，使用降级方案');
+                window.markmapLibsLoadFailed = true;
+                window.markmapLibsLoading = false;
+            };
+            document.head.appendChild(d3Script);
+        }
+        
+        // 加载Markmap CSS
+        function loadMarkmapCSS() {
+            const markmapCSS = document.createElement('link');
+            markmapCSS.rel = 'stylesheet';
+            markmapCSS.href = 'https://cdn.jsdelivr.net/npm/markmap-toolbar@0.14.3/dist/style.css';
+            markmapCSS.onload = () => console.log('✅ Markmap CSS加载完成');
+            document.head.appendChild(markmapCSS);
+        }
+        
+        // 页面加载完成后尝试加载Markmap库
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                loadMarkmapLibs();
+                loadMarkmapCSS();
+            });
+        } else {
+            loadMarkmapLibs();
+            loadMarkmapCSS();
+        }
+        
+        // 3秒超时降级
+        setTimeout(() => {
+            if (window.markmapLibsLoading && !window.markmapLibsLoaded) {
+                console.warn('⏰ Markmap库加载超时，使用降级方案');
+                window.markmapLibsLoadFailed = true;
+                window.markmapLibsLoading = false;
+            }
+        }, 3000);
+    </script>
+    
+    <!-- Markmap样式 -->
+    <style>
+        .markmap-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #ffffff;
+            overflow: hidden;
+        }
+        
+        .markmap-header {
+            padding: 10px 15px;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .markmap-title {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .markmap-controls {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .markmap-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 5px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.2s ease;
+        }
+        
+        .markmap-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .markmap-content {
+            width: 100%;
+            height: calc(100% - 45px);
+            position: relative;
+        }
+        
+        .markmap-content svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* 思维导图节点样式 */
+        .markmap g[data-depth="0"] > circle {
+            fill: #4f46e5 !important;
+        }
+        
+        .markmap g[data-depth="1"] > circle {
+            fill: #059669 !important;
+        }
+        
+        .markmap g[data-depth="2"] > circle {
+            fill: #dc2626 !important;
+        }
+        
+        .markmap g[data-depth="3"] > circle {
+            fill: #d97706 !important;
+        }
+        
+        /* 降级树形结构样式 */
+        .markmap-tree-fallback {
+            padding: 15px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .mindmap-tree-level-0 {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .mindmap-node-item {
+            margin: 5px 0;
+            padding-left: 20px;
+        }
+        
+        .mindmap-node-text {
+            font-weight: 500;
+        }
+    </style>
+    
+    <!-- 思维导图使用本地降级方案，不依赖外部CDN -->
+    <script>
+        // 设置思维导图使用降级模式
+        window.markmapLibsLoading = false;
+        window.markmapLibsLoadFailed = true;
+        window.markmapLibsLoaded = false;
+        
+        console.log('🧠 思维导图使用本地降级方案，不加载外部CDN库');
+    </script>
     
     <!-- 快速初始化脚本 - 性能优化 -->
+    <script>
+        // 页面快速显示逻辑 - DOM准备就绪后立即显示
+        function quickShowPage() {
+            console.log('⚡ 快速显示页面...');
+            
+            const simpleLoading = document.getElementById('simpleLoading');
+            if (simpleLoading) {
+                simpleLoading.classList.add('hidden');
+                console.log('✅ 加载指示器已隐藏');
+            }
+            
+            // 确保页面内容可见
+            document.body.style.opacity = '1';
+            document.body.style.visibility = 'visible';
+            
+            console.log('🚀 页面已快速显示，不等待外部资源');
+        }
+        
+        // DOM内容加载完成后立即显示页面
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', quickShowPage);
+        } else {
+            quickShowPage();
+        }
+        
+        // 备用方案：500ms后强制显示页面
+        setTimeout(quickShowPage, 500);
+    </script>
+    
     <script src="fast-init.js"></script>
     <!-- 降级CSS：当外部资源加载失败时的备用样式 -->
     <style>
@@ -81,9 +350,25 @@
             display: none;
         }
         
-        /* 当FontAwesome没加载时显示文本 */
-        .fas:not([class*="fa-"]):before {
-            content: "[图标]";
+        /* 字体降级样式 */
+        .font-fallback {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif !important;
+        }
+        
+        /* 图标降级样式 */
+        .icon-fallback .fas {
+            font-family: Arial, sans-serif !important;
+        }
+        .icon-fallback .fas.fa-graduation-cap:before { content: "🎓"; }
+        .icon-fallback .fas.fa-cog:before { content: "⚙️"; }
+        .icon-fallback .fas.fa-briefcase:before { content: "💼"; }
+        .icon-fallback .fas.fa-file-alt:before { content: "📄"; }
+        .icon-fallback .fas.fa-lightbulb:before { content: "💡"; }
+        .icon-fallback .fas.fa-question-circle:before { content: "❓"; }
+        .icon-fallback .fas.fa-book:before { content: "📚"; }
+        .icon-fallback .fas.fa-certificate:before { content: "🏆"; }
+        .icon-fallback .fas:not([class*="fa-"]):before {
+            content: "📋";
             font-family: Arial, sans-serif;
         }
         
@@ -207,14 +492,6 @@
                         <i class="fas fa-book"></i>
                         生成学习路线
                     </button>
-                    
-                    <!-- 调试信息 -->
-                    <div style="margin-top: 1rem; padding: 1rem; background: #f0f9ff; border-radius: 8px; font-size: 0.9rem; color: #0369a1;">
-                        <strong>🔧 调试信息：</strong><br>
-                        • 按钮文案应显示为"生成学习路线"<br>
-                        • 输入职位信息后按钮将变为可点击状态<br>
-                        • 点击按钮将打开内容选择弹窗
-                    </div>
                 </div>
             </section>
 
@@ -262,8 +539,8 @@
         <section class="results-section" id="resultsSection" style="display: none;">
             <div class="results-header">
                 <h2 class="results-title">
-                    <i class="fas fa-briefcase"></i>
-                    职位学习资料
+                    <i class="fas fa-graduation-cap"></i>
+                    后端工程师 核心知识点
                 </h2>
                 <div class="results-meta">
                     <span class="topic-display" id="topicDisplay"></span>
@@ -307,6 +584,69 @@
                 </div>
             </div>
 
+            <!-- 五个独立模块展示区域 -->
+            <div class="content-modules-container" id="contentModulesContainer">
+                <!-- 知识点模块 -->
+                <div class="module-card knowledge" id="knowledgeModule" style="display: none;">
+                    <div class="module-header">
+                        <i class="fas fa-lightbulb"></i>
+                        <h3 class="module-title">核心知识点</h3>
+                        <span class="module-count" id="knowledgeCount">0</span>
+                    </div>
+                    <div class="module-content" id="knowledgeContent">
+                        <!-- 知识点内容将动态加载 -->
+                    </div>
+                </div>
+
+                <!-- 高频面试题模块 -->
+                <div class="module-card interview" id="interviewModule" style="display: none;">
+                    <div class="module-header">
+                        <i class="fas fa-question-circle"></i>
+                        <h3 class="module-title">高频面试题</h3>
+                        <span class="module-count" id="interviewCount">0</span>
+                    </div>
+                    <div class="module-content" id="interviewContent">
+                        <!-- 面试题内容将动态加载 -->
+                    </div>
+                </div>
+
+                <!-- 推荐书籍模块 -->
+                <div class="module-card books" id="booksModule" style="display: none;">
+                    <div class="module-header">
+                        <i class="fas fa-book"></i>
+                        <h3 class="module-title">推荐书籍</h3>
+                        <span class="module-count" id="booksCount">0</span>
+                    </div>
+                    <div class="module-content" id="booksContent">
+                        <!-- 书籍内容将动态加载 -->
+                    </div>
+                </div>
+
+                <!-- 推荐课程模块 -->
+                <div class="module-card courses" id="coursesModule" style="display: none;">
+                    <div class="module-header">
+                        <i class="fas fa-graduation-cap"></i>
+                        <h3 class="module-title">推荐课程</h3>
+                        <span class="module-count" id="coursesCount">0</span>
+                    </div>
+                    <div class="module-content" id="coursesContent">
+                        <!-- 课程内容将动态加载 -->
+                    </div>
+                </div>
+
+                <!-- 相关证书模块 -->
+                <div class="module-card certificates" id="certificatesModule" style="display: none;">
+                    <div class="module-header">
+                        <i class="fas fa-certificate"></i>
+                        <h3 class="module-title">相关证书</h3>
+                        <span class="module-count" id="certificatesCount">0</span>
+                    </div>
+                    <div class="module-content" id="certificatesContent">
+                        <!-- 证书内容将动态加载 -->
+                    </div>
+                </div>
+            </div>
+
             <!-- 技能分类展示 -->
             <div class="skills-container" id="skillsContainer">
                 <!-- 技能分类将动态生成 -->
@@ -317,6 +657,10 @@
                 <button class="regenerate-btn" id="regenerateBtn">
                     <i class="fas fa-redo"></i>
                     重新生成
+                </button>
+                <button class="regenerate-btn" id="testModulesBtn" style="margin-left: 1rem; background: #10b981;">
+                    <i class="fas fa-flask"></i>
+                    测试五个模块
                 </button>
             </div>
         </section>
@@ -748,178 +1092,874 @@
                     }
                 };
                 
-                // 添加真实API调用方法
+                // 添加真实API调用方法（流式版本）
                 ui.callRealAPI = async function() {
                     try {
-                        console.log('🤖 调用真实AI后端API...');
-                        this.addLog && this.addLog('info', '🤖 正在调用大模型生成内容...');
+                        console.log('🚀 开始流式生成学习方案...');
+                        this.addLog && this.addLog('info', '🚀 开始调用AI流式生成接口...');
                         
                         // 检查是否有API密钥
                         const apiKey = this.getStoredApiKey ? this.getStoredApiKey() : null;
                         
                         if (!apiKey) {
-                            this.addLog && this.addLog('warning', '⚠️ 未配置API密钥，将使用模拟数据模式');
-                            this.showToast && this.showToast('⚠️ 未配置API密钥，使用模拟数据。点击右上角配置API密钥以获取真实AI功能。', 'info', 5000);
+                            this.addLog && this.addLog('warning', '⚠️ 未配置API密钥，将尝试使用本地工具搜索课程');
+                            this.showToast && this.showToast('⚠️ 未配置API密钥，将尝试使用本地工具。配置API密钥可获得更好的AI功能。', 'info', 5000);
                         }
                         
-                        // 调用后端API
-                        const response = await fetch('/api/generate-learning-plan', {
+                        // 使用流式API端点
+                        const response = await fetch('/api/generate-learning-plan-stream', {
                             method: 'POST',
                             headers: {
-                                'Content-Type': 'application/json',
+                                'Content-Type': 'application/json'
                             },
-                            body: JSON.stringify({ 
+                            body: JSON.stringify({
                                 topic: this.currentJobInfo.content,
-                                apiKey: apiKey // 传递API密钥
+                                apiKey: apiKey,
+                                contentTypes: this.selectedContentTypes  // 添加用户选择的内容类型
                             })
                         });
                         
                         if (!response.ok) {
-                            const errorData = await response.json();
-                            throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                            throw new Error(`HTTP error! status: ${response.status}`);
                         }
                         
-                        const result = await response.json();
-                        console.log('✅ 后端API调用成功:', result);
+                        // 处理流式响应
+                        const reader = response.body.getReader();
+                        const decoder = new TextDecoder();
+                        let buffer = '';
                         
-                        // 模拟进度更新过程
-                        await this.simulateGeneration();
+                        // 存储流式数据
+                        let streamData = {
+                            courses: [],
+                            studyPlan: null,
+                            exercises: [],
+                            notes: null,
+                            progress: null,
+                            mindmap: null
+                        };
                         
-                        // 解析和展示结果
-                        this.processAPIResult(result);
+                        console.log('📊 开始处理流式响应...');
+                        this.addLog && this.addLog('info', '📊 正在接收AI流式数据...');
+                        
+                        const processStream = async () => {
+                            try {
+                                while (true) {
+                                    const { done, value } = await reader.read();
+                                    
+                                    if (done) {
+                                        console.log('🏁 流式数据接收完成');
+                                        this.addLog && this.addLog('success', '✅ 流式数据接收完成');
+                                        
+                                        // 显示最终结果
+                                        this.showStreamResults(streamData);
+                                        return;
+                                    }
+                                    
+                                    buffer += decoder.decode(value, { stream: true });
+                                    const lines = buffer.split('\n');
+                                    
+                                    // 保留最后一行（可能不完整）
+                                    buffer = lines.pop() || '';
+                                    
+                                    for (const line of lines) {
+                                        if (line.trim() === '') continue;
+                                        
+                                        if (line.startsWith('event: ')) {
+                                            const eventType = line.slice(7).trim();
+                                            console.log('📡 SSE事件类型:', eventType);
+                                            continue;
+                                        }
+                                        
+                                        if (line.startsWith('data: ')) {
+                                            try {
+                                                const dataStr = line.slice(6);
+                                                const data = JSON.parse(dataStr);
+                                                console.log('📊 收到流式数据:', data);
+                                                
+                                                // 处理流式事件
+                                                await this.handleStreamEvent(data, streamData);
+                                                
+                                            } catch (e) {
+                                                console.warn('⚠️ 解析流数据失败:', e.message, '原始数据:', line);
+                                            }
+                                        }
+                                    }
+                                }
+                            } catch (streamError) {
+                                console.error('❌ 流处理错误:', streamError);
+                                this.addLog && this.addLog('error', '❌ 流处理错误: ' + streamError.message);
+                                throw streamError;
+                            }
+                        };
+                        
+                        await processStream();
                         
                     } catch (error) {
                         console.error('❓ API调用失败:', error);
                         this.addLog && this.addLog('error', `❌ API调用失败: ${error.message}`);
                         
-                        // 如果是API密钥问题，提示用户配置
-                        if (error.message.includes('API密钥') || error.message.includes('未配置')) {
-                            this.showToast && this.showToast('需要配置API密钥才能使用真实AI功能，现在使用模拟数据', 'warning', 5000);
-                            // 在API失败时使用模拟数据
-                            await this.simulateGeneration();
-                            this.generateMockData();
-                        } else {
-                            // 其他错误，显示错误信息
-                            this.showError && this.showError(error.message);
-                        }
+                        // 降级到模拟数据
+                        this.showToast && this.showToast('API调用失败，使用模拟数据展示', 'warning', 3000);
+                        await this.simulateGeneration();
+                        this.generateMockData();
                     }
                 };
                 
-                // 添加处理API结果的方法
-                ui.processAPIResult = function(result) {
-                    if (!result) {
-                        console.warn('⚠️ API返回结果为空');
-                        this.generateMockData(); // 降级到模拟数据
+                // 添加处理流式事件的方法
+                ui.handleStreamEvent = async function(data, streamData) {
+                    console.log('📊 流式事件:', data);
+                    
+                    // 处理开始事件
+                    if (data.message && data.message.includes('开始生成')) {
+                        this.addLog && this.addLog('info', '🚀 ' + data.message);
                         return;
                     }
                     
-                    console.log('🔍 处理API返回结果:', result);
-                    this.addLog && this.addLog('info', '✅ 大模型生成完成，正在处理结果...');
+                    // 根据事件类型处理
+                    if (data.step) {
+                        console.log(`🔄 处理步骤: ${data.step}, 进度: ${data.progress}%`);
+                        this.addLog && this.addLog('info', `🔄 ${data.message || data.step}`);
+                        
+                        // 如果有数据，更新对应部分
+                        if (data.data) {
+                            console.log(`📊 收到 ${data.step} 数据:`, data.data);
+                            console.log(`🎆 即将显示 ${data.step} 内容...`);
+                            
+                            switch (data.step) {
+                                case 'courses':
+                                    streamData.courses = data.data;
+                                    console.log('🎓 开始显示课程推荐...');
+                                    this.displayStreamCourses(data.data);
+                                    this.addLog && this.addLog('success', '✅ 课程推荐生成完成');
+                                    console.log('✅ 课程推荐显示完成');
+                                    break;
+                                case 'studyPlan':
+                                    streamData.studyPlan = data.data;
+                                    console.log('💡 开始显示知识点...');
+                                    // 使用知识点显示方法而不是学习计划
+                                    this.displayStreamKnowledge(data.data.phases || []);
+                                    this.addLog && this.addLog('success', '✅ 知识点生成完成');
+                                    console.log('✅ 知识点显示完成');
+                                    break;
+                                case 'exercises':
+                                    streamData.exercises = data.data;
+                                    console.log('❓ 开始显示面试题...');
+                                    this.displayStreamExercises(data.data);
+                                    this.addLog && this.addLog('success', '✅ 面试题生成完成');
+                                    console.log('✅ 面试题显示完成');
+                                    break;
+                                case 'notes':
+                                    streamData.notes = data.data;
+                                    console.log('📚 开始显示推荐书籍...');
+                                    this.displayStreamNotes(data.data);
+                                    this.addLog && this.addLog('success', '✅ 推荐书籍生成完成');
+                                    console.log('✅ 推荐书籍显示完成');
+                                    break;
+                                case 'progress':
+                                    streamData.progress = data.data;
+                                    console.log('🏆 开始显示相关证书...');
+                                    this.displayStreamCertificates(data.data);
+                                    this.addLog && this.addLog('success', '✅ 相关证书生成完成');
+                                    console.log('✅ 相关证书显示完成');
+                                    break;
+                                case 'mindmap':
+                                    streamData.mindmap = data.data;
+                                    console.log('🧠 开始显示思维导图...');
+                                    this.displayStreamMindmap(data.data);
+                                    this.addLog && this.addLog('success', '✅ 思维导图生成完成');
+                                    console.log('✅ 思维导图显示完成');
+                                    break;
+                                default:
+                                    console.warn(`⚠️ 未知的步骤类型: ${data.step}`);
+                            }
+                        } else {
+                            console.warn(`⚠️ ${data.step} 步骤没有数据`);
+                        }
+                    }
                     
-                    try {
-                        // 清空技能容器
+                    // 处理完成事件
+                    if (data.result) {
+                        console.log('✅ 流式生成完成，更新最终结果');
+                        console.log('📊 最终结果数据:', data.result);
+                        Object.assign(streamData, data.result);
+                        
+                        // 清空结果容器，准备显示5个独立分块
                         if (this.skillsContainer) {
                             this.skillsContainer.innerHTML = '';
+                            console.log('🗑️ 已清空结果容器，准备显示独立分块');
                         }
                         
-                        // 根据API返回的数据生成技能分类
-                        this.generateSkillsFromAPI(result);
+                        // 确保显示最终结果中的所有内容 - 为每种选中的内容类型显示独立分块
+                        const selectedTypes = this.selectedContentTypes || ['knowledge', 'interview'];
+                        console.log('🔍 用户选择的内容类型:', selectedTypes);
                         
-                        // 处理思维导图
-                        this.processMindmapFromAPI(result);
+                        // 1. 知识点 - 使用studyPlan数据
+                        if (selectedTypes.includes('knowledge') && data.result.studyPlan) {
+                            console.log('💡 显示知识点分块');
+                            this.displayStreamKnowledge(data.result.studyPlan.phases || []);
+                        }
                         
-                        this.addLog && this.addLog('info', '🎉 真实AI学习资料生成完成！');
+                        // 2. 高频面试题 - 使用exercises数据
+                        if (selectedTypes.includes('interview') && data.result.exercises) {
+                            console.log('❓ 显示面试题分块');
+                            this.displayStreamExercises(data.result.exercises);
+                        }
                         
-                    } catch (error) {
-                        console.error('处理API结果失败:', error);
-                        // 降级到模拟数据
-                        this.generateMockData();
+                        // 3. 推荐书籍 - 使用notes数据
+                        if (selectedTypes.includes('books') && data.result.notes) {
+                            console.log('📚 显示书籍分块');
+                            this.displayStreamNotes(data.result.notes);
+                        }
+                        
+                        // 4. 相关证书 - 使用progress数据
+                        if (selectedTypes.includes('certificates') && data.result.progress) {
+                            console.log('🏆 显示证书分块');
+                            this.displayStreamCertificates(data.result.progress);
+                        }
+                        
+                        // 5. 推荐课程 - 使用courses数据
+                        if (selectedTypes.includes('courses') && data.result.courses) {
+                            console.log('🎓 显示课程分块');
+                            this.displayStreamCourses(data.result.courses);
+                        }
+                        
+                        // 6. 思维导图 - 始终显示（作为最后一个独立分块）
+                        if (data.result.mindmap) {
+                            console.log('🧠 显示思维导图分块');
+                            this.displayStreamMindmap(data.result.mindmap);
+                        }
+                        
+                        this.addLog && this.addLog('success', '🎉 学习方案生成完成！');
+                    }
+                    
+                    // 处理错误事件
+                    if (data.error) {
+                        console.error('❌ 流式生成错误:', data.error);
+                        this.addLog && this.addLog('error', '❌ 流式生成错误: ' + data.error);
+                        throw new Error(data.error);
                     }
                 };
                 
-                // 添加根据API生成技能分类的方法
-                ui.generateSkillsFromAPI = function(apiResult) {
+                // 修改课程显示方法 - 使用独立分块显示
+                ui.displayStreamCourses = function(courses) {
+                    if (!courses || !Array.isArray(courses) || courses.length === 0) {
+                        console.warn('⚠️ 课程数据为空或无效');
+                        return;
+                    }
+                    
+                    console.log('🎓 显示推荐课程:', courses);
+                    
+                    // 格式化课程数据
+                    const coursesData = courses.map(course => {
+                        const rating = course.rating ? parseFloat(course.rating).toFixed(1) : 'N/A';
+                        const students = course.students ? course.students.toLocaleString() : '0';
+                        const difficulty = this.translateDifficulty ? this.translateDifficulty(course.difficulty) : course.difficulty || '未知';
+                        const highlights = course.highlights ? course.highlights.join('、') : '';
+                        
+                        return `<div class="course-item" style="margin-bottom: 1.5rem; padding: 1rem; border: 1px solid #e5e5e5; border-radius: 8px; background: #f9f9f9;">
+                            <h4 style="margin: 0 0 0.5rem 0; color: #4f46e5;">${course.title || '未命名课程'}</h4>
+                            <p><strong>🏢 平台:</strong> ${course.platform || '未知平台'}</p>
+                            <p><strong>📊 难度:</strong> ${difficulty}</p>
+                            <p><strong>⭐ 评分:</strong> ${rating}/5 | <strong>👥 学生:</strong> ${students}人</p>
+                            <p><strong>⏱️ 时长:</strong> ${course.duration || '未知'} | <strong>💰 价格:</strong> ${course.price === 0 ? '免费' : '￥' + (course.price || '未知')}</p>
+                            ${highlights ? `<p><strong>🎆 亮点:</strong> ${highlights}</p>` : ''}
+                            ${course.description ? `<p style="color: #444; font-size: 0.9rem;">${course.description}</p>` : ''}
+                        </div>`;
+                    });
+                    
+                    this.addIndependentSkillCategory('🎓 推荐课程', 'courses', coursesData, 'fas fa-graduation-cap');
+                };
+                
+                ui.displayStreamStudyPlan = function(studyPlan) {
+                    if (!studyPlan) {
+                        console.warn('⚠️ 学习计划数据为空');
+                        return;
+                    }
+                    
+                    console.log('📋 显示学习计划:', studyPlan);
+                    
+                    // 为学习计划创建独立的显示块
+                    const studyPlanData = studyPlan.phases ? studyPlan.phases.map(phase => 
+                        `<strong>${phase.name || '未命名阶段'}</strong><br>${(phase.tasks || []).map(task => `• ${task}`).join('<br>')}`
+                    ) : ['暂无学习计划数据'];
+                    
+                    this.addIndependentSkillCategory('📋 学习计划', 'knowledge', studyPlanData, 'fas fa-clipboard-list');
+                };
+                
+                ui.displayStreamExercises = function(exercises) {
+                    if (!exercises || !Array.isArray(exercises) || exercises.length === 0) {
+                        console.warn('⚠️ 练习题数据为空或无效');
+                        return;
+                    }
+                    
+                    console.log('📝 显示练习题:', exercises);
+                    
+                    // 为练习题创建独立的显示块
+                    const exercisesData = exercises.map((exercise, index) => `${index + 1}. ${exercise || '空题目'}`);
+                    
+                    this.addIndependentSkillCategory('❓ 高频面试题', 'interview', exercisesData, 'fas fa-question-circle');
+                };
+                
+                ui.displayStreamNotes = function(notes) {
+                    if (!notes) {
+                        console.warn('⚠️ 笔记数据为空');
+                        return;
+                    }
+                    
+                    console.log('📖 显示学习笔记:', notes);
+                    
+                    // 为学习笔记创建独立的显示块
+                    const notesData = notes.keyPoints ? notes.keyPoints.map(point => point || '空内容') : ['暂无关键知识点'];
+                    
+                    this.addIndependentSkillCategory('📚 推荐书籍', 'books', notesData, 'fas fa-book');
+                };
+                
+                // 添加独立技能分类显示方法
+                ui.addIndependentSkillCategory = function(title, contentType, items, iconClass) {
                     if (!this.skillsContainer) return;
                     
-                    // 优先使用API返回的结构化数据
-                    if (apiResult.studyPlan && apiResult.studyPlan.phases) {
-                        apiResult.studyPlan.phases.forEach(phase => {
-                            const skillContent = {
-                                knowledge: phase.tasks || [],
-                                interview: this.generateInterviewQuestions(phase.name),
-                                books: this.generateBookRecommendations(phase.name),
-                                certificates: this.generateCertificates(phase.name),
-                                courses: this.generateCourses(phase.name)
-                            };
-                            
-                            this.addSkillCategory(phase.name, skillContent);
-                        });
-                    } else {
-                        // 降级到通用数据生成
-                        this.generateMockData();
-                    }
-                };
-                
-                // 添加处理思维导图的方法
-                ui.processMindmapFromAPI = function(apiResult) {
-                    if (!this.mindmapContent) return;
+                    const selectedTypes = this.selectedContentTypes || ['knowledge', 'interview'];
                     
-                    if (apiResult.mindmap) {
-                        // 使用API返回的思维导图数据
-                        this.displayMindmapFromAPI(apiResult.mindmap);
-                    } else if (apiResult.studyPlan) {
-                        // 基于学习计划生成思维导图
-                        this.generateMindmapForJob(this.currentJobInfo.content, [{
-                            name: '学习计划',
-                            content: {
-                                knowledge: apiResult.studyPlan.phases ? 
-                                    apiResult.studyPlan.phases.map(p => p.name) : [],
-                                interview: ['问题解决能力', '项目经验分享'],
-                                books: ['专业书籍推荐'],
-                                certificates: ['相关认证'],
-                                courses: ['在线课程']
-                            }
-                        }]);
+                    // 检查是否应该显示这个内容类型
+                    if (!selectedTypes.includes(contentType)) {
+                        console.log(`🚫 跳过显示 ${title}，因为用户未选择 ${contentType} 类型`);
+                        return;
                     }
-                };
-                
-                // 添加显示API思维导图的方法
-                ui.displayMindmapFromAPI = function(mindmapData) {
-                    if (!mindmapData) return;
                     
-                    let content = '';
-                    if (mindmapData.html) {
-                        content = mindmapData.html;
-                    } else if (mindmapData.content) {
-                        content = `
-                            <div class="mindmap-container">
-                                <div class="mindmap-fallback">
-                                    <h3>${mindmapData.title || '学习思维导图'}</h3>
-                                    <div class="mindmap-tree">
-                                        ${this.convertMarkdownToTree(mindmapData.content)}
-                                    </div>
-                                    <div class="mindmap-info">
-                                        <p><strong>🧠 真实AI生成的思维导图：</strong></p>
-                                        <ul>
-                                            <li>• 基于大模型分析生成</li>
-                                            <li>• 个性化学习路径推荐</li>
-                                            <li>• 结合职位需求与学习目标</li>
-                                            <li>• 智能化学习计划定制</li>
-                                        </ul>
+                    const skillDiv = document.createElement('div');
+                    skillDiv.className = 'skill-category';
+                    skillDiv.innerHTML = `
+                        <div class="skill-header" onclick="this.parentElement.classList.toggle('collapsed')">
+                            <h3 class="skill-title">
+                                <i class="${iconClass}"></i>
+                                ${title}
+                            </h3>
+                            <i class="fas fa-chevron-down skill-toggle"></i>
+                        </div>
+                        <div class="skill-content">
+                            <div class="content-types">
+                                <div class="content-type">
+                                    <div class="content-type-body">
+                                        ${this.renderContentItems(items)}
                                     </div>
                                 </div>
                             </div>
-                        `;
+                        </div>
+                    `;
+                    
+                    this.skillsContainer.appendChild(skillDiv);
+                    console.log(`✅ 添加独立内容块: ${title}`);
+                };
+                
+                // 添加内容渲染辅助方法
+                ui.renderContentItems = function(items) {
+                    if (!items || !Array.isArray(items)) {
+                        return '<p>暂无数据</p>';
                     }
                     
-                    this.mindmapContent.innerHTML = content;
-                    
-                    // 更新思维导图状态
-                    const mindmapStatus = document.getElementById('mindmapStatus');
-                    if (mindmapStatus) {
-                        mindmapStatus.textContent = '完成';
-                        mindmapStatus.className = 'card-status completed';
+                    return items.map(item => {
+                        if (typeof item === 'string') {
+                            return `<div class="content-item">${item}</div>`;
+                        } else {
+                            return `<div class="content-item">${item}</div>`;
+                        }
+                    }).join('');
+                };
+                
+                // 修改课程显示方法
+                ui.displayStreamCourses = function(courses) {
+                    if (!courses || !Array.isArray(courses) || courses.length === 0) {
+                        console.warn('⚠️ 课程数据为空或无效');
+                        return;
                     }
+                    
+                    console.log('🎓 显示推荐课程:', courses);
+                    
+                    // 格式化课程数据
+                    const coursesData = courses.map(course => {
+                        return `<div class="course-item">
+                            <h4>${course.title || '未命名课程'}</h4>
+                            <p><strong>平台:</strong> ${course.platform || '未知平台'}</p>
+                            <p><strong>难度:</strong> ${this.translateDifficulty ? this.translateDifficulty(course.difficulty) : course.difficulty || '未知'}</p>
+                            <p><strong>评分:</strong> ${course.rating || 'N/A'}</p>
+                            <p>${course.description || '暂无描述'}</p>
+                        </div>`;
+                    });
+                    
+                    this.addIndependentSkillCategory('🎓 推荐课程', 'courses', coursesData, 'fas fa-graduation-cap');
+                };
+                
+                // 添加证书显示方法
+                ui.displayStreamCertificates = function(certificates) {
+                    if (!certificates || !Array.isArray(certificates) || certificates.length === 0) {
+                        // 生成默认证书推荐
+                        const jobTitle = this.currentJobInfo?.content || '专业技能';
+                        certificates = [
+                            `${jobTitle}相关职业认证`,
+                            '行业权威证书推荐',
+                            '技能提升认证课程',
+                            '专业能力等级证书'
+                        ];
+                    }
+                    
+                    console.log('🏆 显示相关证书:', certificates);
+                    this.addIndependentSkillCategory('🏆 相关证书', 'certificates', certificates, 'fas fa-certificate');
+                };
+                
+                // 添加知识点显示方法
+                ui.displayStreamKnowledge = function(knowledge) {
+                    const knowledgeModule = document.getElementById('knowledgeModule');
+                    const knowledgeContent = document.getElementById('knowledgeContent');
+                    const knowledgeCount = document.getElementById('knowledgeCount');
+                    
+                    if (!knowledgeModule || !knowledgeContent) {
+                        console.error('⚠️ 知识点模块容器不存在');
+                        return;
+                    }
+                    
+                    if (!knowledge || !Array.isArray(knowledge) || knowledge.length === 0) {
+                        const jobTitle = this.currentJobInfo?.content || '专业技能';
+                        knowledge = [
+                            `${jobTitle}基础理论与概念`,
+                            '行业最佳实践和标准',
+                            '相关工具和技术栈',
+                            '实际项目应用案例'
+                        ];
+                    }
+                    
+                    console.log('💡 显示知识点:', knowledge);
+                    
+                    const knowledgeHtml = knowledge.map((item, index) => {
+                        const content = typeof item === 'string' ? item : item.content || item.title || '未知内容';
+                        return `<div class="knowledge-item"><div class="knowledge-number">${index + 1}</div><div class="knowledge-text">${content}</div></div>`;
+                    }).join('');
+                    
+                    knowledgeContent.innerHTML = `<div class="knowledge-list">${knowledgeHtml}</div>`;
+                    knowledgeCount.textContent = knowledge.length;
+                    knowledgeModule.style.display = 'block';
+                    
+                    console.log(`✅ 知识点模块显示完成（${knowledge.length}个项目）`);
+                };
+                
+                // 添加面试题显示方法
+                ui.displayStreamExercises = function(exercises) {
+                    const interviewModule = document.getElementById('interviewModule');
+                    const interviewContent = document.getElementById('interviewContent');
+                    const interviewCount = document.getElementById('interviewCount');
+                    
+                    if (!interviewModule || !interviewContent) {
+                        console.error('⚠️ 面试题模块容器不存在');
+                        return;
+                    }
+                    
+                    if (!exercises || !Array.isArray(exercises) || exercises.length === 0) {
+                        const jobTitle = this.currentJobInfo?.content || '专业技能';
+                        exercises = [
+                            `请介绍您对${jobTitle}岗位的理解`,
+                            `您在${jobTitle}方面有哪些实战经验？`,
+                            `如何解决${jobTitle}工作中的常见问题？`,
+                            `描述一个具有挑战性的${jobTitle}项目`,
+                            `您认为${jobTitle}未来的发展趋势是什么？`
+                        ];
+                    }
+                    
+                    console.log('❓ 显示面试题:', exercises);
+                    
+                    // 分类面试题
+                    const categories = this.categorizeInterviewQuestions(exercises);
+                    
+                    // 生成面试题HTML
+                    const interviewHtml = `
+                        <div class="interview-header">
+                            <div class="interview-stats">
+                                <div class="stats-item">
+                                    <span class="stats-number">${exercises.length}</span>
+                                    <span class="stats-label">总题目</span>
+                                </div>
+                                <div class="stats-item">
+                                    <span class="stats-number">${categories.length}</span>
+                                    <span class="stats-label">已分类</span>
+                                </div>
+                            </div>
+                            <div class="interview-description">
+                                精选企业高频面试题目，AI智能评分助您提升面试表现
+                            </div>
+                        </div>
+                        
+                        <div class="interview-categories">
+                            ${categories.map(category => `
+                                <div class="interview-category">
+                                    <div class="category-header">
+                                        <div class="category-tags">
+                                            <span class="category-tag primary">${category.type}</span>
+                                            <span class="category-tag secondary">${category.level}</span>
+                                        </div>
+                                        <div class="category-meta">
+                                            <span class="question-count">👁 ${category.views}</span>
+                                            <span class="difficulty-rating">⭐ ${category.rating}</span>
+                                            <span class="time-estimate">⏰ 建议用时 ${category.timeEstimate}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="question-content">
+                                        <h4 class="question-title">${category.question}</h4>
+                                        <div class="question-description">
+                                            ${category.description}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="question-actions">
+                                        <button class="action-btn practice-btn" data-question="${category.question}">
+                                            <i class="fas fa-comments"></i>
+                                            练习答案
+                                        </button>
+                                        <button class="action-btn ai-btn" data-question="${category.question}">
+                                            <i class="fas fa-robot"></i>
+                                            AI评分
+                                        </button>
+                                        <button class="action-btn favorite-btn">
+                                            <i class="far fa-heart"></i>
+                                        </button>
+                                        <button class="action-btn bookmark-btn">
+                                            <i class="far fa-bookmark"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                    
+                    interviewContent.innerHTML = interviewHtml;
+                    interviewCount.textContent = exercises.length;
+                    interviewModule.style.display = 'block';
+                    
+                    // 添加事件监听器
+                    this.addInterviewEventListeners();
+                    
+                    console.log(`✅ 面试题模块显示完成（${exercises.length}个项目）`);
+                };
+                
+                // 面试题分类方法
+                ui.categorizeInterviewQuestions = function(exercises) {
+                    const questionTypes = ['基础理论', '技术实战', '项目经验', '问题解决', '发展规划'];
+                    const levels = ['初级', '中级', '高级'];
+                    
+                    return exercises.map((question, index) => {
+                        const typeIndex = index % questionTypes.length;
+                        const levelIndex = Math.floor(index / 2) % levels.length;
+                        
+                        return {
+                            question: question,
+                            type: questionTypes[typeIndex],
+                            level: levels[levelIndex],
+                            views: (Math.floor(Math.random() * 3000) + 500).toLocaleString(),
+                            rating: (4.0 + Math.random() * 0.9).toFixed(1),
+                            timeEstimate: `${Math.floor(Math.random() * 8) + 3} 分钟`,
+                            description: this.generateQuestionDescription(question)
+                        };
+                    });
+                };
+                
+                // 生成题目描述
+                ui.generateQuestionDescription = function(question) {
+                    // 根据问题类型生成相应的描述
+                    if (question.includes('理解') || question.includes('介绍')) {
+                        return '考察对核心概念的理解和整体认知能力';
+                    } else if (question.includes('实战') || question.includes('经验')) {
+                        return '评估实际项目经验和解决问题的能力';
+                    } else if (question.includes('设计') || question.includes('架构')) {
+                        return '测试系统设计和架构思维能力';
+                    } else if (question.includes('优化') || question.includes('性能')) {
+                        return '考察技术深度和优化思维';
+                    } else if (question.includes('微服务') || question.includes('分布式')) {
+                        return '评估对复杂系统架构的理解能力';
+                    } else {
+                        return '综合考察专业技能和解决问题的思路';
+                    }
+                };
+                
+                // 添加面试题事件监听器
+                ui.addInterviewEventListeners = function() {
+                    // 使用事件委托处理动态添加的元素
+                    const interviewContent = document.getElementById('interviewContent');
+                    if (!interviewContent) return;
+                    
+                    // 练习答案按钮点击事件
+                    interviewContent.addEventListener('click', (e) => {
+                        if (e.target.closest('.practice-btn')) {
+                            const button = e.target.closest('.practice-btn');
+                            const question = button.getAttribute('data-question');
+                            console.log('🎯 点击练习答案按钮:', question);
+                            this.fillAIAssistantInput(question);
+                            
+                            // 添加点击反馈
+                            button.style.transform = 'scale(0.95)';
+                            setTimeout(() => {
+                                button.style.transform = 'scale(1)';
+                            }, 150);
+                        }
+                        
+                        // AI评分按钮点击事件
+                        if (e.target.closest('.ai-btn')) {
+                            const button = e.target.closest('.ai-btn');
+                            const question = button.getAttribute('data-question');
+                            console.log('🤖 点击AI评分按钮:', question);
+                            const aiPrompt = `请帮我分析这道面试题的答题要点和评分标准：${question}`;
+                            this.fillAIAssistantInput(aiPrompt);
+                            
+                            // 添加点击反馈
+                            button.style.transform = 'scale(0.95)';
+                            setTimeout(() => {
+                                button.style.transform = 'scale(1)';
+                            }, 150);
+                        }
+                        
+                        // 收藏按钮点击事件
+                        if (e.target.closest('.favorite-btn')) {
+                            const button = e.target.closest('.favorite-btn');
+                            const icon = button.querySelector('i');
+                            if (icon.classList.contains('far')) {
+                                icon.classList.replace('far', 'fas');
+                                icon.style.color = '#ef4444';
+                                this.showToast('已添加到收藏夹', 'success');
+                            } else {
+                                icon.classList.replace('fas', 'far');
+                                icon.style.color = '';
+                                this.showToast('已取消收藏', 'info');
+                            }
+                        }
+                        
+                        // 书签按钮点击事件
+                        if (e.target.closest('.bookmark-btn')) {
+                            const button = e.target.closest('.bookmark-btn');
+                            const icon = button.querySelector('i');
+                            if (icon.classList.contains('far')) {
+                                icon.classList.replace('far', 'fas');
+                                icon.style.color = '#f59e0b';
+                                this.showToast('已添加书签', 'success');
+                            } else {
+                                icon.classList.replace('fas', 'far');
+                                icon.style.color = '';
+                                this.showToast('已取消书签', 'info');
+                            }
+                        }
+                    });
+                    
+                    console.log('✅ 面试题事件监听器已添加');
+                };
+                
+                // 填入AI助手输入框的方法
+                ui.fillAIAssistantInput = function(text) {
+                    const chatInput = document.getElementById('chatInput');
+                    if (chatInput) {
+                        chatInput.value = text;
+                        chatInput.focus();
+                        
+                        // 触发input事件以更新发送按钮状态
+                        const inputEvent = new Event('input', { bubbles: true });
+                        chatInput.dispatchEvent(inputEvent);
+                        
+                        this.showToast('内容已填入AI助手，可以直接提问！', 'success');
+                        console.log('✅ 内容已填入AI助手:', text);
+                    } else {
+                        console.warn('⚠️ 未找到AI助手输入框');
+                        this.showToast('未找到AI助手输入框', 'error');
+                    }
+                };
+                
+                // Toast提示方法
+                ui.showToast = function(message, type = 'info') {
+                    const toast = document.getElementById('toast');
+                    const toastMessage = toast?.querySelector('.toast-message');
+                    const toastIcon = toast?.querySelector('.toast-icon');
+                    
+                    if (toast && toastMessage && toastIcon) {
+                        // 设置图标
+                        const icons = {
+                            success: 'fas fa-check-circle',
+                            error: 'fas fa-exclamation-circle',
+                            warning: 'fas fa-exclamation-triangle',
+                            info: 'fas fa-info-circle'
+                        };
+                        
+                        toastIcon.className = `toast-icon ${icons[type] || icons.info}`;
+                        toastMessage.textContent = message;
+                        toast.className = `toast show toast-${type}`;
+                        
+                        // 3秒后自动隐藏
+                        setTimeout(() => {
+                            toast.className = 'toast';
+                        }, 3000);
+                    }
+                };
+                
+                // 修改课程显示方法
+                ui.displayStreamCourses = function(courses) {
+                    const coursesModule = document.getElementById('coursesModule');
+                    const coursesContent = document.getElementById('coursesContent');
+                    const coursesCount = document.getElementById('coursesCount');
+                    
+                    if (!coursesModule || !coursesContent) {
+                        console.error('⚠️ 课程模块容器不存在');
+                        return;
+                    }
+                    
+                    if (!courses || !Array.isArray(courses) || courses.length === 0) {
+                        const jobTitle = this.currentJobInfo?.content || '专业技能';
+                        courses = [{
+                            title: `${jobTitle}零基础入门课程`,
+                            platform: 'Coursera',
+                            difficulty: '初级',
+                            rating: '4.8',
+                            students: '50,000+',
+                            description: '从零开始学习核心技能'
+                        }];
+                    }
+                    
+                    console.log('🎓 显示推荐课程:', courses);
+                    
+                    const coursesHtml = courses.map((course, index) => {
+                        const title = course.title || '未命名课程';
+                        const platform = course.platform || '未知平台';
+                        const difficulty = course.difficulty || '未知';
+                        const rating = course.rating || 'N/A';
+                        const students = course.students || '未知';
+                        const description = course.description || '暂无描述';
+                        
+                        return `<div class="course-item"><div class="course-number">${index + 1}</div><div class="course-info"><h4 class="course-title">${title}</h4><div class="course-meta"><span class="course-platform">🏛️ ${platform}</span><span class="course-difficulty">🎯 ${difficulty}</span><span class="course-rating">⭐ ${rating}</span><span class="course-students">👥 ${students}</span></div><p class="course-description">${description}</p></div></div>`;
+                    }).join('');
+                    
+                    coursesContent.innerHTML = `<div class="courses-list">${coursesHtml}</div>`;
+                    coursesCount.textContent = courses.length;
+                    coursesModule.style.display = 'block';
+                    
+                    console.log(`✅ 课程模块显示完成（${courses.length}个项目）`);
+                };
+                
+                // 修改证书显示方法
+                ui.displayStreamCertificates = function(certificates) {
+                    const certificatesModule = document.getElementById('certificatesModule');
+                    const certificatesContent = document.getElementById('certificatesContent');
+                    const certificatesCount = document.getElementById('certificatesCount');
+                    
+                    if (!certificatesModule || !certificatesContent) {
+                        console.error('⚠️ 证书模块容器不存在');
+                        return;
+                    }
+                    
+                    if (!certificates || !Array.isArray(certificates) || certificates.length === 0) {
+                        const jobTitle = this.currentJobInfo?.content || '专业技能';
+                        certificates = [{
+                            name: `${jobTitle}专业认证`,
+                            provider: '行业权威机构',
+                            difficulty: '中级',
+                            duration: '3-6个月',
+                            value: '提升职业竞争力，获得行业认可'
+                        }];
+                    }
+                    
+                    console.log('🏆 显示相关证书:', certificates);
+                    
+                    const certificatesHtml = certificates.map((cert, index) => {
+                        const name = (typeof cert === 'string') ? cert : (cert.name || '未知证书');
+                        const provider = (typeof cert === 'object' && cert.provider) ? cert.provider : '未知机构';
+                        const difficulty = (typeof cert === 'object' && cert.difficulty) ? cert.difficulty : '未知';
+                        const duration = (typeof cert === 'object' && cert.duration) ? cert.duration : '未知';
+                        const value = (typeof cert === 'object' && cert.value) ? cert.value : '专业能力认证';
+                        
+                        return `<div class="certificate-item"><div class="certificate-number">${index + 1}</div><div class="certificate-info"><h4 class="certificate-name">${name}</h4><div class="certificate-meta"><span class="certificate-provider">🏢 ${provider}</span><span class="certificate-difficulty">🎯 ${difficulty}</span><span class="certificate-duration">⏰ ${duration}</span></div><p class="certificate-value">${value}</p></div></div>`;
+                    }).join('');
+                    
+                    certificatesContent.innerHTML = `<div class="certificates-list">${certificatesHtml}</div>`;
+                    certificatesCount.textContent = certificates.length;
+                    certificatesModule.style.display = 'block';
+                    
+                    console.log(`✅ 证书模块显示完成（${certificates.length}个项目）`);
+                };
+                
+                // 恢复思维导图显示方法 - 这是核心功能不能删除！
+                ui.displayStreamMindmap = function(mindmap) {
+                    if (!mindmap) {
+                        console.warn('⚠️ 思维导图数据为空');
+                        return;
+                    }
+                    
+                    console.log('🧠 显示思维导图:', mindmap);
+                    
+                    // 处理思维导图显示
+                    if (this.mindmapContent) {
+                        let content = '';
+                        if (mindmap.html) {
+                            content = mindmap.html;
+                        } else if (mindmap.content) {
+                            content = `
+                                <div class="mindmap-container">
+                                    <div class="mindmap-fallback">
+                                        <h3>${mindmap.title || '学习思维导图'}</h3>
+                                        <div class="mindmap-tree">
+                                            ${this.convertMarkdownToTree ? this.convertMarkdownToTree(mindmap.content) : mindmap.content}
+                                        </div>
+                                        <div class="mindmap-info">
+                                            <p><strong>🧠 真实AI生成的思维导图：</strong></p>
+                                            <ul>
+                                                <li>• 基于大模型分析生成</li>
+                                                <li>• 个性化学习路径推荐</li>
+                                                <li>• 结合职位需求与学习目标</li>
+                                                <li>• 智能化学习计划定制</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                        
+                        this.mindmapContent.innerHTML = content;
+                        
+                        // 更新思维导图状态
+                        const mindmapStatus = document.getElementById('mindmapStatus');
+                        if (mindmapStatus) {
+                            mindmapStatus.textContent = '完成';
+                            mindmapStatus.className = 'card-status completed';
+                        }
+                    }
+                };
+                
+                ui.showStreamResults = function(streamData) {
+                    console.log('🎉 显示流式结果:', streamData);
+                    
+                    // 隐藏加载状态
+                    if (this.loadingSection) {
+                        this.loadingSection.style.display = 'none';
+                    }
+                    
+                    // 显示结果区域
+                    if (this.resultsSection) {
+                        this.resultsSection.style.display = 'block';
+                    }
+                    
+                    // 更新职位显示
+                    if (this.topicDisplay) {
+                        this.topicDisplay.textContent = this.currentJobInfo.content;
+                    }
+                    
+                    // 更新生成时间
+                    if (this.generationTime) {
+                        this.generationTime.textContent = new Date().toLocaleString();
+                    }
+                    
+                    this.addLog && this.addLog('success', '✅ 学习方案生成完成');
+                };
+                
+                // 添加难度翻译方法
+                ui.translateDifficulty = function(difficulty) {
+                    const difficultyMap = {
+                        'beginner': '初级',
+                        'intermediate': '中级', 
+                        'advanced': '高级',
+                        'expert': '专家级',
+                        'unknown': '未知'
+                    };
+                    return difficultyMap[difficulty] || '未知';
                 };
                 
                 // 添加辅助生成方法
@@ -954,7 +1994,7 @@
                 
                 // 添加获取存储的API密钥方法
                 ui.getStoredApiKey = function() {
-                    return localStorage.getItem('apiKey') || '';
+                    return localStorage.getItem('ai_learning_companion_api_key') || '';
                 };
                 
                 // 添加模拟生成过程
@@ -1324,28 +2364,6 @@
                     return names[type] || '未知类型';
                 };
                 
-                ui.renderContentItems = function(items) {
-                    if (!Array.isArray(items)) {
-                        return `<div class="content-item"><p>${items}</p></div>`;
-                    }
-                    
-                    return items.map(item => {
-                        if (typeof item === 'string') {
-                            return `<div class="content-item"><p>${item}</p></div>`;
-                        }
-                        
-                        return `
-                            <div class="content-item">
-                                ${item.title ? `<h4>${item.title}</h4>` : ''}
-                                ${item.description ? `<p>${item.description}</p>` : ''}
-                                ${item.points && Array.isArray(item.points) ? 
-                                    `<ul>${item.points.map(point => `<li>${point}</li>`).join('')}</ul>` : 
-                                    ''}
-                            </div>
-                        `;
-                    }).join('');
-                };
-                
                 // 初始化时更新按钮状态
                 setTimeout(() => {
                     ui.updateGenerateButton && ui.updateGenerateButton();
@@ -1368,9 +2386,110 @@
                 
                 console.log('✓ 职途助手补充方法已加载');
                 
+                // 添加测试五个独立模块的函数
+                ui.testIndependentModules = function() {
+                    console.log('🗺️ 测试五个独立模块展示');
+                    
+                    // 设置测试职位信息
+                    this.currentJobInfo = { content: '后端工程师' };
+                    
+                    // 显示结果区域
+                    if (this.resultsSection) {
+                        this.resultsSection.style.display = 'block';
+                    }
+                    
+                    // 更新职位显示
+                    if (this.topicDisplay) {
+                        this.topicDisplay.textContent = '后端工程师 - 测试模块';
+                    }
+                    
+                    // 更新生成时间
+                    if (this.generationTime) {
+                        this.generationTime.textContent = new Date().toLocaleString();
+                    }
+                    
+                    // 1. 测试知识点模块
+                    this.displayStreamKnowledge([
+                        '后端工程师基础理论与概念',
+                        '行业最佳实践和标准',
+                        '相关工具和技术栈',
+                        '实际项目应用案例'
+                    ]);
+                    
+                    // 2. 测试面试题模块
+                    this.displayStreamExercises([
+                        '请介绍您对后端工程师岗位的理解',
+                        '您在后端开发方面有哪些实战经验？',
+                        '如何设计一个高并发的后端系统？',
+                        '描述一个复杂的数据库优化项目',
+                        '您对微服务架构有什么理解？',
+                        '如何处理分布式系统中的事务？'
+                    ]);
+                    
+                    // 3. 测试书籍模块
+                    this.displayStreamNotes({
+                        keyPoints: [
+                            '《机器学习实战》 - 周志华',
+                            '《深度学习》 - Ian Goodfellow',
+                            '《Python机器学习》 - Sebastian Raschka',
+                            '《统计学习方法》 - 李航'
+                        ]
+                    });
+                    
+                    // 4. 测试课程模块
+                    this.displayStreamCourses([
+                        {
+                            title: '机器学习入门与实战',
+                            platform: 'Coursera',
+                            difficulty: '初级',
+                            rating: '4.8',
+                            students: '50,000+',
+                            description: '由斯坦福大学提供的机器学习经典课程'
+                        },
+                        {
+                            title: '深度学习与神经网络',
+                            platform: 'Udemy',
+                            difficulty: '中级',
+                            rating: '4.6',
+                            students: '25,000+',
+                            description: '从基础到高级的深度学习实战课程'
+                        }
+                    ]);
+                    
+                    // 5. 测试证书模块
+                    this.displayStreamCertificates([
+                        {
+                            name: 'TensorFlow开发者认证',
+                            provider: 'Google',
+                            difficulty: '中级',
+                            duration: '3-6个月',
+                            value: '谷歌官方认证，行业权威性高'
+                        },
+                        {
+                            name: 'AWS机器学习专家认证',
+                            provider: 'Amazon',
+                            difficulty: '高级',
+                            duration: '6-12个月',
+                            value: '云平台ML领域顶级认证'
+                        }
+                    ]);
+                    
+                    this.addLog && this.addLog('success', '✅ 五个独立模块测试完成');
+                    console.log('✅ 五个独立模块测试完成');
+                };
+                
                 // 添加直接的输入监听器（备用方案）
                 const jobTitleInput = document.getElementById('jobTitle');
                 const generateButton = document.getElementById('generateBtn');
+                const testModulesBtn = document.getElementById('testModulesBtn');
+                
+                // 绑定测试模块按钮
+                if (testModulesBtn) {
+                    testModulesBtn.addEventListener('click', () => {
+                        console.log('🗺️ 点击测试模块按钮');
+                        ui.testIndependentModules();
+                    });
+                }
                 
                 if (jobTitleInput && generateButton) {
                     jobTitleInput.addEventListener('input', function() {
@@ -1390,11 +2509,8 @@
                         generateButton.style.cursor = 'pointer';
                         console.log('✅ 初始检查：按钮已启用');
                     }
+                    }
                 }
-                return true;
-            }
-            return false;
-        }
         
         // 添加日志流连接功能到 UI 实例
         function initializeLogStream() {

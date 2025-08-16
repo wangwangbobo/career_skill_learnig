@@ -1,0 +1,56 @@
+{
+  "timestamp": "2025-08-15T12:30:24.600Z",
+  "fileKey": "example_file_2",
+  "analysis": {
+    "fileName": "设计文件_example_",
+    "fileType": "DOCUMENT",
+    "version": "1.0.0",
+    "pageCount": 1,
+    "nodeCount": 4,
+    "imageNodes": [
+      {
+        "id": "1:3",
+        "name": "Logo"
+      }
+    ],
+    "componentNodes": [
+      {
+        "id": "1:5",
+        "name": "Button组件"
+      }
+    ],
+    "textNodes": [
+      {
+        "id": "1:4",
+        "name": "标题"
+      }
+    ]
+  },
+  "downloadedAssets": [
+    {
+      "nodeId": "1:3",
+      "fileName": "image_1_Logo.png",
+      "requiresImageDimensions": true,
+      "needsCropping": false
+    },
+    {
+      "nodeId": "1:5",
+      "fileName": "component_1_Button__.png",
+      "requiresImageDimensions": true,
+      "needsCropping": false
+    }
+  ],
+  "downloadResult": [
+    {
+      "type": "text",
+      "text": "{\n  \"downloadedImages\": [\n    {\n      \"nodeId\": \"1:3\",\n      \"fileName\": \"image_1_Logo.png\",\n      \"localPath\": \"/Users/wangbo/open-source/eko/example/figma-output/example_file_2/image_1_Logo.png\",\n      \"success\": true\n    },\n    {\n      \"nodeId\": \"1:5\",\n      \"fileName\": \"component_1_Button__.png\",\n      \"localPath\": \"/Users/wangbo/open-source/eko/example/figma-output/example_file_2/component_1_Button__.png\",\n      \"success\": true\n    }\n  ]\n}"
+    }
+  ],
+  "options": {
+    "exportImages": true,
+    "exportComponents": true,
+    "maxImages": 3,
+    "maxComponents": 2,
+    "pngScale": 2
+  }
+}

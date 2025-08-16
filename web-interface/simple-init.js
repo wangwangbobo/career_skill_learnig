@@ -8,6 +8,13 @@ class SimpleJobAssistant {
         this.initElements();
         this.bindEvents();
         this.selectedContentTypes = ['knowledge', 'interview']; // 默认选择
+        
+        // 初始化日志系统
+        this.initLogSystem();
+        
+        // 启动实时日志流连接
+        this.startLogStreamConnection();
+        
         console.log('✅ 简化JobAssistant初始化完成');
     }
     
@@ -219,6 +226,24 @@ class SimpleJobAssistant {
                 toggleLogPanelBtn.title = isHidden ? '显示日志' : '隐藏日志';
                 
                 console.log('✅ 日志面板状态已更新:', isHidden ? '隐藏' : '显示');
+            });
+        }
+        
+        // 日志清空和下载按钮
+        const clearLogsBtn = document.getElementById('clearLogsBtn');
+        const downloadLogsBtn = document.getElementById('downloadLogsBtn');
+        
+        if (clearLogsBtn) {
+            clearLogsBtn.addEventListener('click', () => {
+                console.log('🗑️ 清空日志');
+                this.clearLogs();
+            });
+        }
+        
+        if (downloadLogsBtn) {
+            downloadLogsBtn.addEventListener('click', () => {
+                console.log('💾 下载日志');
+                this.downloadLogs();
             });
         }
         
@@ -1564,6 +1589,417 @@ class SimpleJobAssistant {
         URL.revokeObjectURL(url);
         
         console.log('✅ 对话记录已下载');
+    }
+    
+    // ===================== 日志系统相关方法 =====================
+    
+    // 初始化日志系统
+    initLogSystem() {
+        console.log('🔄 初始化日志系统...');
+        
+        // 日志管理
+        this.logs = [];
+        this.maxLogs = 1000;
+        
+        // 连接状态管理
+        this.isConnecting = false;
+        this.lastConnectTime = 0;
+        this.connectRetryDelay = 2000; // 重连延迟，逐渐增加
+        
+        // 获取日志面板元素
+        this.logPanel = document.getElementById('logPanel');
+        this.logContent = document.getElementById('logContent');
+        this.toggleLogPanelBtn = document.getElementById('toggleLogPanelBtn');
+        
+        console.log('📋 日志面板元素状态:', {
+            logPanel: !!this.logPanel,
+            logContent: !!this.logContent,
+            toggleLogPanelBtn: !!this.toggleLogPanelBtn
+        });
+        
+        // 添加初始日志
+        this.addLog('info', '🎓 智能学习伴侣已初始化');
+        this.addLog('info', '🔗 版本: 基于Eko框架 3.0.0-alpha.3 构建');
+        
+        console.log('✅ 日志系统初始化完成');
+    }
+    
+    // 启动日志流连接
+    startLogStreamConnection() {
+        console.log('🚀 准备启动日志流连接...');
+        
+        // 延迟启动，确保页面元素已加载
+        setTimeout(() => {
+            console.log('⏰ 延迟时间到，开始连接日志流');
+            this.connectToLogStream();
+        }, 1000);
+    }
+    
+    // 连接到实时日志流
+    connectToLogStream() {
+        const now = Date.now();
+        
+        // 防止过于频繁的连接尝试
+        if (this.isConnecting) {
+            console.log('⏳ 日志流正在连接中，跳过重复连接');
+            return;
+        }
+        
+        if (now - this.lastConnectTime < 1000) {
+            console.log('⏳ 连接太频繁，稍后再试');
+            setTimeout(() => this.connectToLogStream(), 1000);
+            return;
+        }
+        
+        this.isConnecting = true;
+        this.lastConnectTime = now;
+        
+        console.log('📋 正在连接到服务器实时日志流...');
+        
+        // 检查日志面板元素是否存在
+        if (!this.logContent) {
+            console.error('❌ 日志内容元素不存在，无法建立日志连接');
+            this.addLog('error', '❌ 日志面板元素未找到，请刷新页面');
+            this.isConnecting = false;
+            return;
+        }
+        
+        // 如果已经有连接，关闭它
+        if (this.logEventSource) {
+            console.log('🔄 关闭旧的日志流连接');
+            this.logEventSource.close();
+        }
+        
+        try {
+            console.log('🔗 创建EventSource连接: /api/logs-stream');
+            
+            // 创建 SSE 连接
+            this.logEventSource = new EventSource('/api/logs-stream');
+            
+            this.logEventSource.onopen = () => {
+                console.log('✅ 实时日志流连接成功');
+                this.addLog('success', '📡 实时日志流已连接');
+                this.isConnecting = false;
+                this.connectRetryDelay = 2000; // 重置延迟
+            };
+            
+            // 处理连接确认事件
+            this.logEventSource.addEventListener('connected', (event) => {
+                console.log('📞 收到连接确认事件:', event);
+                try {
+                    const data = JSON.parse(event.data);
+                    console.log('📞 日志流连接确认:', data.message);
+                    this.addLog('success', data.message);
+                } catch (e) {
+                    console.warn('⚠️ 解析连接确认数据失败:', e);
+                }
+            });
+            
+            // 处理系统状态事件
+            this.logEventSource.addEventListener('status', (event) => {
+                console.log('📊 收到系统状态事件:', event);
+                try {
+                    const data = JSON.parse(event.data);
+                    console.log('📊 系统状态数据:', data);
+                    this.handleServerLog(data);
+                } catch (e) {
+                    console.warn('⚠️ 解析系统状态数据失败:', e);
+                }
+            });
+            
+            // 处理心跳事件（ping）——仅用于保持连接，不显示日志
+            this.logEventSource.addEventListener('ping', (event) => {
+                console.log('💓 收到心跳信号，连接正常');
+                // 不处理ping事件的内容，仅用于保持连接活跃
+            });
+            
+            // 处理主要日志事件
+            this.logEventSource.addEventListener('log', (event) => {
+                console.log('📄 收到日志事件:', event);
+                try {
+                    const logData = JSON.parse(event.data);
+                    console.log('📄 日志数据:', logData);
+                    this.handleServerLog(logData);
+                } catch (e) {
+                    console.warn('⚠️ 解析日志数据失败:', e);
+                    this.addLog('warning', '⚠️ 日志数据解析错误: ' + e.message);
+                }
+            });
+            
+            // 处理通用message事件
+            this.logEventSource.onmessage = (event) => {
+                console.log('📬 收到通用消息事件:', event);
+                try {
+                    const data = JSON.parse(event.data);
+                    console.log('📬 通用消息数据:', data);
+                    this.handleServerLog(data);
+                } catch (e) {
+                    console.log('📬 原始消息:', event.data);
+                    this.addLog('info', event.data);
+                }
+            };
+            
+            // 处理错误事件
+            this.logEventSource.onerror = (error) => {
+                console.warn('⚠️ 实时日志流连接错误:', error);
+                console.log('🔍 连接状态:', {
+                    readyState: this.logEventSource.readyState,
+                    url: this.logEventSource.url,
+                    withCredentials: this.logEventSource.withCredentials
+                });
+                
+                // 立即重连，不等待
+                if (this.logEventSource.readyState === EventSource.CLOSED) {
+                    console.log('🔄 连接已关闭，立即重连');
+                    this.addLog('info', '🔄 重新连接日志流...');
+                    this.isConnecting = false;
+                    
+                    setTimeout(() => {
+                        this.connectToLogStream();
+                    }, this.connectRetryDelay); // 使用逐渐增加的延迟
+                    
+                    // 增加重连延迟，最多10秒
+                    this.connectRetryDelay = Math.min(this.connectRetryDelay * 1.5, 10000);
+                } else if (this.logEventSource.readyState === EventSource.CONNECTING) {
+                    console.log('⏳ 连接中，等待建立');
+                    this.isConnecting = false;
+                } else {
+                    console.log('ℹ️ 连接仍在活跃状态，不需要重连');
+                    this.isConnecting = false;
+                }
+            };
+            
+        } catch (error) {
+            console.error('❌ 无法连接实时日志流:', error);
+            this.addLog('error', '❌ 连接实时日志流失败: ' + error.message);
+            this.isConnecting = false;
+            
+            // 尝试重新连接
+            console.log(`🔄 ${this.connectRetryDelay/1000}秒后尝试重新连接`);
+            setTimeout(() => {
+                console.log('🔄 开始重新连接日志流');
+                this.connectToLogStream();
+            }, this.connectRetryDelay);
+            
+            // 增加重连延迟
+            this.connectRetryDelay = Math.min(this.connectRetryDelay * 1.5, 10000);
+        }
+        
+        // 设置连接超时检测
+        setTimeout(() => {
+            if (this.logEventSource && this.logEventSource.readyState !== EventSource.OPEN) {
+                console.warn('⚠️ 日志流连接超时，尝试重新连接');
+                this.addLog('warning', '⚠️ 连接超时，尝试重新连接...');
+                this.connectToLogStream();
+            }
+        }, 8000); // 减少超时时间到8秒
+    }
+    
+    // 处理服务器日志
+    handleServerLog(logData) {
+        if (!logData || !logData.message) return;
+        
+        // 过滤不重要的日志
+        const shouldFilter = (
+            logData.message.includes('SSE客户端') ||
+            logData.message.includes('MCP Client') ||
+            logData.message.includes('Module type') ||
+            logData.message.includes('trace-warnings') ||
+            logData.message.includes('日志SSE连接建立') ||
+            logData.message.includes('日志SSE连接断开') ||
+            logData.source === 'heartbeat' || // 过滤心跳消息
+            logData.message.includes('系统运行正常') // 过滤心跳相关消息
+        );
+        
+        if (shouldFilter) return;
+        
+        // 处理不同源的日志
+        let displayMessage = logData.message;
+        let logLevel = logData.level || 'info';
+        
+        // 根据源添加标签
+        if (logData.source === 'system') {
+            // 系统状态信息保持原样
+        } else if (logData.source === 'stdout' || logData.source === 'stderr') {
+            displayMessage = `[终端] ${displayMessage}`;
+        } else if (!displayMessage.includes('🎓') && 
+                  !displayMessage.includes('🔑') && 
+                  !displayMessage.includes('✅') && 
+                  !displayMessage.includes('❌') &&
+                  !displayMessage.includes('💳') &&
+                  !displayMessage.includes('📊') &&
+                  !displayMessage.includes('📡')) {
+            displayMessage = `[服务器] ${displayMessage}`;
+        }
+        
+        // 智能识别日志级别
+        if (logData.level === 'error' || displayMessage.includes('❌')) {
+            logLevel = 'error';
+        } else if (logData.level === 'warning' || displayMessage.includes('⚠️')) {
+            logLevel = 'warning';
+        } else if (logData.level === 'success' || 
+                  displayMessage.includes('✅') || 
+                  displayMessage.includes('✓') ||
+                  displayMessage.includes('🎉')) {
+            logLevel = 'success';
+        } else if (logData.level === 'debug' || logData.level === 'trace') {
+            logLevel = 'debug';
+        }
+        
+        // 添加到日志面板
+        this.addLog(logLevel, displayMessage);
+    }
+    
+    // 添加日志条目
+    addLog(level, message, timestamp = new Date()) {
+        const logEntry = {
+            id: Date.now() + Math.random(),
+            level: level,
+            message: message,
+            timestamp: timestamp
+        };
+        
+        this.logs.push(logEntry);
+        
+        // 限制日志数量
+        if (this.logs.length > this.maxLogs) {
+            this.logs = this.logs.slice(-this.maxLogs);
+        }
+        
+        this.renderLogEntry(logEntry);
+        this.updateLogCount();
+        
+        // 自动滚动到底部
+        if (this.logContent) {
+            const autoScrollLog = document.getElementById('autoScrollLog');
+            if (autoScrollLog && autoScrollLog.checked) {
+                this.logContent.scrollTop = this.logContent.scrollHeight;
+            }
+        }
+    }
+    
+    // 渲染日志条目
+    renderLogEntry(logEntry) {
+        if (!this.logContent) return;
+        
+        // 删除欢迎信息
+        const welcomeMsg = this.logContent.querySelector('.log-welcome');
+        if (welcomeMsg) {
+            welcomeMsg.remove();
+        }
+        
+        const logDiv = document.createElement('div');
+        logDiv.className = `log-entry log-${logEntry.level}`;
+        logDiv.dataset.logId = logEntry.id;
+        
+        const timeSpan = document.createElement('span');
+        timeSpan.className = 'log-time';
+        timeSpan.textContent = logEntry.timestamp.toLocaleTimeString();
+        
+        const levelSpan = document.createElement('span');
+        levelSpan.className = 'log-level';
+        levelSpan.textContent = this.getLogLevelIcon(logEntry.level);
+        
+        const messageSpan = document.createElement('span');
+        messageSpan.className = 'log-message';
+        messageSpan.textContent = logEntry.message;
+        
+        logDiv.appendChild(timeSpan);
+        logDiv.appendChild(levelSpan);
+        logDiv.appendChild(messageSpan);
+        
+        this.logContent.appendChild(logDiv);
+    }
+    
+    // 获取日志级别图标
+    getLogLevelIcon(level) {
+        const icons = {
+            'info': '📝',
+            'success': '✅',
+            'warning': '⚠️',
+            'error': '❌',
+            'debug': '🔎'
+        };
+        return icons[level] || '📝';
+    }
+    
+    // 更新日志计数
+    updateLogCount() {
+        const logCountElement = document.querySelector('.log-count');
+        if (logCountElement) {
+            logCountElement.textContent = `${this.logs.length} 条日志`;
+        }
+    }
+    
+    // 清空日志
+    clearLogs() {
+        this.logs = [];
+        if (this.logContent) {
+            this.logContent.innerHTML = `
+                <div class="log-welcome">
+                    <i class="fas fa-info-circle"></i>
+                    欢迎使用职途助手！请输入职位信息开始生成...
+                </div>
+            `;
+        }
+        this.updateLogCount();
+    }
+    
+    // 下载日志
+    downloadLogs() {
+        if (this.logs.length === 0) {
+            alert('暂无日志内容可下载');
+            return;
+        }
+        
+        let content = '智能学习伴侣 - 实时日志\n';
+        content += '=' .repeat(50) + '\n\n';
+        
+        this.logs.forEach((log, index) => {
+            const time = log.timestamp.toLocaleString();
+            const level = log.level.toUpperCase();
+            content += `[${time}] [${level}] ${log.message}\n`;
+        });
+        
+        content += '\n' + '=' .repeat(50) + '\n';
+        content += `导出时间: ${new Date().toLocaleString()}\n`;
+        content += `日志数量: ${this.logs.length} 条\n`;
+        
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `智能学习伴侣-日志-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        this.showToast('日志已下载', 'success');
+    }
+    
+    // 显示提示信息
+    showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        
+        document.body.appendChild(toast);
+        
+        // 动画显示
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 100);
+        
+        // 自动隐藏
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                if (document.body.contains(toast)) {
+                    document.body.removeChild(toast);
+                }
+            }, 300);
+        }, 3000);
     }
 }
 

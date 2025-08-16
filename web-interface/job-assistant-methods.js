@@ -260,8 +260,15 @@ addSkillCategory(skillName, contentData) {
     
     const contentTypesDiv = skillDiv.querySelector('.content-types');
     
+    // 获取实际选择的内容类型，如果没有则使用默认的知识点和面试题
+    const actualSelectedTypes = this.selectedContentTypes && this.selectedContentTypes.length > 0 
+        ? this.selectedContentTypes 
+        : ['knowledge', 'interview'];
+    
+    console.log('🔍 addSkillCategory 使用的内容类型:', actualSelectedTypes);
+    
     // 添加各类型内容
-    this.selectedContentTypes.forEach(type => {
+    actualSelectedTypes.forEach(type => {
         if (contentData[type]) {
             const typeDiv = document.createElement('div');
             typeDiv.className = 'content-type';
@@ -279,7 +286,7 @@ addSkillCategory(skillName, contentData) {
     });
     
     this.skillsContainer.appendChild(skillDiv);
-    this.addLog('info', `📈 添加技能分类: ${skillName}`);
+    this.addLog('info', `📈 添加技能分类: ${skillName} (${actualSelectedTypes.length}种内容类型)`);
 }
 
 // 获取内容类型图标

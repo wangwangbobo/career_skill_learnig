@@ -61,6 +61,19 @@ class JobAssistantUI {
         this.regenerateBtn = document.getElementById('regenerateBtn');
         this.mindmapContent = document.getElementById('mindmapContent');
         
+        // 添加内容卡片元素初始化
+        this.coursesContent = document.getElementById('coursesContent');
+        this.studyPlanContent = document.getElementById('studyPlanContent');
+        this.exercisesContent = document.getElementById('exercisesContent');
+        this.notesContent = document.getElementById('notesContent');
+        this.progressContent = document.getElementById('progressContent');
+        
+        // 如果找不到相应元素，尝试使用skillsContainer作为备用
+        if (!this.coursesContent) {
+            console.warn('⚠️ coursesContent元素不存在，使用skillsContainer作为备用');
+            this.coursesContent = this.skillsContainer;
+        }
+        
         // 操作按钮
         this.retryBtn = document.getElementById('retryBtn');
         
@@ -97,6 +110,9 @@ class JobAssistantUI {
         
         // 初始化日志系统
         this.initLogSystem();
+        
+        // 启动实时日志流连接
+        this.startLogStreamConnection();
         
         // 测试Mock思维导图显示
         setTimeout(() => {
@@ -524,7 +540,8 @@ class JobAssistantUI {
                 },
                 body: JSON.stringify({
                     topic: jobInfo.content,
-                    apiKey: this.getStoredApiKey()
+                    apiKey: this.getStoredApiKey(),
+                    contentTypes: selectedContentTypes  // 添加用户选择的内容类型
                 })
             });
             
@@ -672,7 +689,7 @@ class JobAssistantUI {
             // 生成基于职位的mock数据
             const topic = jobInfo.content;
             const mockData = this.generateMockJobData(topic, contentTypes);
-            console.log('✅ Mock数据生成完成:', mockData);
+            console.log('✅ Mock数据快速生成完成:', mockData);
             
             // 强制显示结果区域
             if (this.resultsSection) {
@@ -758,6 +775,9 @@ class JobAssistantUI {
             }
             
             console.log('🎉 Mock数据流式显示测试完成');
+            
+            // 在后台异步获取真实课程数据并更新显示
+            this.loadRealCoursesInBackground(topic);
             
         } catch (error) {
             console.error('❌ Mock数据流式显示测试失败:', error);
@@ -869,9 +889,55 @@ class JobAssistantUI {
     
     // 生成基于职位的Mock数据
     generateMockJobData(jobTitle, contentTypes) {
+        console.log('👩‍💼 快速生成Mock数据:', jobTitle);
+        
+        // 立即返回mock数据，不阻塞页面加载
         const mindmapData = this.generateMockMindmapData(jobTitle);
         
         const mockData = {
+            mindmap: mindmapData,
+            // 使用Mock课程数据，保证页面快速加载
+            courses: [
+                {
+                    title: `${jobTitle}权威指南`,
+                    author: '技术专家',
+                    rating: 4.8,
+                    description: `${jobTitle}领域的经典教材，适合深入学习`,
+                    platform: 'Mock平台',
+                    students: 50000,
+                    duration: '40小时',
+                    difficulty: 'intermediate',
+                    price: 299,
+                    highlights: ['经典教材', '专家授课'],
+                    language: '中文'
+                },
+                {
+                    title: `实战${jobTitle}项目开发`,
+                    author: '资深开发者',
+                    rating: 4.6,
+                    description: '通过实际项目学习最佳实践',
+                    platform: 'Mock平台',
+                    students: 30000,
+                    duration: '60小时',
+                    difficulty: 'advanced',
+                    price: 399,
+                    highlights: ['实战项目', '行业最佳实践'],
+                    language: '中文'
+                },
+                {
+                    title: `${jobTitle}设计模式与架构`,
+                    author: '架构师',
+                    rating: 4.7,
+                    description: '高级开发者必读的架构设计书籍',
+                    platform: 'Mock平台',
+                    students: 20000,
+                    duration: '80小时',
+                    difficulty: 'expert',
+                    price: 599,
+                    highlights: ['架构设计', '设计模式'],
+                    language: '中文'
+                }
+            ],
             mindmap: mindmapData,
             skills: {
                 core: [
@@ -995,7 +1061,31 @@ class JobAssistantUI {
         console.log(`📊 开始显示${stepLabel}...`);
         console.log(`- stepName: ${stepName}`);
         console.log(`- stepData:`, stepData);
-        console.log(`- skillsContainer:`, !!this.skillsContainer);
+        
+        // 先检查并确保结果区域可见
+        if (this.resultsSection) {
+            this.resultsSection.style.display = 'block';
+            console.log('✅ 结果区域已显示');
+        } else {
+            console.warn('⚠️ resultsSection不存在');
+        }
+        
+        // 重新获取关键容器元素（防止初始化时丢失）
+        if (!this.skillsContainer) {
+            this.skillsContainer = document.getElementById('skillsContainer');
+            console.log('🔄 重新获取 skillsContainer:', !!this.skillsContainer);
+        }
+        
+        if (!this.mindmapContent) {
+            this.mindmapContent = document.getElementById('mindmapContent');
+            console.log('🔄 重新获取 mindmapContent:', !!this.mindmapContent);
+        }
+        
+        console.log(`🔍 DOM元素检查:`, {
+            skillsContainer: !!this.skillsContainer,
+            mindmapContent: !!this.mindmapContent,
+            resultsSection: !!this.resultsSection
+        });
         
         // 检查skillsContainer是否存在
         if (!this.skillsContainer) {
@@ -1015,6 +1105,69 @@ class JobAssistantUI {
         // 根据步骤类型显示不同内容
         try {
             switch (stepName) {
+                case 'courses':
+                    console.log('🎓 开始显示课程数据...');
+                    console.log('- 课程数据:', stepData);
+                    console.log('- skillsContainer存在:', !!this.skillsContainer);
+                    
+                    // 确保 skillsContainer 存在
+                    if (!this.skillsContainer) {
+                        console.error('❌ skillsContainer不存在，尝试重新获取...');
+                        this.skillsContainer = document.getElementById('skillsContainer');
+                        if (!this.skillsContainer) {
+                            console.error('❌ 无法找到skillsContainer，跳过课程显示');
+                            this.addLog('error', '❌ 课程容器不存在');
+                            break;
+                        }
+                    }
+                    
+                    // 确保结果区域可见
+                    if (this.resultsSection) {
+                        this.resultsSection.style.display = 'block';
+                    }
+                    
+                    // 检查课程数据格式并显示
+                    if (Array.isArray(stepData) && stepData.length > 0) {
+                        if (stepData[0].platform) {
+                            // 真实课程数据，使用displayCourses方法
+                            console.log('🎆 检测到真实课程数据，使用专用显示方法');
+                            this.displayCourses(stepData);
+                        } else {
+                            // Mock课程数据，显示为推荐课程
+                            console.log('📚 显示Mock课程数据作为推荐课程');
+                            await this.displayMockCourses(stepData);
+                        }
+                    } else {
+                        console.warn('⚠️ 课程数据为空或格式不正确，生成默认课程');
+                        // 生成默认的mock课程数据
+                        const jobTitle = this.topicDisplay?.textContent || '前端工程师';
+                        const defaultCourses = [
+                            {
+                                platform: 'Coursera',
+                                title: `${jobTitle}完整教程`,
+                                rating: 4.7,
+                                students: 15420,
+                                duration: '25小时',
+                                difficulty: 'beginner',
+                                price: 199,
+                                highlights: ['终身访问', '实战项目'],
+                                description: `深入学习${jobTitle}的核心技能和最佳实践。`
+                            },
+                            {
+                                platform: 'B站',
+                                title: `${jobTitle}从入门到精通`,
+                                rating: 4.8,
+                                students: 23100,
+                                duration: '30小时',
+                                difficulty: 'beginner',
+                                price: 0,
+                                highlights: ['完全免费', '中文讲解'],
+                                description: '免费优质的中文教程，适合中文学习者入门和进阶。'
+                            }
+                        ];
+                        await this.displayMockCourses(defaultCourses);
+                    }
+                    break;
                 case 'skills':
                     console.log('🎯 开始显示技能数据...');
                     await this.displayMockSkills(stepData);
@@ -1037,7 +1190,33 @@ class JobAssistantUI {
                     break;
                 case 'mindmap':
                     console.log('🧠 开始显示思维导图...');
-                    this.displayStreamMindmap(stepData);
+                    
+                    // 先检查 mindmapContent 是否存在
+                    if (!this.mindmapContent) {
+                        console.warn('⚠️ mindmapContent容器不存在，尝试重新获取...');
+                        this.mindmapContent = document.getElementById('mindmapContent');
+                        if (!this.mindmapContent) {
+                            console.error('❌ 无法找到思维导图容器，跳过显示');
+                            this.addLog('error', '❌ 思维导图容器不存在');
+                            break;
+                        }
+                    }
+                    
+                    // 确保结果区域可见
+                    if (this.resultsSection) {
+                        this.resultsSection.style.display = 'block';
+                    }
+                    
+                    // 显示思维导图
+                    if (stepData) {
+                        console.log('✅ 思维导图数据和容器都存在，开始显示');
+                        this.displayMindmap(stepData);
+                    } else {
+                        console.warn('⚠️ 思维导图数据为空，生成Mock数据');
+                        const jobTitle = this.topicDisplay?.textContent || '前端工程师';
+                        const mockMindmapData = this.generateMockMindmapData(jobTitle);
+                        this.displayMindmap(mockMindmapData);
+                    }
                     break;
                 default:
                     console.warn(`未知的步骤类型: ${stepName}`);
@@ -1070,10 +1249,65 @@ class JobAssistantUI {
         console.log(`✅ ${stepLabel}显示完成`);
     }
     
-    // 显示Mock技能要求
-    async displayMockSkills(skillsData) {
-        console.log('🎯 开始显示技能数据:', skillsData);
+    // 显示Mock课程数据
+    async displayMockCourses(coursesData) {
+        console.log('🎓 开始显示课程数据:', coursesData);
         
+        if (!this.skillsContainer) {
+            console.error('❌ skillsContainer不存在，无法显示课程');
+            return;
+        }
+        
+        // 检查数据格式
+        const courses = Array.isArray(coursesData) ? coursesData : [];
+        if (courses.length === 0) {
+            console.warn('⚠️ 课程数据为空');
+            return;
+        }
+        
+        const skillDiv = document.createElement('div');
+        skillDiv.className = 'skill-category';
+        skillDiv.innerHTML = `
+            <div class="skill-header">
+                <h3>🎓 推荐课程</h3>
+                <div class="skill-summary">共 ${courses.length} 门课程</div>
+            </div>
+            <div class="skill-content">
+                <div class="courses-grid">
+                    ${courses.map(course => {
+                        const difficulty = this.translateDifficulty(course.difficulty || 'intermediate');
+                        const highlights = Array.isArray(course.highlights) ? 
+                            course.highlights.join(' • ') : '专业课程';
+                        
+                        return `
+                            <div class="course-card">
+                                <div class="course-header">
+                                    <h4 class="course-title">${course.title || '未命名课程'}</h4>
+                                    <div class="course-platform">${course.platform || '未知平台'}</div>
+                                </div>
+                                <div class="course-info">
+                                    <div class="course-meta">
+                                        <span class="rating">⭐ ${course.rating || '4.5'}</span>
+                                        <span class="students">👥 ${(course.students || 10000).toLocaleString()}人</span>
+                                        <span class="duration">🕰️ ${course.duration || '20小时'}</span>
+                                    </div>
+                                    <div class="course-meta">
+                                        <span class="difficulty">🎯 ${difficulty}</span>
+                                        <span class="price">💰 ￥${course.price || 0}</span>
+                                        <span class="language">🌍 ${course.language || '中文'}</span>
+                                    </div>
+                                    <div class="course-highlights">🎆 ${highlights}</div>
+                                    ${course.description ? `<p class="course-description">${course.description}</p>` : ''}
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        `;
+        
+    // 显示Mock技能数据
+    async displayMockSkills(skillsData) {
         if (!this.skillsContainer) {
             console.error('❌ skillsContainer不存在，无法显示技能');
             return;
@@ -1186,7 +1420,7 @@ class JobAssistantUI {
                     <div class="interview-category">
                         <h4>${category.category}</h4>
                         <ul class="interview-questions">
-                            ${category.questions.map(question => `<li>${question}</li>`).join('')}
+                            ${category.questions.map(question => `<li class="interview-question-item" data-question="${question}">${question}</li>`).join('')}
                         </ul>
                     </div>
                 `).join('')}
@@ -1194,6 +1428,47 @@ class JobAssistantUI {
         `;
         
         this.skillsContainer.innerHTML += interviewHtml;
+        
+        // 为面试题添加点击事件
+        this.addInterviewClickEvents();
+    }
+    
+    // 为面试题添加点击事件
+    addInterviewClickEvents() {
+        const interviewItems = document.querySelectorAll('.interview-question-item');
+        
+        interviewItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const question = item.getAttribute('data-question');
+                this.fillAIAssistantInput(question);
+                
+                // 添加点击反馈效果
+                item.style.backgroundColor = '#e0e7ff';
+                setTimeout(() => {
+                    item.style.backgroundColor = '';
+                }, 300);
+            });
+        });
+    }
+    
+    // 填入AI助手输入框
+    fillAIAssistantInput(question) {
+        // 获取右侧AI助手的输入框
+        const chatInput = document.querySelector('#chatInput');
+        if (chatInput) {
+            chatInput.value = question;
+            chatInput.focus();
+            
+            // 触发input事件以更新发送按钮状态
+            const inputEvent = new Event('input', { bubbles: true });
+            chatInput.dispatchEvent(inputEvent);
+            
+            // 显示成功提示
+            this.showToast('面试题已填入AI助手，可以直接提问！', 'success');
+        } else {
+            console.warn('未找到AI助手输入框');
+            this.showToast('未找到AI助手输入框', 'error');
+        }
     }
     
     // 显示Mock书籍推荐
@@ -1467,6 +1742,15 @@ class JobAssistantUI {
                 
                 switch (data.step) {
                     case 'courses':
+                        // 在第一次收到courses数据时清空容器，避免新旧内容混合
+                        if (!streamData._containerCleared) {
+                            console.log('🧹 第一次收到courses数据，清空容器');
+                            if (this.skillsContainer) {
+                                this.skillsContainer.innerHTML = '';
+                                streamData._containerCleared = true;
+                                console.log('✅ skillsContainer 已清空');
+                            }
+                        }
                         streamData.courses = data.data;
                         console.log('🎓 开始显示课程推荐...');
                         this.displayStreamCourses(data.data);
@@ -1519,7 +1803,51 @@ class JobAssistantUI {
         // 处理完成事件
         if (data.result) {
             console.log('✅ 流式生成完成，更新最终结果');
+            console.log('📊 最终结果数据:', data.result);
+            
+            // 在显示最终结果之前清空容器，确保只显示最新内容
+            if (!streamData._finalContainerCleared && this.skillsContainer) {
+                console.log('🧹 清空容器以显示最终结果');
+                this.skillsContainer.innerHTML = '';
+                streamData._finalContainerCleared = true;
+                console.log('✅ 最终结果显示前容器已清空');
+            }
+            
             Object.assign(streamData, data.result);
+            
+            // 确保显示最终结果中的所有内容
+            if (data.result.courses && data.result.courses.length > 0) {
+                console.log('🎓 显示最终课程结果:', data.result.courses);
+                console.log('🔥 即将调用 displayStreamCourses 方法');
+                this.displayStreamCourses(data.result.courses);
+                console.log('✅ displayStreamCourses 调用完成');
+            }
+            
+            if (data.result.studyPlan) {
+                console.log('📋 显示最终学习计划:', data.result.studyPlan);
+                this.displayStreamStudyPlan(data.result.studyPlan);
+            }
+            
+            if (data.result.exercises) {
+                console.log('📝 显示最终练习题:', data.result.exercises);
+                this.displayStreamExercises(data.result.exercises);
+            }
+            
+            if (data.result.notes) {
+                console.log('📖 显示最终学习笔记:', data.result.notes);
+                this.displayStreamNotes(data.result.notes);
+            }
+            
+            if (data.result.progress) {
+                console.log('📈 显示最终进度跟踪:', data.result.progress);
+                this.displayStreamProgress(data.result.progress);
+            }
+            
+            if (data.result.mindmap) {
+                console.log('🧠 显示最终思维导图:', data.result.mindmap);
+                this.displayStreamMindmap(data.result.mindmap);
+            }
+            
             this.updateStreamProgress(data.message || '生成完成', 100);
             this.addLog('success', '🎉 学习方案生成完成！');
             
@@ -1584,6 +1912,13 @@ class JobAssistantUI {
     
     // 流式显示课程推荐
     displayStreamCourses(courses) {
+        console.log('🎓 displayStreamCourses 被调用，课程数据:', courses);
+        console.log('🔍 检查页面元素状态:', {
+            coursesContent: !!this.coursesContent,
+            skillsContainer: !!this.skillsContainer,
+            resultsSection: !!this.resultsSection
+        });
+        
         this.hideLoading();
         this.showResults();
         
@@ -1597,6 +1932,7 @@ class JobAssistantUI {
         }
         
         this.displayCourses(courses);
+        console.log('✅ displayStreamCourses 调用完成');
     }
     
     // 流式显示学习计划
@@ -1961,10 +2297,23 @@ class JobAssistantUI {
     }
 
     displayCourses(courses) {
+        console.log('🚀 displayCourses 方法开始执行，课程数据:', courses);
+        console.log('🔍 检查 DOM 元素:', {
+            coursesContent: this.coursesContent,
+            skillsContainer: this.skillsContainer,
+            coursesContentExists: !!this.coursesContent,
+            skillsContainerExists: !!this.skillsContainer,
+            isCoursesContentSameAsSkills: this.coursesContent === this.skillsContainer
+        });
+        
         if (!courses || !Array.isArray(courses) || courses.length === 0) {
             console.warn('⚠️ 课程数据为空或无效');
-            this.coursesContent.innerHTML = '<p>⚠️ 暂无课程推荐数据</p>';
-            this.updateCardStatus('courses', 'error');
+            if (this.coursesContent) {
+                this.coursesContent.innerHTML = '<p>⚠️ 暂无课程推荐数据</p>';
+                this.updateCardStatus('courses', 'error');
+            } else {
+                console.warn('⚠️ coursesContent元素不存在，使用skillsContainer作为备用');
+            }
             return;
         }
         
@@ -2005,8 +2354,89 @@ class JobAssistantUI {
                 }).join('')}
             </ul>
         `;
-        this.coursesContent.innerHTML = html;
-        this.updateCardStatus('courses', 'completed');
+        
+        // 尝试使用coursesContent，如果不存在则使用skillsContainer
+        if (this.coursesContent && this.coursesContent !== this.skillsContainer) {
+            console.log('✅ 使用 coursesContent 显示课程');
+            this.coursesContent.innerHTML = html;
+            this.updateCardStatus('courses', 'completed');
+        } else {
+            // 备用方案：使用skillsContainer显示
+            console.log('🔄 使用skillsContainer作为备用显示区域');
+            console.log('🔍 skillsContainer 检查:', {
+                exists: !!this.skillsContainer,
+                element: this.skillsContainer
+            });
+            
+            if (!this.skillsContainer) {
+                console.error('⚠️ skillsContainer也不存在，无法显示课程');
+                return;
+            }
+            
+            // 确保显示结果区域
+            if (this.resultsSection) {
+                console.log('📺 显示结果区域');
+                this.resultsSection.style.display = 'block';
+            }
+            
+            // 直接创建课程分类显示
+            const skillDiv = document.createElement('div');
+            skillDiv.className = 'skill-category';
+            skillDiv.innerHTML = `
+                <div class="skill-header" onclick="this.parentElement.classList.toggle('collapsed')">
+                    <h3 class="skill-title">
+                        <i class="fas fa-graduation-cap"></i>
+                        🎓 推荐课程 (共${courses.length}门)
+                    </h3>
+                    <i class="fas fa-chevron-down skill-toggle"></i>
+                </div>
+                <div class="skill-content">
+                    <div class="content-types">
+                        <div class="content-type">
+                            <div class="content-type-header">
+                                <i class="fas fa-graduation-cap"></i>
+                                真实搜索的优质课程
+                            </div>
+                            <div class="content-type-body">
+                                ${courses.map(course => {
+                                    const link = addCourseLink(course);
+                                    const rating = course.rating ? parseFloat(course.rating).toFixed(1) : 'N/A';
+                                    const students = course.students ? course.students.toLocaleString() : '0';
+                                    const difficulty = this.translateDifficulty(course.difficulty || 'unknown');
+                                    const highlights = course.highlights ? course.highlights.join('、') : '';
+                                    return `
+                                        <div class="content-item course-item" style="margin-bottom: 1.5rem; padding: 1rem; border: 1px solid #e5e5e5; border-radius: 8px; background: #f9f9f9;">
+                                            <h4 style="margin: 0 0 0.5rem 0;">
+                                                <a href="${link}" target="_blank" style="color: #4f46e5; text-decoration: none; font-weight: bold;">
+                                                    ${course.title || '未命名课程'} 🔗
+                                                </a>
+                                            </h4>
+                                            <div style="margin-bottom: 0.5rem; color: #666;">
+                                                <span style="display: inline-block; margin-right: 1rem;">🏢 ${course.platform || '未知平台'}</span>
+                                                <span style="display: inline-block; margin-right: 1rem;">⭐ ${rating}/5</span>
+                                                <span style="display: inline-block; margin-right: 1rem;">👥 ${students}人</span>
+                                                <span style="display: inline-block; margin-right: 1rem;">⏱️ ${course.duration || '未知'}</span>
+                                            </div>
+                                            <div style="margin-bottom: 0.5rem; color: #666;">
+                                                <span style="display: inline-block; margin-right: 1rem;">💰 ${course.price === 0 ? '免费' : '￥' + (course.price || '未知')}</span>
+                                                <span style="display: inline-block; margin-right: 1rem;">📊 ${difficulty}</span>
+                                                <span style="display: inline-block;">🌍 ${course.language || '未知'}</span>
+                                            </div>
+                                            ${highlights ? `<div style="margin-bottom: 0.5rem;"><span style="color: #059669; font-weight: bold;">🎆 亮点：</span> ${highlights}</div>` : ''}
+                                            ${course.description ? `<p style="margin: 0.5rem 0 0 0; color: #444; font-size: 0.9rem;">${course.description}</p>` : ''}
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            this.skillsContainer.appendChild(skillDiv);
+            console.log(`✅ 成功显示 ${courses.length} 门真实搜索的课程！`);
+            console.log('📊 最终 skillsContainer 内容:', this.skillsContainer.innerHTML.substring(0, 200) + '...');
+        }
     }
     
     // 翻译难度级别

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>调试正式页面功能</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-btn {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        .test-btn:hover {
+            background: #3730a3;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 6px;
+        }
+        .log-item {
+            padding: 5px;
+            margin: 2px 0;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .log-success { background: #d1fae5; color: #065f46; }
+        .log-error { background: #fee2e2; color: #991b1b; }
+        .log-info { background: #e0e7ff; color: #3730a3; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 正式页面调试工具</h1>
+        <p>检查正式页面的JavaScript修复状态</p>
+        
+        <button class="test-btn" onclick="testPageAccess()">测试页面访问</button>
+        <button class="test-btn" onclick="testApiCall()">测试API调用</button>
+        <button class="test-btn" onclick="testConsoleOutput()">检查控制台输出</button>
+        <button class="test-btn" onclick="openMainPage()">打开正式页面</button>
+        
+        <div id="results" class="results" style="display: none;">
+            <h3>测试结果：</h3>
+            <div id="output"></div>
+        </div>
+    </div>
+
+    <script>
+        function addLog(type, message) {
+            const output = document.getElementById('output');
+            const logItem = document.createElement('div');
+            logItem.className = `log-item log-${type}`;
+            logItem.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            output.appendChild(logItem);
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function showResults() {
+            document.getElementById('results').style.display = 'block';
+        }
+
+        async function testPageAccess() {
+            showResults();
+            addLog('info', '🔄 测试正式页面访问...');
+            
+            try {
+                const response = await fetch('http://localhost:3000');
+                if (response.ok) {
+                    const html = await response.text();
+                    if (html.includes('app.js')) {
+                        addLog('success', '✅ 正式页面可以访问，包含app.js引用');
+                    } else {
+                        addLog('error', '❌ 正式页面没有引用app.js');
+                    }
+                } else {
+                    addLog('error', `❌ 页面访问失败: ${response.status}`);
+                }
+            } catch (error) {
+                addLog('error', `❌ 页面访问异常: ${error.message}`);
+            }
+        }
+
+        async function testApiCall() {
+            showResults();
+            addLog('info', '🔄 测试流式API调用...');
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/generate-learning-plan-stream', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ topic: 'Python工程师' })
+                });
+
+                if (response.ok) {
+                    addLog('success', '✅ API调用成功，开始读取流式数据...');
+                    
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let buffer = '';
+                    let courseCount = 0;
+                    
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
+                        
+                        buffer += decoder.decode(value, { stream: true });
+                        const lines = buffer.split('\n');
+                        buffer = lines.pop() || '';
+                        
+                        for (const line of lines) {
+                            if (line.startsWith('data: ')) {
+                                try {
+                                    const data = JSON.parse(line.slice(6));
+                                    if (data.result && data.result.courses) {
+                                        courseCount = data.result.courses.length;
+                                        addLog('success', `✅ 收到完成事件，包含 ${courseCount} 门课程`);
+                                        break;
+                                    }
+                                } catch (e) {
+                                    // 忽略解析错误
+                                }
+                            }
+                        }
+                        
+                        if (courseCount > 0) break;
+                    }
+                    
+                    if (courseCount > 0) {
+                        addLog('success', `🎓 API返回了 ${courseCount} 门Python工程师课程`);
+                    } else {
+                        addLog('error', '❌ API没有返回课程数据');
+                    }
+                } else {
+                    addLog('error', `❌ API调用失败: ${response.status}`);
+                }
+            } catch (error) {
+                addLog('error', `❌ API调用异常: ${error.message}`);
+            }
+        }
+
+        function testConsoleOutput() {
+            showResults();
+            addLog('info', '📝 检查浏览器控制台输出...');
+            addLog('info', '🔍 请在正式页面生成学习方案，然后检查控制台是否有以下日志：');
+            addLog('info', '   • "displayStreamCourses 被调用，课程数据:"');
+            addLog('info', '   • "显示最终课程结果:"');
+            addLog('info', '   • "即将调用 displayStreamCourses 方法"');
+            addLog('info', '   • "成功显示 X 门真实搜索的课程！"');
+            addLog('info', '💡 如果看到这些日志但界面没有显示，可能是DOM元素问题');
+        }
+
+        function openMainPage() {
+            addLog('info', '🔗 即将打开正式页面...');
+            window.open('http://localhost:3000', '_blank');
+        }
+
+        // 页面加载时自动检查
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                addLog('info', '🚀 调试工具已就绪');
+                addLog('info', '📋 建议步骤：');
+                addLog('info', '1. 点击"测试页面访问"确认服务正常');
+                addLog('info', '2. 点击"测试API调用"确认后端返回课程数据');
+                addLog('info', '3. 点击"打开正式页面"并生成学习方案');
+                addLog('info', '4. 检查浏览器控制台是否有修复后的调试日志');
+            }, 100);
+        });
+    </script>
+</body>
+</html>
