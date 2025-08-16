@@ -881,16 +881,34 @@ app.get('/api/chat-stream/:sessionId', async (req, res) => {
     res.socket.setKeepAlive(true);
     
     const sendSSE = (event, data) => {
-        const message = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
-        console.log(`📡 发送SSE消息:`, message.replace(/\n/g, '\\n'));
-        res.write(message);
-        
-        // 强制刷新缓冲区
-        if (res.flush) {
-            res.flush();
+        try {
+            const message = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
+            console.log(`📡 发送SSE消息 [${event}]:`, JSON.stringify(data).substring(0, 100) + '...');
+            
+            // 写入数据
+            res.write(message);
+            
+            // 多种强制刷新机制
+            if (res.flush) {
+                res.flush();
+            }
+            
+            // 强制TCP发送
+            if (res.socket && !res.socket.destroyed) {
+                res.socket.uncork();
+            }
+            
+            // 额外的刷新机制
+            process.nextTick(() => {
+                if (res.socket && !res.socket.destroyed) {
+                    res.socket.write('');
+                }
+            });
+            
+            console.log(`✅ SSE消息已发送: ${event}`);
+        } catch (error) {
+            console.error('📡 发送SSE消息失败:', error);
         }
-        // 额外的刷新机制
-        res.socket.write('');
     };
     
     // 立即发送初始化心跳
@@ -1099,16 +1117,17 @@ async function callDashScopeChatStream(messages, apiKey, sendSSE) {
                                 const delta = parsed.choices[0].delta;
                                 if (delta.content) {
                                     chunkCount++;
-                                    console.log(`🔥 发送流式数据块 ${chunkCount}:`, delta.content.substring(0, 50) + '...');
+                                    console.log(`🔥 发送流式数据块 ${chunkCount}: "${delta.content.substring(0, 30)}..." (长度: ${delta.content.length})`);
                                     
-                                    // 发送流式数据到前端
+                                    // 立即发送流式数据到前端
                                     sendSSE('message', {
                                         content: delta.content,
                                         done: false,
-                                        chunk: chunkCount
+                                        chunk: chunkCount,
+                                        timestamp: Date.now()
                                     });
                                     
-                                    console.log(`📡 SSE数据已发送: chunk ${chunkCount}`);
+                                    console.log(`✅ SSE数据块 ${chunkCount} 已立即发送`);
                                 }
                             }
                         } catch (parseError) {

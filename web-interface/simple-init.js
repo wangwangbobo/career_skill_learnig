@@ -1185,13 +1185,16 @@ class SimpleJobAssistant {
                 const renderedContent = this.renderMarkdown(streamContent);
                 aiMessageDiv.innerHTML = renderedContent;
                 
-                // 优化后的滚动机制，使用防抖减少频繁滚动
-                if (!this.scrollTimeout) {
-                    this.scrollTimeout = setTimeout(() => {
-                        this.chatContent.scrollTop = this.chatContent.scrollHeight;
-                        this.scrollTimeout = null;
-                    }, 50); // 50ms防抖
-                }
+                // 强制DOM更新和重绘
+                aiMessageDiv.offsetHeight; // 触发重排
+                
+                // 立即滚动到底部，不使用防抖
+                this.chatContent.scrollTop = this.chatContent.scrollHeight;
+                
+                // 强制浏览器重绘
+                requestAnimationFrame(() => {
+                    this.chatContent.scrollTop = this.chatContent.scrollHeight;
+                });
             });
             
             console.log('✅ 流式对话完成，最终内容长度:', streamContent.length);
@@ -1358,7 +1361,7 @@ class SimpleJobAssistant {
                                 streamContent = ''; // 清空之前的状态文本
                             }
                             
-                            console.log('🔥 流式内容块:', data.chunk || 'unknown', data.content);
+                            console.log('🔥 流式内容块:', data.chunk || 'unknown', '内容:', data.content);
                             streamContent += data.content;
                             onContent(data.content);
                         }
@@ -1366,6 +1369,29 @@ class SimpleJobAssistant {
                         console.warn('⚠️ 解析SSE数据失败:', parseError.message, '原始数据:', event.data);
                     }
                 };
+                
+                // 专门处理message事件（流式内容）
+                eventSource.addEventListener('message', (event) => {
+                    try {
+                        console.log('📨 收到message事件:', event.data);
+                        const data = JSON.parse(event.data);
+                        
+                        if (data.content) {
+                            if (!hasReceivedFirstMessage) {
+                                hasReceivedFirstMessage = true;
+                                clearTimeout(connectionTimeout);
+                                streamContent = '';
+                                console.log('🎆 开始接收流式内容');
+                            }
+                            
+                            console.log('💬 流式消息:', data.content);
+                            streamContent += data.content;
+                            onContent(data.content);
+                        }
+                    } catch (parseError) {
+                        console.warn('⚠️ 解析message事件失败:', parseError.message);
+                    }
+                });
                 
                 eventSource.addEventListener('status', (event) => {
                     try {
@@ -1418,6 +1444,162 @@ class SimpleJobAssistant {
     getStoredApiKey() {
         // 介 localStorage或配置获取API密钥（与配置保存时保持一致）
         return localStorage.getItem('ai_learning_companion_api_key') || '';
+    }
+    
+    // 显示API密钥配置提示
+    showApiKeyTip() {
+        // 创建提示框
+        const tipDiv = document.createElement('div');
+        tipDiv.className = 'api-key-tip';
+        tipDiv.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #4f46e5;
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 10000;
+            max-width: 400px;
+            text-align: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        `;
+        
+        tipDiv.innerHTML = `
+            <div style="font-size: 20px; margin-bottom: 15px;">🔑</div>
+            <h3 style="margin: 0 0 10px 0; font-size: 18px;">配置API密钥</h3>
+            <p style="margin: 0 0 15px 0; opacity: 0.9;">要使用AI聊天功能，需要先配置阿里云百炼 API密钥</p>
+            <button onclick="this.parentElement.remove(); document.getElementById('configBtn').click();" 
+                    style="
+                        background: white;
+                        color: #4f46e5;
+                        border: none;
+                        padding: 10px 20px;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-weight: 600;
+                        margin-right: 10px;
+                    ">
+                现在配置
+            </button>
+            <button onclick="this.parentElement.remove();" 
+                    style="
+                        background: transparent;
+                        color: white;
+                        border: 1px solid rgba(255,255,255,0.3);
+                        padding: 10px 20px;
+                        border-radius: 6px;
+                        cursor: pointer;
+                    ">
+                稍后
+            </button>
+        `;
+        
+        document.body.appendChild(tipDiv);
+        
+        // 5秒后自动消失
+        setTimeout(() => {
+            if (tipDiv.parentElement) {
+                tipDiv.remove();
+            }
+        }, 5000);
+    }
+    
+    // 设置前端console捕获
+    setupFrontendLogCapture() {
+        // 保存原始的console方法
+        if (!window.__originalConsole) {
+            window.__originalConsole = {
+                log: console.log.bind(console),
+                error: console.error.bind(console),
+                warn: console.warn.bind(console),
+                info: console.info.bind(console)
+            };
+        }
+        
+        const self = this;
+        
+        // 重写console.log
+        console.log = function(...args) {
+            const message = args.join(' ');
+            window.__originalConsole.log.apply(console, args);
+            
+            // 将前端日志添加到实时日志面板
+            if (self.shouldCaptureFrontendLog(message)) {
+                self.addLog('info', `[前端] ${message}`);
+            }
+        };
+        
+        // 重写console.error
+        console.error = function(...args) {
+            const message = args.join(' ');
+            window.__originalConsole.error.apply(console, args);
+            
+            if (self.shouldCaptureFrontendLog(message)) {
+                self.addLog('error', `[前端] ${message}`);
+            }
+        };
+        
+        // 重写console.warn
+        console.warn = function(...args) {
+            const message = args.join(' ');
+            window.__originalConsole.warn.apply(console, args);
+            
+            if (self.shouldCaptureFrontendLog(message)) {
+                self.addLog('warning', `[前端] ${message}`);
+            }
+        };
+        
+        // 重写console.info
+        console.info = function(...args) {
+            const message = args.join(' ');
+            window.__originalConsole.info.apply(console, args);
+            
+            if (self.shouldCaptureFrontendLog(message)) {
+                self.addLog('info', `[前端] ${message}`);
+            }
+        };
+        
+        console.log('🌍 前端日志捕获已启用');
+    }
+    
+    // 判断是否应该捕获前端日志
+    shouldCaptureFrontendLog(message) {
+        // 过滤一些不重要的日志
+        const shouldFilter = (
+            message.includes('🔄 初始化日志系统') ||
+            message.includes('✅ 日志系统初始化完成') ||
+            message.includes('📋 日志面板元素状态') ||
+            message.includes('🌍 前端日志捕获已启用') ||
+            message.includes('SSE数据') ||
+            message.includes('收到原始') ||
+            message.includes('解析后') ||
+            message.includes('EventSource') ||
+            message.includes('❤️') || // 过滤聊天相关的调试日志
+            message.includes('📡') || // 过滤SSE调试日志
+            message.includes('📊') || // 过滤SSE数据日志
+            message.length < 10 // 过滤太短的日志
+        );
+        
+        // 只捕获有意义的业务日志
+        const isBusinessLog = (
+            message.includes('开始生成') ||
+            message.includes('检验内容') ||
+            message.includes('进度更新') ||
+            message.includes('生成成功') ||
+            message.includes('职位信息') ||
+            message.includes('开始生成习题') ||
+            message.includes('✅') ||
+            message.includes('✖️') ||
+            message.includes('🔄') ||
+            message.includes('📄') ||
+            message.includes('🔍') ||
+            message.includes('📊') && !message.includes('SSE')
+        );
+        
+        return !shouldFilter && isBusinessLog;
     }
     
     // Markdown到HTML转换函数
@@ -1616,6 +1798,9 @@ class SimpleJobAssistant {
             logContent: !!this.logContent,
             toggleLogPanelBtn: !!this.toggleLogPanelBtn
         });
+        
+        // 设置前端console捕获
+        this.setupFrontendLogCapture();
         
         // 添加初始日志
         this.addLog('info', '🎓 智能学习伴侣已初始化');
