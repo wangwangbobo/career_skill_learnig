@@ -1,0 +1,4232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>学习资料生成结果 - 职途助手AI求职大师</title>
+    
+    <!-- 加载样式文件 -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- 加载 Font Awesome 图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- API配置相关全局函数 - 在页面解析时立即可用 -->
+    <script>
+        // 全局API配置函数 - 确保立即可用
+        function openApiConfigModal() {
+            console.log('🚀 全局函数: 打开API配置模态框');
+            const apiConfigModal = document.getElementById('apiConfigModal');
+            const apiKeyInput = document.getElementById('apiKey');
+            const apiProviderSelect = document.getElementById('apiProvider');
+            
+            if (!apiConfigModal) {
+                console.error('找不到API配置模态框');
+                alert('API配置模态框未找到，请刷新页面重试');
+                return;
+            }
+            
+            // 从localStorage加载已保存的配置
+            if (apiKeyInput) {
+                const savedApiKey = localStorage.getItem('ai_learning_companion_api_key');
+                apiKeyInput.value = savedApiKey || '';
+            }
+            
+            if (apiProviderSelect) {
+                const savedApiProvider = localStorage.getItem('apiProvider');
+                apiProviderSelect.value = savedApiProvider || 'alibaba';
+            }
+            
+            // 显示模态框
+            apiConfigModal.style.display = 'block';
+            apiConfigModal.classList.add('show');
+            
+            console.log('✅ API配置模态框已显示');
+        }
+        
+        // 全局关闭模态框函数
+        function closeApiConfigModal() {
+            console.log('关闭API配置模态框');
+            const apiConfigModal = document.getElementById('apiConfigModal');
+            if (apiConfigModal) {
+                apiConfigModal.classList.remove('show');
+                setTimeout(() => {
+                    apiConfigModal.style.display = 'none';
+                }, 300);
+            }
+        }
+        
+        // 确保函数也在window对象上
+        window.openApiConfigModal = openApiConfigModal;
+        window.closeApiConfigModal = closeApiConfigModal;
+    </script>
+    
+    <style>
+        /* 强制样式覆盖 - 直接修复问题 */
+        .content-layout {
+            display: flex !important;
+            flex-direction: row !important;
+            width: 100% !important;
+            position: relative !important;
+            overflow: visible !important;
+            max-width: 100% !important;
+        }
+        
+        .content-sidebar {
+            width: 260px !important;
+            flex-shrink: 0 !important;
+            position: relative !important;
+            z-index: 1 !important;
+        }
+        
+        .content-main {
+            flex: 1 !important;
+            width: auto !important;
+            min-width: 0 !important;
+            position: relative !important;
+            display: flex !important;
+            flex-direction: column !important;
+            overflow: hidden !important;
+            z-index: 10 !important; /* 提高z-index确保内容在最上层 */
+            margin: 0 1rem !important;
+            background: white !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+            border-radius: 8px !important;
+        }
+        
+        .ai-assistant {
+            width: 380px !important;
+            flex-shrink: 0 !important;
+            position: relative !important;
+            z-index: 2 !important;
+        }
+        
+        .books-grid,
+        .certificates-grid,
+        .courses-grid {
+            width: 100% !important;
+            display: grid !important;
+        }
+        
+        /* 移动端响应式布局 */
+        @media (max-width: 1024px) {
+            .content-layout {
+                flex-direction: column !important;
+            }
+            
+            .content-sidebar,
+            .content-main,
+            .ai-assistant {
+                width: 100% !important;
+                margin: 0 0 1rem 0 !important;
+            }
+        }
+    </style>
+    <!-- 页面专用样式 -->
+    <style>
+        /* 结果页面专用样式 */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: #f3f4f6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .results-container {
+            display: flex;
+            flex: 1;
+            padding: 0.5rem 1rem 1rem 1rem; /* 减小上边距 */
+            gap: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* 顶部标题栏 */
+        .results-header {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 0.1rem 1rem; /* 减小到极小值 */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            min-height: 2.5rem; /* 设置最小高度 */
+        }
+        
+        .results-title {
+            display: flex;
+            align-items: center;
+            font-size: 1rem; /* 进一步减小字体大小 */
+            font-weight: 600;
+            color: #111827;
+            margin: 0;
+        }
+        
+        .results-title i {
+            margin-right: 0.5rem; /* 减小图标间距 */
+            color: #6366f1;
+        }
+        
+        .results-meta {
+            display: flex;
+            align-items: center;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        
+        .generation-time {
+            display: flex;
+            align-items: center;
+        }
+        
+        .generation-time i {
+            margin-right: 0.5rem;
+        }
+        
+        .results-actions {
+            display: flex;
+            gap: 0.5rem; /* 减小按钮间距 */
+        }
+        
+        .result-action-btn {
+            padding: 0.2rem 0.6rem; /* 进一步减小按钮内边距 */
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            font-size: 0.75rem; /* 减小字体 */
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            z-index: 100; /* 添加z-index确保按钮在最上层 */
+            position: relative; /* 添加相对定位 */
+        }
+        
+        .result-action-btn:hover {
+            border-color: #6366f1;
+            color: #6366f1;
+        }
+        
+        .result-action-btn i {
+            margin-right: 0.5rem;
+        }
+        
+        /* 主要内容区域 - 三列布局 */
+        .content-layout {
+            display: flex;
+            flex: 1;
+            gap: 1rem;
+            width: 100%;
+            position: relative;
+            overflow: visible;
+        }
+        
+        /* 左侧目录面板 */
+        .content-sidebar {
+            width: 260px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+        
+        .sidebar-header {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .sidebar-header h3 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #111827;
+        }
+        
+
+        .sidebar-section {
+            margin-bottom: 1rem;
+        }
+        
+        .sidebar-section-title {
+            padding: 0.75rem 1rem;
+            margin: 0;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #111827;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .content-nav-list, .skill-nav-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            color: #4b5563;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .nav-item:hover {
+            background: #f9fafb;
+            color: #6366f1;
+        }
+        
+        .nav-item.active {
+            background: rgba(99, 102, 241, 0.1);
+            color: #6366f1;
+            font-weight: 500;
+        }
+        
+        .nav-item i {
+            margin-right: 0.75rem;
+            width: 16px;
+            text-align: center;
+        }
+        
+        .item-count {
+            margin-left: 0.5rem;
+            font-size: 0.75rem;
+            color: #9ca3af;
+        }
+        
+        .nav-arrow {
+            margin-left: auto;
+            font-size: 0.75rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .nav-item.expanded .nav-arrow {
+            transform: rotate(90deg);
+        }
+        
+        /* 中间内容区域 */
+        .content-main {
+            flex: 1;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            z-index: 1;
+            min-width: 0; /* 防止flex元素溢出 */
+            width: 100%;
+        }
+        
+        .content-section {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            position: relative;
+            background: white;
+            border-radius: 8px;
+            width: 100%;
+            min-width: 0; /* 防止flex元素溢出 */
+            overflow: hidden;
+        }
+        
+        .content-section.active {
+            display: flex;
+            z-index: 10;
+        }
+        
+        .section-header {
+            padding: 0.5rem 1rem; /* 进一步减少上下内边距 */
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .section-header > div {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        .section-header h2 {
+            margin: 0;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #111827;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-header h2 i {
+            margin-right: 0.75rem;
+            color: #6366f1;
+        }
+        
+        .section-count {
+            margin-left: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 400;
+            color: #6b7280;
+        }
+        
+        .expand-all-btn {
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            font-size: 0.75rem;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+        
+        .expand-all-btn:hover {
+            border-color: #6366f1;
+            color: #6366f1;
+        }
+        
+        .expand-all-btn i {
+            margin-right: 0.5rem;
+        }
+        
+        .section-content {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            width: 100%;
+        }
+        
+        /* 思维导图 */
+        .mindmap-card {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .mindmap-controls {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 10;
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .mindmap-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .mindmap-btn:hover {
+            background: #f9fafb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .mindmap-content {
+            flex: 1;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            min-height: 600px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        /* 右侧AI助手 */
+        .ai-assistant {
+            width: 380px;
+            height: calc(100vh - 120px); /* 减少顶部留白，更好适应屏幕 */
+            max-height: 900px; /* 增加最大高度 */
+            min-height: 400px; /* 设置最小高度 */
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            z-index: 2; /* 确保AI助手始终在最上层 */
+        }
+        
+        /* AI助手缩小状态 */
+        .ai-assistant.minimized {
+            position: fixed !important;
+            top: 20px !important;
+            right: 20px !important;
+            width: 60px !important;
+            height: 60px !important;
+            min-width: 60px !important;
+            min-height: 60px !important;
+            max-width: 60px !important;
+            max-height: 60px !important;
+            border-radius: 50% !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+            z-index: 1000 !important;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+            cursor: pointer !important;
+            transition: all 0.3s ease !important;
+            overflow: hidden !important;
+            flex-direction: row !important;
+        }
+        
+        .ai-assistant.minimized:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+        
+        .ai-assistant.minimized .assistant-header {
+            display: none !important;
+        }
+        
+        .ai-assistant.minimized .assistant-title {
+            display: none !important;
+        }
+        
+        .ai-assistant.minimized .assistant-actions {
+            display: none !important;
+        }
+        
+        .ai-assistant.minimized .assistant-content {
+            display: none !important;
+        }
+        
+        .ai-assistant.minimized .chat-messages {
+            display: none !important;
+        }
+        
+        .ai-assistant.minimized .chat-input-container {
+            display: none !important;
+        }
+        
+        /* 缩小后的机器人图标 */
+        .ai-assistant.minimized::before {
+            content: "\f544";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            font-size: 28px;
+            color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1001;
+            pointer-events: none;
+        }
+        
+        /* 缩小状态下的点击区域 */
+        .ai-assistant.minimized::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            z-index: 1002;
+            cursor: pointer;
+        }
+        
+        .assistant-header {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #6366f1;
+            color: white;
+        }
+        
+        .assistant-title {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+        
+        .assistant-title i {
+            margin-right: 0.75rem;
+        }
+        
+        .assistant-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .assistant-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .assistant-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .assistant-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            overflow-x: hidden; /* 防止水平滚动 */
+            background: #f9fafb;
+            min-height: 300px; /* 最小高度 */
+            max-height: calc(100vh - 250px); /* 调整最大高度，更好适应屏幕 */
+            /* 美化滚动条 */
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e0 #f7fafc;
+        }
+        
+        /* Webkit 浏览器滚动条样式 */
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f7fafc;
+            border-radius: 3px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 3px;
+            transition: background 0.3s ease;
+        }
+        
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
+        
+        .welcome-message {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 200px; /* 改为min-height，不再占用整个高度 */
+            padding: 2rem;
+            margin-bottom: 1rem; /* 添加下边距 */
+        }
+        
+        .assistant-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #6366f1;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .welcome-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #111827;
+            margin: 0 0 0.5rem 0;
+        }
+        
+        .welcome-text {
+            font-size: 0.875rem;
+            color: #6b7280;
+            line-height: 1.5;
+            margin: 0;
+        }
+        
+        .chat-input-container {
+            padding: 1rem;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            font-size: 0.875rem;
+            resize: none;
+            transition: border-color 0.3s ease;
+        }
+        
+        .chat-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        .send-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: none;
+            background: #6366f1;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            align-self: flex-end;
+        }
+        
+        .send-btn:hover {
+            background: #4f46e5;
+        }
+        
+        .send-btn:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+        }
+        
+        /* 聊天消息样式 */
+        .message {
+            display: flex;
+            margin-bottom: 0.75rem; /* 减小消息间距 */
+            max-width: 90%;
+        }
+        
+        .user-message {
+            margin-left: auto;
+            flex-direction: row-reverse;
+        }
+        
+        .assistant-message {
+            margin-right: auto;
+        }
+        
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #6366f1;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin: 0 0.75rem;
+        }
+        
+        .message-content {
+            background: #f3f4f6;
+            padding: 0.5rem 0.75rem; /* 减小内边距 */
+            border-radius: 12px;
+            font-size: 0.875rem;
+            line-height: 1.4; /* 减小行高 */
+            color: #4b5563;
+            max-width: 280px; /* AI消息最大宽度 */
+            width: fit-content !important; /* 强制让容器宽度自适应内容 */
+            display: inline-block !important; /* 确保容器为inline-block */
+            word-wrap: break-word; /* 强制换行 */
+            word-break: break-word; /* 兼容性设置 */
+            overflow-wrap: break-word; /* 现代浏览器支持 */
+            white-space: pre-wrap; /* 保持换行和空格 */
+        }
+        
+        /* 流式消息内容的样式 */
+        .message-content.streaming {
+            animation: none;
+            transition: none;
+            opacity: 0.8;
+            background: rgba(99, 102, 241, 0.05);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        
+        .user-message .message-content {
+            background: #6366f1 !important;
+            color: white !important;
+            padding: 0.35rem 0.6rem !important; /* 适中的内边距，接近机器人消息样式 */
+            border-radius: 12px !important;
+            font-size: 0.875rem !important;
+            line-height: 1.2 !important; /* 稍微放宽行高 */
+            display: inline-flex !important; /* 使用flex布局 */
+            align-items: center !important; /* 垂直居中 */
+            width: auto !important;
+            max-width: 220px !important;
+            min-width: auto !important;
+            height: auto !important; /* 完全自适应高度 */
+            word-wrap: break-word !important;
+            word-break: break-word !important;
+            overflow-wrap: break-word !important;
+            box-sizing: border-box !important;
+        }
+        
+        /* 增加一个更具体的选择器以确保优先级 */
+        .ai-assistant .chat-messages .message.user-message .message-content {
+            max-width: 220px !important;
+            width: fit-content !important;
+            min-width: 20px !important;
+        }
+        
+        .message-content p {
+            margin: 0 !important;
+            padding: 0 !important; /* 确保段落没有额外的内边距 */
+            line-height: inherit !important; /* 继承父元素的行高 */
+        }
+        
+
+        
+        /* 面试题新样式 */
+        .interview-card {
+            background: white;
+            border-radius: 16px; /* 增加圆角 */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1); /* 增强阴影 */
+            padding: 2rem; /* 增加内边距 */
+            margin-bottom: 2rem; /* 增加下边距 */
+            position: relative;
+            transition: all 0.3s ease;
+            border: 1px solid #f1f5f9;
+        }
+        
+        .interview-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .interview-progress {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .interview-progress i {
+            color: #4f46e5;
+            margin-right: 0.5rem;
+        }
+
+        .interview-question {
+            font-size: 1.375rem; /* 增大字体 */
+            font-weight: 700; /* 加粗 */
+            color: #1f2937;
+            margin-bottom: 1.5rem;
+            line-height: 1.4;
+            letter-spacing: -0.025em; /* 细微调整字符间距 */
+        }
+
+        .interview-tags {
+            display: flex;
+            gap: 0.75rem; /* 增加间距 */
+            margin-bottom: 2rem; /* 增加下边距 */
+            flex-wrap: wrap;
+        }
+
+        .interview-tag {
+            padding: 0.375rem 1rem; /* 增加内边距 */
+            border-radius: 9999px;
+            font-size: 0.8rem; /* 稍微增大字体 */
+            font-weight: 600; /* 增加字体重量 */
+            letter-spacing: 0.025em;
+            transition: all 0.2s ease;
+        }
+
+        .interview-tag.primary {
+            background-color: #e9d5ff;
+            color: #7e22ce;
+        }
+
+        .interview-tag.secondary {
+            background-color: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .interview-tag.tech {
+            background-color: #e0f2fe;
+            color: #0369a1;
+        }
+
+        /* 知识点新样式 */
+        .knowledge-item {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 0;
+            margin-bottom: 1.5rem;
+            display: block;
+            transition: all 0.2s ease;
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+        }
+
+        .knowledge-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-color: #6366f1;
+        }
+
+        .knowledge-header {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            padding: 1.2rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .knowledge-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+            margin: 0;
+            line-height: 1.3;
+            text-align: center;
+        }
+
+        .knowledge-content {
+            padding: 1.5rem;
+            background: white;
+        }
+
+        .knowledge-text {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #4b5563;
+            margin: 0;
+        }
+
+        .knowledge-text strong {
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .knowledge-text br {
+            margin-bottom: 0.5rem;
+        }
+
+        .interview-actions {
+            display: flex;
+            gap: 1rem; /* 增加间距 */
+            justify-content: space-between;
+            margin-top: 1.5rem; /* 增加上边距 */
+        }
+
+        .interview-btn {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+        }
+
+        .interview-btn i {
+            margin-right: 0.5rem;
+        }
+
+        .interview-btn.primary {
+            background-color: #4f46e5;
+            color: white;
+            border: none;
+        }
+
+        .interview-btn.primary:hover {
+            background-color: #4338ca;
+        }
+
+        .interview-btn.secondary {
+            background-color: white;
+            color: #4b5563;
+            border: 1px solid #e5e7eb;
+        }
+
+        .interview-btn.secondary:hover {
+            background-color: #f9fafb;
+            color: #111827;
+        }
+
+        .interview-btn.outline {
+            background-color: white;
+            color: #4f46e5;
+            border: 1px solid #4f46e5;
+        }
+
+        .interview-btn.outline:hover {
+            background-color: #f5f3ff;
+        }
+
+        .interview-btn.ai-score {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            border: none;
+            position: relative;
+        }
+
+        .interview-btn.ai-score:hover {
+            background: linear-gradient(135deg, #d97706, #b45309);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+        
+        /* 面试题答案输入框样式优化 */
+        .interview-answer-input {
+            width: 100%;
+            min-height: 150px; /* 增加最小高度 */
+            height: auto;
+            padding: 1rem; /* 增加内边距 */
+            border: 2px solid #e5e7eb;
+            border-radius: 12px; /* 增加圆角 */
+            font-size: 0.95rem;
+            line-height: 1.6;
+            resize: vertical; /* 允许垂直调整大小 */
+            transition: all 0.3s ease;
+            font-family: inherit;
+            background: #fafafa;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+            margin: 1.5rem 0; /* 增加上下间距 */
+        }
+        
+        .interview-answer-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+            transform: translateY(-1px);
+        }
+        
+        .interview-answer-input:hover {
+            border-color: #d1d5db;
+            background: white;
+        }
+        
+        .interview-answer-input::placeholder {
+            color: #9ca3af;
+            font-style: italic;
+            font-size: 0.9rem;
+        }
+        
+        /* 书籍样式 */
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 0;
+            width: 100%;
+        }
+        
+        .book-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            border: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .book-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-color: #d1d5db;
+        }
+        
+        .book-cover {
+            width: 60px;
+            height: 80px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .book-cover i {
+            font-size: 1.5rem;
+            color: white;
+        }
+        
+        .book-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .book-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #111827;
+            margin: 0 0 0.5rem 0;
+            line-height: 1.4;
+        }
+        
+        .book-author {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin: 0 0 0.75rem 0;
+        }
+        
+        .book-description {
+            font-size: 0.875rem;
+            color: #4b5563;
+            line-height: 1.5;
+            margin: 0 0 1rem 0;
+            flex: 1;
+        }
+        
+        .book-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .stars {
+            display: flex;
+            gap: 0.125rem;
+        }
+        
+        .stars i {
+            font-size: 0.875rem;
+            color: #fbbf24;
+        }
+        
+        .stars .far {
+            color: #d1d5db;
+        }
+        
+        .rating-text {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #4b5563;
+        }
+        
+        .book-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        .book-btn {
+            flex: 1;
+            padding: 0.625rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+        }
+        
+        .book-btn i {
+            margin-right: 0.5rem;
+            font-size: 0.75rem;
+        }
+        
+        .book-btn.primary {
+            background: #6366f1;
+            color: white;
+        }
+        
+        .book-btn.primary:hover {
+            background: #4f46e5;
+            transform: translateY(-1px);
+        }
+        
+        .book-btn.secondary {
+            background: #f8fafc;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .book-btn.secondary:hover {
+            background: #f1f5f9;
+            color: #475569;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .books-grid,
+            .certificates-grid,
+            .courses-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                width: 100%;
+            }
+            
+            .book-card,
+            .certificate-card,
+            .course-card {
+                padding: 1rem;
+            }
+            
+            .book-actions,
+            .certificate-actions,
+            .course-actions {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .chat-messages {
+                max-height: calc(400px - 130px);
+                padding: 0.75rem; /* 减小内边距 */
+            }
+            
+            .message-content {
+                max-width: 85%; /* AI消息小屏幕进一步增加消息宽度 */
+                padding: 0.4rem 0.6rem; /* 进一步减小内边距 */
+            }
+            
+            .user-message .message-content {
+                max-width: 80%; /* 用户消息小屏幕下保持合理宽度 */
+            }
+        }
+        
+        /* 证书样式 */
+        .certificates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+            padding: 0;
+            width: 100%;
+        }
+        
+        .certificate-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            border: 1px solid #e5e7eb;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .certificate-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-color: #d1d5db;
+        }
+        
+        .certificate-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .certificate-icon i {
+            font-size: 1.5rem;
+            color: white;
+        }
+        
+        .certificate-info {
+            flex: 1;
+        }
+        
+        .certificate-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #111827;
+            margin: 0 0 0.5rem 0;
+            line-height: 1.4;
+        }
+        
+        .certificate-issuer {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin: 0 0 0.75rem 0;
+        }
+        
+        .certificate-description {
+            font-size: 0.875rem;
+            color: #4b5563;
+            line-height: 1.5;
+            margin: 0 0 1rem 0;
+        }
+        
+        .certificate-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .difficulty-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .difficulty-badge.beginner {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .difficulty-badge.intermediate {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .difficulty-badge.advanced {
+            background: #fecaca;
+            color: #991b1b;
+        }
+        
+        .validity {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+        
+        .certificate-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        .cert-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+        }
+        
+        .cert-btn i {
+            margin-right: 0.5rem;
+            font-size: 0.75rem;
+        }
+        
+        .cert-btn.primary {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .cert-btn.primary:hover {
+            background: #d97706;
+            transform: translateY(-1px);
+        }
+        
+        .cert-btn.secondary {
+            background: #f8fafc;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .cert-btn.secondary:hover {
+            background: #f1f5f9;
+            color: #475569;
+        }
+        
+        /* 课程样式 */
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+            padding: 0;
+            width: 100%;
+        }
+        
+        .course-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 0;
+            transition: all 0.3s ease;
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .course-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-color: #d1d5db;
+        }
+        
+        .course-thumbnail {
+            height: 120px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .course-thumbnail i {
+            font-size: 3rem;
+            color: white;
+            opacity: 0.9;
+        }
+        
+        .course-duration {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .course-info {
+            padding: 1.5rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .course-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #111827;
+            margin: 0 0 0.5rem 0;
+            line-height: 1.4;
+        }
+        
+        .course-instructor {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin: 0 0 0.75rem 0;
+        }
+        
+        .course-description {
+            font-size: 0.875rem;
+            color: #4b5563;
+            line-height: 1.5;
+            margin: 0 0 1rem 0;
+            flex: 1;
+        }
+        
+        .course-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .course-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .level-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .level-badge.beginner {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .level-badge.intermediate {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .level-badge.advanced {
+            background: #fecaca;
+            color: #991b1b;
+        }
+        
+        .course-price {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .current-price {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #dc2626;
+        }
+        
+        .original-price {
+            font-size: 0.875rem;
+            color: #9ca3af;
+            text-decoration: line-through;
+        }
+        
+        .discount {
+            background: #dc2626;
+            color: white;
+            padding: 0.125rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .course-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        .course-btn {
+            flex: 1;
+            padding: 0.625rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+        }
+        
+        .course-btn i {
+            margin-right: 0.5rem;
+            font-size: 0.75rem;
+        }
+        
+        .course-btn.primary {
+            background: #6366f1;
+            color: white;
+        }
+        
+        .course-btn.primary:hover {
+            background: #4f46e5;
+            transform: translateY(-1px);
+        }
+        
+        .course-btn.secondary {
+            background: #f8fafc;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+            flex: 0 0 auto;
+            padding: 0.625rem;
+        }
+        
+        .course-btn.secondary:hover {
+            background: #f1f5f9;
+            color: #dc2626;
+        }
+
+        .interview-refresh {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+        }
+
+        .interview-refresh:hover {
+            background-color: #f3f4f6;
+            color: #4f46e5;
+        }
+
+        .interview-ai-badge {
+            display: flex;
+            align-items: center;
+            color: #4f46e5;
+            font-weight: 500;
+            font-size: 0.875rem;
+            margin-left: auto;
+        }
+
+        .interview-ai-badge i {
+            margin-right: 0.5rem;
+        }
+
+        /* 面试题列表样式 */
+        .content-subtitle {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #111827;
+            margin: 2rem 0 1rem 0;
+        }
+
+        .interview-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .interview-list-item {
+            display: flex;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid #e5e7eb;
+        }
+
+        .interview-list-item:hover {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transform: translateX(5px);
+            border-color: #d1d5db;
+        }
+
+        .interview-list-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #f3f4f6;
+            color: #4b5563;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        .interview-list-content {
+            flex: 1;
+        }
+
+        .interview-list-title {
+            font-size: 0.9375rem;
+            font-weight: 500;
+            color: #1f2937;
+            margin: 0 0 0.5rem 0;
+            line-height: 1.4;
+        }
+
+        .interview-list-tags {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* 适配移动端 */
+        @media (max-width: 640px) {
+            .interview-actions {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .interview-btn {
+                width: 100%;
+            }
+        }
+
+        /* 模态框样式 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: none;
+            z-index: 9999; /* 确保在最顶层 */
+        }
+
+        .modal.show {
+            display: block !important; /* 强制显示 */
+        }
+
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 10000;
+        }
+        
+        .modal-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            width: 95%;
+            max-width: 500px;
+            overflow: hidden;
+            z-index: 10001;
+        }
+        
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #111827;
+            display: flex;
+            align-items: center;
+        }
+        
+        .modal-header h3 i {
+            margin-right: 0.75rem;
+            color: #6366f1;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            color: #6b7280;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-close:hover {
+            background: #f3f4f6;
+            color: #111827;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .modal-description {
+            margin: 0 0 1.5rem 0;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: #6b7280;
+        }
+        
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .input-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+        
+        .key-input-container {
+            position: relative;
+            display: flex;
+        }
+        
+        .modal-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            border: 1px solid #d1d5db;
+            font-size: 0.875rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .modal-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        .toggle-btn {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .toggle-btn:hover {
+            color: #111827;
+        }
+        
+        .provider-select {
+            margin-bottom: 1.5rem;
+        }
+        
+        .provider-select label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+        
+        .modal-select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            border: 1px solid #d1d5db;
+            font-size: 0.875rem;
+            background-color: white;
+        }
+        
+        .modal-select:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        .provider-info {
+            display: flex;
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .provider-logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            flex-shrink: 0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .provider-details {
+            flex: 1;
+        }
+        
+        .provider-details h4 {
+            margin: 0 0 0.25rem 0;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #111827;
+        }
+        
+        .provider-details p {
+            margin: 0 0 0.5rem 0;
+            font-size: 0.75rem;
+            line-height: 1.4;
+            color: #6b7280;
+        }
+        
+        .provider-link {
+            font-size: 0.75rem;
+            color: #6366f1;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .provider-link:hover {
+            text-decoration: underline;
+        }
+        
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+        
+        .modal-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-btn-cancel {
+            background: white;
+            border: 1px solid #d1d5db;
+            color: #6b7280;
+        }
+        
+        .modal-btn-cancel:hover {
+            border-color: #9ca3af;
+            color: #111827;
+        }
+        
+        .modal-btn-confirm {
+            background: #6366f1;
+            border: 1px solid #6366f1;
+            color: white;
+        }
+        
+        .modal-btn-confirm:hover {
+            background: #4f46e5;
+            border-color: #4f46e5;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 1400px) {
+            .ai-assistant {
+                width: 320px;
+                height: calc(100vh - 120px); /* 保持高度限制 */
+            }
+            
+            .message-content {
+                max-width: 240px; /* AI消息适应较小的宽度 */
+            }
+            
+            .user-message .message-content {
+                max-width: 200px; /* 用户消息适中的宽度 */
+            }
+        }
+        
+        @media (max-width: 1200px) {
+            .results-container {
+                flex-direction: column;
+            }
+            
+            .content-layout {
+                flex-direction: column;
+            }
+            
+            .content-sidebar, .ai-assistant {
+                width: 100%;
+            }
+            
+            .ai-assistant {
+                height: 450px; /* 增加移动端高度 */
+                max-height: 450px;
+                min-height: 400px;
+            }
+            
+            .chat-messages {
+                max-height: calc(450px - 130px); /* 适应新的高度 */
+            }
+            
+            .message-content {
+                max-width: 70%; /* AI消息移动端调整消息宽度 */
+            }
+            
+            .user-message .message-content {
+                max-width: 70%; /* 用户消息适中紧凑 */
+            }
+            
+            .mindmap-content {
+                min-height: 400px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .results-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem; /* 减小间距 */
+                padding: 0.1rem 1rem; /* 保持与主样式一致的小内边距 */
+                min-height: auto; /* 移动端取消最小高度限制 */
+            }
+            
+            .results-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .content-layout {
+                flex-direction: column;
+            }
+            
+            .content-sidebar {
+                width: 100%;
+                margin-bottom: 1rem;
+            }
+            
+            .content-main {
+                width: 100%;
+            }
+            
+            .ai-assistant {
+                width: 100%;
+                height: 400px; /* 小屏幕适中的高度 */
+                max-height: 400px;
+                min-height: 350px;
+                margin-top: 1rem; /* 添加上边距，与内容区域分开 */
+            }
+            
+            .chat-messages {
+                max-height: calc(400px - 130px);
+                padding: 0.75rem; /* 减小内边距 */
+            }
+            
+            .message-content {
+                max-width: 85%; /* AI消息小屏幕进一步增加消息宽度 */
+                padding: 0.4rem 0.6rem; /* 进一步减小内边距 */
+            }
+            
+            .user-message .message-content {
+                max-width: 80%; /* 用户消息小屏幕下保持合理宽度 */
+            }
+        }
+    </style>
+    
+    <!-- 直接在head中加载Markmap库和样式 -->
+    <!-- D3库 -->
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <!-- Markmap View -->
+    <script src="https://cdn.jsdelivr.net/npm/markmap-view@0.14.4"></script>
+    <!-- Markmap Lib -->
+    <script src="https://cdn.jsdelivr.net/npm/markmap-lib@0.14.4"></script>
+    <!-- Markmap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/markmap-toolbar@0.14.4/dist/style.css">
+    
+    <script>
+        // 等待所有库加载完成
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🧠 DOM加载完成，开始初始化思维导图...');
+            
+            // 检查必要的库是否加载
+            function checkLibrariesLoaded() {
+                return typeof window.d3 !== 'undefined' && 
+                       typeof window.markmap !== 'undefined' &&
+                       window.markmap.Markmap &&
+                       window.markmap.Transformer;
+            }
+            
+            // 延迟初始化，确保所有库都已加载
+            function waitForLibraries(maxAttempts = 10, attempt = 1) {
+                console.log(`🔍 检查库加载状态 (尝试 ${attempt}/${maxAttempts})...`);
+                
+                if (checkLibrariesLoaded()) {
+                    console.log('✅ 所有Markmap库已加载完成');
+                    initializeMarkmap();
+                } else if (attempt < maxAttempts) {
+                    console.log('⏳ 等待库加载...');
+                    setTimeout(() => waitForLibraries(maxAttempts, attempt + 1), 1000);
+                } else {
+                    console.error('❌ Markmap库加载失败，使用降级方案');
+                    showMarkmapFallback();
+                }
+            }
+            
+            // 开始检查库加载状态
+            waitForLibraries();
+        });
+        
+        function initializeMarkmap() {
+            console.log('🚀 开始初始化思维导图...');
+            
+            // 检查必要的库是否已加载
+            if (typeof window.d3 === 'undefined') {
+                console.error('❌ d3库未加载');
+                showMarkmapFallback();
+                return;
+            }
+            
+            if (typeof window.markmap === 'undefined' || !window.markmap.Markmap || !window.markmap.Transformer) {
+                console.error('❌ markmap库未加载或不完整');
+                showMarkmapFallback();
+                return;
+            }
+            
+            try {
+                // 明确的思维导图内容（使用标准Markdown格式）
+                const markdown = `# 后端工程师学习路线
+
+## 🔥 编程语言
+### Java
+- 基础语法和面向对象
+- 集合框架和数据结构
+- 多线程和并发编程
+- JVM原理和调优
+
+### Python
+- 基础语法和数据类型
+- 网络编程和Web框架
+- 数据分析和机器学习
+
+### Go
+- 并发模型和Goroutine
+- 内存管理和性能优化
+- 微服务和云原生开发
+
+## 🏗️ 框架技术
+### Spring生态
+- Spring Framework 核心
+- Spring Boot 微服务
+- Spring Cloud 分布式
+- Spring Security 安全框架
+
+### 数据库框架
+- MyBatis ORM框架
+- Hibernate JPA规范
+- 数据库连接池优化
+
+## 📊 数据库技术
+### 关系型数据库
+- MySQL 设计和优化
+- PostgreSQL 高级特性
+- 索引优化和查询优化
+
+### NoSQL数据库
+- Redis 缓存和数据结构
+- MongoDB 文档数据库
+- Elasticsearch 搜索引擎
+
+## 📝 中间件技术
+### 消息队列
+- Kafka 大数据流处理
+- RabbitMQ 可靠消息传递
+- 消息队列选型和优化
+
+### 分布式协调
+- Zookeeper 配置管理
+- etcd 分布式键值存储
+- 服务发现和注册
+
+## 🏢 架构设计
+### 微服务架构
+- 服务拆分和设计原则
+- API网关和负载均衡
+- 服务治理和监控
+
+### 分布式系统
+- CAP理论和一致性
+- 分布式事务处理
+- 高可用和容灾设计
+
+## 🚀 DevOps和部署
+### 容器化技术
+- Docker 容器部署
+- Kubernetes 容器编排
+- 容器监控和日志
+
+### CI/CD 流水线
+- Jenkins 自动化构建
+- GitLab CI 持续集成
+- 代码质量和测试策略
+
+## 🔒 安全和性能
+### 安全防护
+- 身份认证和授权
+- 数据加密和传输安全
+- 常见攻击防护
+
+### 性能优化
+- 系统性能监控
+- 数据库查询优化
+- 缓存策略和并发优化`;
+                
+                // 初始化思维导图
+                const mindmapElement = document.getElementById('mindmapContent');
+                if (!mindmapElement) {
+                    console.error('❌ 找不到思维导图容器元素');
+                    return;
+                }
+                
+                // 清空元素内容
+                mindmapElement.innerHTML = '';
+                
+                // 创建SVG元素
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('width', '100%');
+                svg.setAttribute('height', '600');
+                svg.style.background = '#fff';
+                svg.style.border = '1px solid #e5e7eb';
+                svg.style.borderRadius = '8px';
+                mindmapElement.appendChild(svg);
+                
+                console.log('🎨 SVG元素创建完成');
+                
+                // 创建转换器
+                const transformer = new window.markmap.Transformer();
+                console.log('🔄 Transformer创建完成');
+                
+                // 验证并修复数据
+                const validateData = (data) => {
+                    if (!data) return data;
+                    
+                    // 递归验证每个节点
+                    const validateNode = (node) => {
+                        if (!node) return;
+                        
+                        // 修复可能的NaN值
+                        if (!node.x || isNaN(node.x)) node.x = 0;
+                        if (!node.y || isNaN(node.y)) node.y = 0;
+                        
+                        // 确保其他关键属性存在
+                        if (typeof node.depth === 'undefined') node.depth = 0;
+                        if (!node.parent) node.parent = null;
+                        if (!node.data) node.data = {};
+                        if (!node.children) node.children = [];
+                        
+                        // 验证所有坐标和变换相关的属性
+                        ['x0', 'y0', 'x1', 'y1', 'height', 'width'].forEach(prop => {
+                            if (node[prop] && isNaN(node[prop])) node[prop] = 0;
+                        });
+                        
+                        // 处理子节点
+                        if (node.children && Array.isArray(node.children)) {
+                            node.children.forEach(validateNode);
+                        }
+                    };
+                    
+                    validateNode(data);
+                    return data;
+                };
+                
+                // 转换markdown
+                const { root } = transformer.transform(markdown);
+                console.log('🌳 Markdown转换完成');
+                
+                // 验证并修复数据
+                const validatedRoot = validateData(root);
+                
+                // 创建Markmap实例
+                const markmapInstance = window.markmap.Markmap.create(svg, {
+                    duration: 500,
+                    zoom: true,
+                    pan: true,
+                    autoFit: true,
+                    color: (d) => {
+                        // 根据层级设置不同颜色
+                        const colors = ['#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#ef4444'];
+                        return colors[(d.depth || 0) % colors.length]; // 添加默认值0防止undefined
+                    },
+                    // 设置嵌套元素间距，防止相互重叠
+                    spacingHorizontal: 80,
+                    spacingVertical: 20
+                }, validatedRoot);
+                
+                // 添加额外处理，防止初始化过程中的错误
+                if (markmapInstance && typeof markmapInstance.setData === 'function') {
+                    // 尝试为MarkmapInstance添加错误处理函数
+                    markmapInstance._handleTransformError = function(node) {
+                        if (!node) return;
+                        if (isNaN(node.x) || isNaN(node.y)) {
+                            node.x = 0;
+                            node.y = 0;
+                        }
+                    };
+                }
+                
+                console.log('✅ Markmap实例创建完成');
+                
+                // 默认展开所有节点并适配视图
+                setTimeout(() => {
+                    try {
+                        console.log('🔄 自动适配视图大小...');
+                        // 先检查根节点是否有效
+                        if (root && typeof root === 'object') {
+                            // 确保每个节点都有有效的坐标
+                            const validateNode = (node) => {
+                                if (node) {
+                                    // 确保节点有有效的位置属性
+                                    if (!node.x) node.x = 0;
+                                    if (!node.y) node.y = 0;
+                                    // 处理子节点
+                                    if (node.children && Array.isArray(node.children)) {
+                                        node.children.forEach(validateNode);
+                                    }
+                                }
+                            };
+                            
+                            // 验证所有节点
+                            validateNode(root);
+                            
+                            // 先修复现有的SVG元素
+                            try {
+                                // 获取所有可能有问题的SVG元素
+                                const gElements = svg.querySelectorAll('g');
+                                gElements.forEach(g => {
+                                    const transform = g.getAttribute('transform');
+                                    if (transform && transform.includes('NaN')) {
+                                        console.log('🚨 适配前修复无效transform:', transform);
+                                        g.setAttribute('transform', 'translate(0,0) scale(1)');
+                                    }
+                                });
+                            } catch (svgError) {
+                                console.warn('⚠️ 适配前修复SVG错误时出错:', svgError);
+                            }
+                            
+                            // 使用try-catch包裹fit调用
+                            try {
+                                if (markmapInstance && typeof markmapInstance.fit === 'function') {
+                                    // 调用fit适配视图
+                                    markmapInstance.fit();
+                                    console.log('✅ 视图适配完成');
+                                } else {
+                                    console.warn('⚠️ markmapInstance或fit方法不可用');
+                                }
+                            } catch (fitError) {
+                                console.error('❌ 调用fit方法时出错:', fitError);
+                                // 尝试备用方案：设置缩放级别
+                                try {
+                                    svg.setAttribute('viewBox', '0 0 1000 600');
+                                    console.log('✅ 使用备用方案设置viewBox');
+                                } catch (viewBoxError) {
+                                    console.error('❌ 设置viewBox时出错:', viewBoxError);
+                                }
+                            }
+                        } else {
+                            console.warn('⚠️ 根节点无效，跳过自动适配');
+                        }
+                    } catch (error) {
+                        console.error('❌ 自动适配视图时出错:', error);
+                    }
+                }, 400); // 增加延迟时间到400ms
+                
+                // 为控制按钮添加事件
+                const expandAllBtn = document.getElementById('expandAll');
+                if (expandAllBtn) {
+                    expandAllBtn.addEventListener('click', () => {
+                        console.log('🔍 展开所有节点');
+                        try {
+                            // 防止坐标计算错误
+                            if (markmapInstance && typeof markmapInstance.fit === 'function') {
+                                markmapInstance.fit(); // 使用fit方法适配视图并显示全部内容
+                                console.log('✅ 视图适配完成');
+                            } else {
+                                console.warn('⚠️ Markmap实例无效，无法适配视图');
+                            }
+                        } catch (error) {
+                            console.error('❌ 适配视图时出错:', error);
+                        }
+                    });
+                }
+                
+                const collapseAllBtn = document.getElementById('collapseAll');
+                if (collapseAllBtn) {
+                    collapseAllBtn.addEventListener('click', () => {
+                        console.log('📋 折叠所有节点');
+                        try {
+                            if (markmapInstance && root) {
+                                // 防止空数据或非法坐标
+                                const collapsedRoot = JSON.parse(JSON.stringify(root)); // 深拷贝根节点
+                                
+                                // 验证并修复坐标
+                                const validateNode = (node) => {
+                                    if (node) {
+                                        // 确保节点有有效的位置属性
+                                        if (!node.x || isNaN(node.x)) node.x = 0;
+                                        if (!node.y || isNaN(node.y)) node.y = 0;
+                                        
+                                        // 处理子节点
+                                        if (node.children && Array.isArray(node.children)) {
+                                            node.children.forEach(validateNode);
+                                        }
+                                    }
+                                };
+                                
+                                validateNode(collapsedRoot);
+                                
+                                // 创建新的实例
+                                try {
+                                    const newInstance = window.markmap.Markmap.create(svg, {
+                                        duration: 500,
+                                        zoom: true,
+                                        pan: true,
+                                        autoFit: true
+                                    }, collapsedRoot);
+                                    
+                                    console.log('✅ 折叠所有节点成功');
+                                } catch (innerError) {
+                                    console.error('❌ 创建新实例时出错:', innerError);
+                                }
+                            } else {
+                                console.warn('⚠️ Markmap实例或根节点无效');
+                            }
+                        } catch (error) {
+                            console.error('❌ 折叠节点时出错:', error);
+                        }
+                    });
+                }
+                
+                const downloadMindmapBtn = document.getElementById('downloadMindmap');
+                if (downloadMindmapBtn) {
+                    downloadMindmapBtn.addEventListener('click', () => {
+                        console.log('💾 下载思维导图');
+                        // 获取SVG内容并下载
+                        const svgData = svg.outerHTML;
+                        const blob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = '后端工程师学习路线图.svg';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        URL.revokeObjectURL(url);
+                        alert('思维导图已下载！');
+                    });
+                }
+                
+                console.log('🎉 思维导图初始化完成！已自动适配显示全部内容');
+                
+                // 修复最常见的SVG transform错误
+                const fixSvgTransformErrors = () => {
+                    console.log('🔧 尝试修复SVG transform错误...');
+                    try {
+                        // 获取所有g元素
+                        const gElements = svg.querySelectorAll('g');
+                        let fixedCount = 0;
+                        
+                        // 检查每个g元素的transform属性
+                        gElements.forEach(g => {
+                            const transform = g.getAttribute('transform');
+                            if (transform && transform.includes('NaN')) {
+                                // 发现无效的变换，将其设置为有效值
+                                console.log('🚨 发现无效的transform:', transform);
+                                g.setAttribute('transform', 'translate(0,0) scale(1)');
+                                fixedCount++;
+                            }
+                        });
+                        
+                        console.log(`✅ SVG错误修复完成: 共修复${fixedCount}个节点`);
+                    } catch (error) {
+                        console.error('❌ 修复SVG错误时出错:', error);
+                    }
+                };
+                
+                // 在初始化后延迟执行修复
+                setTimeout(() => {
+                    fixSvgTransformErrors();
+                }, 500);
+                
+            } catch (error) {
+                console.error('❌ 初始化思维导图时出错:', error);
+                showMarkmapFallback();
+            }
+        }
+        
+        function showMarkmapFallback() {
+            console.log('🚑 显示思维导图降级方案');
+            const mindmapElement = document.getElementById('mindmapContent');
+            if (mindmapElement) {
+                mindmapElement.innerHTML = `
+                    <div class="mindmap-fallback" style="
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        height: 100%;
+                        min-height: 400px;
+                        text-align: center;
+                        padding: 2rem;
+                        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+                        border: 1px solid #e5e7eb;
+                        border-radius: 8px;
+                    ">
+                        <div style="
+                            width: 80px;
+                            height: 80px;
+                            border-radius: 50%;
+                            background: #fbbf24;
+                            color: white;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 2rem;
+                            margin-bottom: 1.5rem;
+                            animation: pulse 2s infinite;
+                        ">
+                            <i class="fas fa-project-diagram"></i>
+                        </div>
+                        <h3 style="
+                            font-size: 1.25rem;
+                            font-weight: 600;
+                            color: #111827;
+                            margin: 0 0 1rem 0;
+                        ">正在加载思维导图...</h3>
+                        <p style="
+                            font-size: 0.875rem;
+                            color: #6b7280;
+                            line-height: 1.6;
+                            margin: 0 0 1.5rem 0;
+                            max-width: 400px;
+                        ">如果长时间未加载，可能是网络连接问题或浏览器兼容性问题。请尝试以下操作：</p>
+                        
+                        <!-- 操作建议 -->
+                        <div style="
+                            display: flex;
+                            flex-direction: column;
+                            gap: 0.75rem;
+                            margin-bottom: 1.5rem;
+                            text-align: left;
+                        ">
+                            <div style="display: flex; align-items: center; color: #4b5563;">
+                                <i class="fas fa-redo" style="margin-right: 0.5rem; color: #6366f1;"></i>
+                                <span>刷新页面重试</span>
+                            </div>
+                            <div style="display: flex; align-items: center; color: #4b5563;">
+                                <i class="fas fa-wifi" style="margin-right: 0.5rem; color: #6366f1;"></i>
+                                <span>检查网络连接</span>
+                            </div>
+                            <div style="display: flex; align-items: center; color: #4b5563;">
+                                <i class="fas fa-browser" style="margin-right: 0.5rem; color: #6366f1;"></i>
+                                <span>更新浏览器版本</span>
+                            </div>
+                        </div>
+                        
+                        <!-- 重试按钮 -->
+                        <button onclick="location.reload()" style="
+                            padding: 0.75rem 1.5rem;
+                            border-radius: 8px;
+                            border: none;
+                            background: #6366f1;
+                            color: white;
+                            font-weight: 500;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                        " 
+                        onmouseover="this.style.background='#4f46e5'" 
+                        onmouseout="this.style.background='#6366f1'">
+                            <i class="fas fa-redo" style="margin-right: 0.5rem;"></i>
+                            重新加载页面
+                        </button>
+                        
+                        <!-- 简化版本提示 -->
+                        <div style="
+                            margin-top: 2rem;
+                            padding: 1rem;
+                            background: rgba(99, 102, 241, 0.1);
+                            border-radius: 6px;
+                            border-left: 4px solid #6366f1;
+                        ">
+                            <p style="
+                                margin: 0;
+                                font-size: 0.75rem;
+                                color: #4b5563;
+                                line-height: 1.5;
+                            ">
+                                <strong>💡 提示：</strong>
+                                您也可以通过左侧导航查看其他学习资料，
+                                包括知识点、面试题、课程推荐等内容。
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <style>
+                        @keyframes pulse {
+                            0% { opacity: 1; transform: scale(1); }
+                            50% { opacity: 0.7; transform: scale(1.05); }
+                            100% { opacity: 1; transform: scale(1); }
+                        }
+                    </style>
+                `;
+            }
+        }
+    </script>
+</head>
+<body>
+    <!-- 顶部标题栏 -->
+    <header class="results-header">
+        <h1 class="results-title">
+            <i class="fas fa-graduation-cap"></i>
+            <span id="jobTitleDisplay">后端工程师</span>
+        </h1>
+        
+        <div class="results-meta">
+            <div class="generation-time">
+                <i class="fas fa-clock"></i>
+                <span id="generationTimeDisplay">2025/08/17 16:20:14</span>
+            </div>
+        </div>
+        
+        <div class="results-actions">
+<button class="result-action-btn" id="configApiBtn" onclick="openApiConfigModal(); console.log('🛠️ 内联事件被触发');">
+    <i class="fas fa-cog"></i>
+    配置API密钥
+</button>
+            <button class="result-action-btn" id="saveBtn">
+                <i class="fas fa-save"></i>
+                保存
+            </button>
+            <button class="result-action-btn" id="exportPdfBtn">
+                <i class="fas fa-file-pdf"></i>
+                导出PDF
+            </button>
+            <button class="result-action-btn" id="exportFeishuBtn">
+                <i class="fas fa-file-alt"></i>
+                导出飞书文档
+            </button>
+        </div>
+    </header>
+    
+    <!-- 主要内容容器 -->
+    <div class="results-container">
+        <!-- 三列布局 -->
+        <div class="content-layout">
+            <!-- 左侧目录 -->
+            <aside class="content-sidebar">
+                <div class="sidebar-header">
+                    <h3>目录</h3>
+                </div>
+                
+                <!-- 主内容目录 -->
+                <div class="sidebar-section">
+                    <h4 class="sidebar-section-title" id="sidebarJobTitle">后端工程师</h4>
+                    <ul class="content-nav-list">
+                        <li class="nav-item" data-target="mindmap">
+                            <i class="fas fa-project-diagram"></i>
+                            <span>思维导图</span>
+                            <i class="fas fa-chevron-right nav-arrow"></i>
+                        </li>
+                        <li class="nav-item" data-target="knowledge">
+                            <i class="fas fa-lightbulb"></i>
+                            <span>知识点</span>
+                            <span class="item-count" id="knowledgeCount">(20)</span>
+                            <i class="fas fa-chevron-right nav-arrow"></i>
+                        </li>
+                        <li class="nav-item active" data-target="interview">
+                            <i class="fas fa-question-circle"></i>
+                            <span>高频面试题</span>
+                            <span class="item-count" id="interviewCount">(15)</span>
+                            <i class="fas fa-chevron-right nav-arrow"></i>
+                        </li>
+                        <li class="nav-item" data-target="books">
+                            <i class="fas fa-book"></i>
+                            <span>推荐书籍</span>
+                            <span class="item-count" id="booksCount">(8)</span>
+                            <i class="fas fa-chevron-right nav-arrow"></i>
+                        </li>
+                        <li class="nav-item" data-target="certificates">
+                            <i class="fas fa-certificate"></i>
+                            <span>证书</span>
+                            <span class="item-count" id="certificatesCount">(5)</span>
+                            <i class="fas fa-chevron-right nav-arrow"></i>
+                        </li>
+                        <li class="nav-item" data-target="courses">
+                            <i class="fas fa-graduation-cap"></i>
+                            <span>推荐课程</span>
+                            <span class="item-count" id="coursesCount">(12)</span>
+                            <i class="fas fa-chevron-right nav-arrow"></i>
+                        </li>
+                    </ul>
+                </div>
+            </aside>
+
+            <!-- 中间内容区域 -->
+            <main class="content-main">
+                <!-- 思维导图区域 -->
+                <div class="content-section" id="mindmapSection">
+                    <div class="section-header">
+                        <h2>
+                            <i class="fas fa-project-diagram"></i>
+                            思维导图
+                        </h2>
+                        <div>
+                            <button class="expand-all-btn" id="expandAll">
+                                <i class="fas fa-expand-arrows-alt"></i>
+                                展开全部
+                            </button>
+                            <button class="expand-all-btn" id="collapseAll">
+                                <i class="fas fa-compress-arrows-alt"></i>
+                                折叠全部
+                            </button>
+                            <button class="expand-all-btn" id="downloadMindmap">
+                                <i class="fas fa-download"></i>
+                                下载思维导图
+                            </button>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        <div class="mindmap-card">
+                            <div class="mindmap-content" id="mindmapContent">
+                                <!-- 思维导图内容将动态加载 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 面试题内容默认显示 -->
+                <div class="content-section active" id="interviewSection">
+                    <div class="section-header">
+                        <h2>
+                            <i class="fas fa-question-circle"></i>
+                            高频面试题
+                        </h2>
+                    </div>
+                    <div class="section-content">
+                        <!-- 面试题卡片 -->
+                        <div class="interview-card">
+                            <h3 class="interview-question">解释JavaScript中的闭包概念，并举例说明其应用场景</h3>
+                            <div class="interview-tags">
+                                <span class="interview-tag primary">中等</span>
+                                <span class="interview-tag tech">JavaScript</span>
+                                <span class="interview-tag secondary">前端开发</span>
+                            </div>
+                            <textarea class="interview-answer-input" placeholder="请输入您的答案..."></textarea>
+                            <div class="interview-actions">
+                                <button class="interview-btn secondary">
+                                    <i class="fas fa-eye"></i>
+                                    查看答案
+                                </button>
+                                <button class="interview-btn ai-score">
+                                    <i class="fas fa-star"></i>
+                                    AI评分
+                                </button>
+                                <button class="interview-btn primary">
+                                    <i class="fas fa-check"></i>
+                                    我会了
+                                </button>
+                                <button class="interview-btn outline">
+                                    <i class="fas fa-arrow-right"></i>
+                                    记一下
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 知识点内容 -->
+                <div class="content-section" id="knowledgeSection">
+                    <div class="section-header">
+                        <h2>
+                            <i class="fas fa-lightbulb"></i>
+                            知识点
+                            <span class="section-count">(20)</span>
+                        </h2>
+                    </div>
+                    <div class="section-content">
+                        <div class="knowledge-list">
+                            <div class="knowledge-item">
+                                <div class="knowledge-header">
+                                    <div class="knowledge-title">Java基础语法和面向对象编程</div>
+                                </div>
+                                <div class="knowledge-content">
+                                    <div class="knowledge-text">
+                                        <strong>核心概念：</strong>Java是一种面向对象的编程语言，具有跨平台、安全、健壮等特点。<br><br>
+                                        <strong>重要特性：</strong><br>
+                                        • <strong>封装（Encapsulation）：</strong>将数据和操作数据的方法绑定在一起，隐藏内部实现细节<br>
+                                        • <strong>继承（Inheritance）：</strong>子类可以继承父类的属性和方法，实现代码复用<br>
+                                        • <strong>多态（Polymorphism）：</strong>同一个接口可以有多种不同的实现方式<br><br>
+                                        <strong>实际应用：</strong>企业级应用开发、Android开发、大数据处理等领域
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="knowledge-item">
+                                <div class="knowledge-header">
+                                    <div class="knowledge-title">Spring Boot微服务框架</div>
+                                </div>
+                                    <div class="knowledge-text">
+                                        <strong>核心概念：</strong>Spring Boot是由Pivotal团队提供的全新框架，旨在简化Spring应用的初始搭建和开发过程。<br><br>
+                                        <strong>主要特性：</strong><br>
+                                        • <strong>自动配置：</strong>根据项目依赖自动配置相关组件<br>
+                                        • <strong>内嵌服务器：</strong>无需部署WAR文件，直接运行JAR文件<br>
+                                        • <strong>Starter依赖：</strong>一站式解决各种功能模块的依赖问题<br>
+                                        • <strong>生产级特性：</strong>内置监控、健康检查、指标统计等<br><br>
+                                        <strong>实际应用：</strong>构建 RESTful API、微服务架构、企业级应用开发
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="knowledge-item">
+                                <div class="knowledge-header">
+                                    <div class="knowledge-title">MySQL数据库设计和优化</div>
+                                </div>
+                                <div class="knowledge-content">
+                                    <div class="knowledge-text">
+                                        <strong>核心概念：</strong>MySQL是世界上最流行的关系型数据库管理系统，支持ACID事务和完整的SQL标准。<br><br>
+                                        <strong>关键技术点：</strong><br>
+                                        • <strong>索引优化：</strong>B+树索引、联合索引、覆盖索引策略<br>
+                                        • <strong>查询优化：</strong>EXPLAIN分析、慢查询日志、查询缓存<br>
+                                        • <strong>事务管理：</strong>ACID特性、隔离级别、死锁避免<br>
+                                        • <strong>存储引擎：</strong>InnoDB vs MyISAM的特点和选择<br><br>
+                                        <strong>实际应用：</strong>数据库表设计、高并发场景优化、数据备份与恢复
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="knowledge-item">
+                                <div class="knowledge-header">
+                                    <div class="knowledge-title">Redis缓存策略和数据结构</div>
+                                </div>
+                                <div class="knowledge-content">
+                                    <div class="knowledge-text">
+                                        <strong>核心概念：</strong>Redis是一个开源的内存数据结构存储，用作数据库、缓存和消息代理。<br><br>
+                                        <strong>数据结构类型：</strong><br>
+                                        • <strong>String：</strong>简单键值对，适用于计数器、缓存等<br>
+                                        • <strong>Hash：</strong>键值对集合，适用于存储对象属性<br>
+                                        • <strong>List：</strong>有序列表，适用于队列、栈等场景<br>
+                                        • <strong>Set/ZSet：</strong>集合和有序集合，适用于去重和排行<br><br>
+                                        <strong>缓存策略：</strong>缓存雪崩、缓存击穿、缓存穿透的解决方案
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="knowledge-item">
+                                <div class="knowledge-header">
+                                    <div class="knowledge-title">多线程和并发编程</div>
+                                </div>
+                                <div class="knowledge-content">
+                                    <div class="knowledge-text">
+                                        <strong>核心概念：</strong>多线程编程是现代软件开发中提高程序性能和响应速度的关键技术。<br><br>
+                                        <strong>核心概念：</strong><br>
+                                        • <strong>线程池：</strong>ThreadPoolExecutor、工作队列、拒绝策略<br>
+                                        • <strong>锁机制：</strong>synchronized、ReentrantLock、读写锁<br>
+                                        • <strong>并发集合：</strong>ConcurrentHashMap、BlockingQueue<br>
+                                        • <strong>原子操作：</strong>AtomicInteger、CAS算法<br><br>
+                                        <strong>常见问题：</strong>死锁、竞态条件、内存可见性问题的识别和解决
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 书籍内容 -->
+                <div class="content-section" id="booksSection">
+                    <div class="section-header">
+                        <h2>
+                            <i class="fas fa-book"></i>
+                            推荐书籍
+                            <span class="section-count">(8)</span>
+                        </h2>
+                    </div>
+                    <div class="section-content">
+                        <div class="books-grid">
+                            <!-- 书籍卡片 -->
+                            <div class="book-card">
+                                <div class="book-cover">
+                                    <i class="fas fa-book"></i>
+                                </div>
+                                <div class="book-info">
+                                    <h3 class="book-title">Java核心技术卷I</h3>
+                                    <p class="book-author">作者：Cay S. Horstmann</p>
+                                    <p class="book-description">Java领域经典之作，深入讲解Java核心技术和最佳实践。</p>
+                                    <div class="book-rating">
+                                        <div class="stars">
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                        </div>
+                                        <span class="rating-text">9.2/10</span>
+                                    </div>
+                                    <div class="book-actions">
+                                        <button class="book-btn primary">
+                                            <i class="fas fa-shopping-cart"></i>
+                                            购买
+                                        </button>
+                                        <button class="book-btn secondary">
+                                            <i class="fas fa-eye"></i>
+                                            查看
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="book-card">
+                                <div class="book-cover">
+                                    <i class="fas fa-book"></i>
+                                </div>
+                                <div class="book-info">
+                                    <h3 class="book-title">深入理解Java虚拟机</h3>
+                                    <p class="book-author">作者：周志明</p>
+                                    <p class="book-description">深入分析JVM的工作原理和性能优化技巧。</p>
+                                    <div class="book-rating">
+                                        <div class="stars">
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                        </div>
+                                        <span class="rating-text">9.0/10</span>
+                                    </div>
+                                    <div class="book-actions">
+                                        <button class="book-btn primary">
+                                            <i class="fas fa-shopping-cart"></i>
+                                            购买
+                                        </button>
+                                        <button class="book-btn secondary">
+                                            <i class="fas fa-eye"></i>
+                                            查看
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="book-card">
+                                <div class="book-cover">
+                                    <i class="fas fa-book"></i>
+                                </div>
+                                <div class="book-info">
+                                    <h3 class="book-title">Spring实战</h3>
+                                    <p class="book-author">作者：Craig Walls</p>
+                                    <p class="book-description">Spring框架全面指南，从基础到高级的实战教程。</p>
+                                    <div class="book-rating">
+                                        <div class="stars">
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="far fa-star"></i>
+                                        </div>
+                                        <span class="rating-text">8.8/10</span>
+                                    </div>
+                                    <div class="book-actions">
+                                        <button class="book-btn primary">
+                                            <i class="fas fa-shopping-cart"></i>
+                                            购买
+                                        </button>
+                                        <button class="book-btn secondary">
+                                            <i class="fas fa-eye"></i>
+                                            查看
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="book-card">
+                                <div class="book-cover">
+                                    <i class="fas fa-book"></i>
+                                </div>
+                                <div class="book-info">
+                                    <h3 class="book-title">MySQL必知必会</h3>
+                                    <p class="book-author">作者：Ben Forta</p>
+                                    <p class="book-description">MySQL数据库的经典入门教程，适合初学者。</p>
+                                    <div class="book-rating">
+                                        <div class="stars">
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="far fa-star"></i>
+                                        </div>
+                                        <span class="rating-text">8.5/10</span>
+                                    </div>
+                                    <div class="book-actions">
+                                        <button class="book-btn primary">
+                                            <i class="fas fa-shopping-cart"></i>
+                                            购买
+                                        </button>
+                                        <button class="book-btn secondary">
+                                            <i class="fas fa-eye"></i>
+                                            查看
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 证书内容 -->
+                <div class="content-section" id="certificatesSection">
+                    <div class="section-header">
+                        <h2>
+                            <i class="fas fa-certificate"></i>
+                            证书
+                            <span class="section-count">(5)</span>
+                        </h2>
+                    </div>
+                    <div class="section-content">
+                        <div class="certificates-grid">
+                            <!-- 证书卡片 -->
+                            <div class="certificate-card">
+                                <div class="certificate-icon">
+                                    <i class="fas fa-award"></i>
+                                </div>
+                                <div class="certificate-info">
+                                    <h3 class="certificate-title">Oracle Certified Professional Java SE</h3>
+                                    <p class="certificate-issuer">颁发机构：Oracle</p>
+                                    <p class="certificate-description">Java SE开发者专业认证，证明具备Java核心技能。</p>
+                                    <div class="certificate-meta">
+                                        <span class="difficulty-badge advanced">高级</span>
+                                        <span class="validity">有效期：3年</span>
+                                    </div>
+                                    <div class="certificate-actions">
+                                        <button class="cert-btn primary">
+                                            <i class="fas fa-external-link-alt"></i>
+                                            查看详情
+                                        </button>
+                                        <button class="cert-btn secondary">
+                                            <i class="fas fa-bookmark"></i>
+                                            收藏
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="certificate-card">
+                                <div class="certificate-icon">
+                                    <i class="fas fa-certificate"></i>
+                                </div>
+                                <div class="certificate-info">
+                                    <h3 class="certificate-title">AWS Certified Solutions Architect</h3>
+                                    <p class="certificate-issuer">颁发机构：Amazon Web Services</p>
+                                    <p class="certificate-description">云架构师专业认证，证明具备AWS云服务设计能力。</p>
+                                    <div class="certificate-meta">
+                                        <span class="difficulty-badge intermediate">中级</span>
+                                        <span class="validity">有效期：3年</span>
+                                    </div>
+                                    <div class="certificate-actions">
+                                        <button class="cert-btn primary">
+                                            <i class="fas fa-external-link-alt"></i>
+                                            查看详情
+                                        </button>
+                                        <button class="cert-btn secondary">
+                                            <i class="fas fa-bookmark"></i>
+                                            收藏
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="certificate-card">
+                                <div class="certificate-icon">
+                                    <i class="fas fa-medal"></i>
+                                </div>
+                                <div class="certificate-info">
+                                    <h3 class="certificate-title">Spring Professional Certification</h3>
+                                    <p class="certificate-issuer">颁发机构：Pivotal (VMware)</p>
+                                    <p class="certificate-description">Spring框架专业认证，证明掌握Spring核心技术。</p>
+                                    <div class="certificate-meta">
+                                        <span class="difficulty-badge intermediate">中级</span>
+                                        <span class="validity">有效期：2年</span>
+                                    </div>
+                                    <div class="certificate-actions">
+                                        <button class="cert-btn primary">
+                                            <i class="fas fa-external-link-alt"></i>
+                                            查看详情
+                                        </button>
+                                        <button class="cert-btn secondary">
+                                            <i class="fas fa-bookmark"></i>
+                                            收藏
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="certificate-card">
+                                <div class="certificate-icon">
+                                    <i class="fas fa-trophy"></i>
+                                </div>
+                                <div class="certificate-info">
+                                    <h3 class="certificate-title">MongoDB Certified Developer</h3>
+                                    <p class="certificate-issuer">颁发机构：MongoDB Inc.</p>
+                                    <p class="certificate-description">MongoDB数据库开发者认证，证明具备NoSQL数据库技能。</p>
+                                    <div class="certificate-meta">
+                                        <span class="difficulty-badge beginner">初级</span>
+                                        <span class="validity">有效期：2年</span>
+                                    </div>
+                                    <div class="certificate-actions">
+                                        <button class="cert-btn primary">
+                                            <i class="fas fa-external-link-alt"></i>
+                                            查看详情
+                                        </button>
+                                        <button class="cert-btn secondary">
+                                            <i class="fas fa-bookmark"></i>
+                                            收藏
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 课程内容 -->
+                <div class="content-section" id="coursesSection">
+                    <div class="section-header">
+                        <h2>
+                            <i class="fas fa-graduation-cap"></i>
+                            推荐课程
+                            <span class="section-count">(12)</span>
+                        </h2>
+                    </div>
+                    <div class="section-content">
+                        <div class="courses-grid">
+                            <!-- 课程卡片 -->
+                            <div class="course-card">
+                                <div class="course-thumbnail">
+                                    <i class="fas fa-play-circle"></i>
+                                    <span class="course-duration">24小时</span>
+                                </div>
+                                <div class="course-info">
+                                    <h3 class="course-title">Java全栈开发实战课程</h3>
+                                    <p class="course-instructor">讲师：张三 | 高级Java架构师</p>
+                                    <p class="course-description">从零基础到项目实战，全面掌握Java全栈开发技能。</p>
+                                    <div class="course-meta">
+                                        <div class="course-rating">
+                                            <div class="stars">
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                            </div>
+                                            <span class="rating-text">4.9 (2,345人)</span>
+                                        </div>
+                                        <div class="course-level">
+                                            <span class="level-badge intermediate">中级</span>
+                                        </div>
+                                    </div>
+                                    <div class="course-price">
+                                        <span class="current-price">￥299</span>
+                                        <span class="original-price">￥599</span>
+                                        <span class="discount">5折</span>
+                                    </div>
+                                    <div class="course-actions">
+                                        <button class="course-btn primary">
+                                            <i class="fas fa-play"></i>
+                                            立即学习
+                                        </button>
+                                        <button class="course-btn secondary">
+                                            <i class="fas fa-heart"></i>
+                                            收藏
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="course-card">
+                                <div class="course-thumbnail">
+                                    <i class="fas fa-play-circle"></i>
+                                    <span class="course-duration">18小时</span>
+                                </div>
+                                <div class="course-info">
+                                    <h3 class="course-title">Spring Boot微服务架构实战</h3>
+                                    <p class="course-instructor">讲师：李四 | Spring核心开发者</p>
+                                    <p class="course-description">深入学习Spring Boot，构建企业级微服务架构。</p>
+                                    <div class="course-meta">
+                                        <div class="course-rating">
+                                            <div class="stars">
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="far fa-star"></i>
+                                            </div>
+                                            <span class="rating-text">4.7 (1,678人)</span>
+                                        </div>
+                                        <div class="course-level">
+                                            <span class="level-badge advanced">高级</span>
+                                        </div>
+                                    </div>
+                                    <div class="course-price">
+                                        <span class="current-price">￥399</span>
+                                        <span class="original-price">￥699</span>
+                                        <span class="discount">5.7折</span>
+                                    </div>
+                                    <div class="course-actions">
+                                        <button class="course-btn primary">
+                                            <i class="fas fa-play"></i>
+                                            立即学习
+                                        </button>
+                                        <button class="course-btn secondary">
+                                            <i class="fas fa-heart"></i>
+                                            收藏
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="course-card">
+                                <div class="course-thumbnail">
+                                    <i class="fas fa-play-circle"></i>
+                                    <span class="course-duration">32小时</span>
+                                </div>
+                                <div class="course-info">
+                                    <h3 class="course-title">MySQL数据库优化与调优</h3>
+                                    <p class="course-instructor">讲师：王五 | 数据库专家</p>
+                                    <p class="course-description">系统学习MySQL性能优化，提升数据库应用性能。</p>
+                                    <div class="course-meta">
+                                        <div class="course-rating">
+                                            <div class="stars">
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                            </div>
+                                            <span class="rating-text">4.8 (3,124人)</span>
+                                        </div>
+                                        <div class="course-level">
+                                            <span class="level-badge intermediate">中级</span>
+                                        </div>
+                                    </div>
+                                    <div class="course-price">
+                                        <span class="current-price">￥199</span>
+                                        <span class="original-price">￥399</span>
+                                        <span class="discount">5折</span>
+                                    </div>
+                                    <div class="course-actions">
+                                        <button class="course-btn primary">
+                                            <i class="fas fa-play"></i>
+                                            立即学习
+                                        </button>
+                                        <button class="course-btn secondary">
+                                            <i class="fas fa-heart"></i>
+                                            收藏
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="course-card">
+                                <div class="course-thumbnail">
+                                    <i class="fas fa-play-circle"></i>
+                                    <span class="course-duration">20小时</span>
+                                </div>
+                                <div class="course-info">
+                                    <h3 class="course-title">Redis缓存与分布式实战</h3>
+                                    <p class="course-instructor">讲师：赵六 | Redis核心贡献者</p>
+                                    <p class="course-description">深入Redis内核，掌握高性能缓存在分布式系统中的应用。</p>
+                                    <div class="course-meta">
+                                        <div class="course-rating">
+                                            <div class="stars">
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="far fa-star"></i>
+                                            </div>
+                                            <span class="rating-text">4.6 (892人)</span>
+                                        </div>
+                                        <div class="course-level">
+                                            <span class="level-badge advanced">高级</span>
+                                        </div>
+                                    </div>
+                                    <div class="course-price">
+                                        <span class="current-price">￥259</span>
+                                        <span class="original-price">￥499</span>
+                                        <span class="discount">5.2折</span>
+                                    </div>
+                                    <div class="course-actions">
+                                        <button class="course-btn primary">
+                                            <i class="fas fa-play"></i>
+                                            立即学习
+                                        </button>
+                                        <button class="course-btn secondary">
+                                            <i class="fas fa-heart"></i>
+                                            收藏
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- 右侧AI助手 -->
+            <aside class="ai-assistant">
+                <div class="assistant-header">
+                    <h3 class="assistant-title">
+                        <i class="fas fa-robot"></i>
+                        AI 智能助手
+                    </h3>
+                    <div class="assistant-actions">
+                        <button class="assistant-btn" id="clearChatBtn" title="清空聊天">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <button class="assistant-btn" id="downloadChatBtn" title="下载聊天记录">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <button class="assistant-btn" id="minimizeAssistantBtn" title="缩小面板">
+                            <i class="fas fa-compress"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="assistant-content">
+                    <div class="chat-messages" id="chatMessages">
+                        <!-- 聊天消息将动态生成 -->
+                        <div class="welcome-message">
+                            <div class="assistant-avatar">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <h3 class="welcome-title">您好！我是AI学习助手</h3>
+                            <p class="welcome-text">我可以回答您关于职业发展、技能提升的问题。请在下方输入您的问题！</p>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input-container">
+                        <textarea class="chat-input" id="chatInput" placeholder="请输入您的问题..."></textarea>
+                        <button class="send-btn" id="sendBtn">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- 页面脚本 -->
+    <script>
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // 强制修复布局问题
+            console.log('\ud83d\udee0 正在修复布局问题...');
+            
+            // 确保内容区域在正确的位置
+            const contentMain = document.querySelector('.content-main');
+            const contentSections = document.querySelectorAll('.content-section');
+            
+            if (contentMain && contentSections) {
+                // 确保所有内容区域都有正确的父元素
+                contentSections.forEach(section => {
+                    // 仅当父元素不是内容区域时才移动
+                    if (section.parentElement !== contentMain) {
+                        console.log(`\ud83d\udd04 移动内容区域到正确位置: ${section.id}`);
+                        contentMain.appendChild(section);
+                    }
+                });
+                
+                console.log('\u2705 布局问题修复完成');
+            }
+            
+            const jobTitleDisplay = document.getElementById('jobTitleDisplay');
+            const sidebarJobTitle = document.getElementById('sidebarJobTitle');
+            const generationTimeDisplay = document.getElementById('generationTimeDisplay');
+            const navItems = document.querySelectorAll('.nav-item');
+            const chatInput = document.getElementById('chatInput');
+            const sendBtn = document.getElementById('sendBtn');
+            
+            // 初始化内容区域
+            console.log('🔔 初始化页面内容');
+            const urlSection = new URLSearchParams(window.location.search).get('section');
+            let activeSection = urlSection || 'interview';
+            
+            // 激活导航项
+            navItems.forEach(nav => {
+                nav.classList.remove('active');
+                if (nav.getAttribute('data-target') === activeSection) {
+                    nav.classList.add('active');
+                }
+            });
+            
+            // 激活内容区域
+            contentSections.forEach(section => {
+                section.classList.remove('active');
+                if (section.id === `${activeSection}Section`) {
+                    section.classList.add('active');
+                    console.log('✅ 激活区域:', section.id);
+                }
+            });
+            
+            // 初始化变量
+            const currentApiKey = localStorage.getItem('ai_learning_companion_api_key') || '';
+            
+            // 更新配置API按钮状态
+            const configApiBtn = document.getElementById('configApiBtn');
+            if(configApiBtn && currentApiKey) {
+                configApiBtn.innerHTML = '<i class="fas fa-check-circle"></i> 已配置API';
+                configApiBtn.style.color = '#10b981';
+                configApiBtn.style.borderColor = '#10b981';
+            }
+            
+            // 绑定模态框事件
+            setTimeout(function() {
+                // 绑定关闭按钮事件
+                const apiConfigClose = document.getElementById('apiConfigClose');
+                const apiConfigCancel = document.getElementById('apiConfigCancel');
+                const apiConfigModal = document.getElementById('apiConfigModal');
+                const modalOverlay = apiConfigModal ? apiConfigModal.querySelector('.modal-overlay') : null;
+                
+                if (apiConfigClose) {
+                    apiConfigClose.addEventListener('click', closeApiConfigModal);
+                }
+                
+                if (apiConfigCancel) {
+                    apiConfigCancel.addEventListener('click', closeApiConfigModal);
+                }
+                
+                if (modalOverlay) {
+                    modalOverlay.addEventListener('click', closeApiConfigModal);
+                }
+                
+                // 切换API Key显示/隐藏
+                const toggleApiKey = document.getElementById('toggleApiKey');
+                const apiKeyInput = document.getElementById('apiKey');
+                
+                if (toggleApiKey && apiKeyInput) {
+                    toggleApiKey.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('👁️ 切换密钥显示/隐藏');
+                        
+                        if (apiKeyInput.type === 'password') {
+                            apiKeyInput.type = 'text';
+                            toggleApiKey.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                            console.log('✅ 密钥已显示');
+                        } else {
+                            apiKeyInput.type = 'password';
+                            toggleApiKey.innerHTML = '<i class="fas fa-eye"></i>';
+                            console.log('✅ 密钥已隐藏');
+                        }
+                    });
+                }
+                
+                // 处理厂商切换
+                const apiProviderSelect = document.getElementById('apiProvider');
+                if (apiProviderSelect) {
+                    // 初始化显示当前选中的厂商信息
+                    updateProviderInfo(apiProviderSelect.value);
+                    
+                    apiProviderSelect.addEventListener('change', function() {
+                        console.log('🔄 厂商切换为:', this.value);
+                        updateProviderInfo(this.value);
+                    });
+                }
+                
+                // 更新厂商信息显示
+                function updateProviderInfo(provider) {
+                    const providerInfo = document.querySelector('.provider-info');
+                    if (!providerInfo) return;
+                    
+                    const logo = providerInfo.querySelector('.provider-logo i');
+                    const title = providerInfo.querySelector('.provider-details h4');
+                    const description = providerInfo.querySelector('.provider-details p');
+                    const link = providerInfo.querySelector('.provider-link');
+                    
+                    switch(provider) {
+                        case 'alibaba':
+                            if (logo) {
+                                logo.className = 'fas fa-cloud';
+                                logo.style.color = '#ff6a00';
+                            }
+                            if (title) title.textContent = '阿里云 DashScope';
+                            if (description) description.textContent = '使用通义大模型系列，包括模型通义千问2.0等';
+                            if (link) {
+                                link.href = 'https://dashscope.aliyun.com/';
+                                link.textContent = '获取密钥';
+                            }
+                            break;
+                        case 'openai':
+                            if (logo) {
+                                logo.className = 'fas fa-brain';
+                                logo.style.color = '#10a37f';
+                            }
+                            if (title) title.textContent = 'OpenAI';
+                            if (description) description.textContent = '使用GPT-4、GPT-3.5等先进的语言模型';
+                            if (link) {
+                                link.href = 'https://platform.openai.com/api-keys';
+                                link.textContent = '获取密钥';
+                            }
+                            break;
+                        case 'anthropic':
+                            if (logo) {
+                                logo.className = 'fas fa-robot';
+                                logo.style.color = '#d97700';
+                            }
+                            if (title) title.textContent = 'Anthropic Claude';
+                            if (description) description.textContent = '使用Claude 3.5 Sonnet等先进的AI模型';
+                            if (link) {
+                                link.href = 'https://console.anthropic.com/';
+                                link.textContent = '获取密钥';
+                            }
+                            break;
+                    }
+                }
+                
+                // 保存API配置
+                const apiConfigConfirm = document.getElementById('apiConfigConfirm');
+                // 复用之前声明的 apiProviderSelect
+                
+                if (apiConfigConfirm) {
+                    apiConfigConfirm.addEventListener('click', function() {
+                        const apiKey = apiKeyInput ? apiKeyInput.value.trim() : '';
+                        const apiProvider = apiProviderSelect ? apiProviderSelect.value : 'alibaba';
+                        
+                        if (!apiKey) {
+                            alert('请输入API密钥');
+                            return;
+                        }
+                        
+                        // 保存到localStorage
+                        localStorage.setItem('ai_learning_companion_api_key', apiKey);
+                        localStorage.setItem('apiProvider', apiProvider);
+                        
+                        // 更新按钮状态
+                        const configApiBtn = document.getElementById('configApiBtn');
+                        if (configApiBtn) {
+                            configApiBtn.innerHTML = '<i class="fas fa-check-circle"></i> 已配置API';
+                            configApiBtn.style.color = '#10b981';
+                            configApiBtn.style.borderColor = '#10b981';
+                        }
+                        
+                        // 关闭模态框
+                        closeApiConfigModal();
+                        
+                        alert('API配置已保存');
+                    });
+                }
+            }, 100);
+            
+            // 获取URL参数
+            const urlParams = new URLSearchParams(window.location.search);
+            const jobTitle = urlParams.get('job') || localStorage.getItem('currentJob') || '后端工程师';
+            
+            // 更新页面标题
+            document.title = `${jobTitle} 学习资料 - 职途助手AI求职大师`;
+            
+            // 更新职位标题
+            if (jobTitleDisplay) jobTitleDisplay.textContent = jobTitle;
+            if (sidebarJobTitle) sidebarJobTitle.textContent = jobTitle;
+            
+            // 更新生成时间
+            if (generationTimeDisplay) {
+                const now = new Date();
+                generationTimeDisplay.textContent = `${now.getFullYear()}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getDate().toString().padStart(2, '0')} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+            }
+            
+            // 处理导航项点击
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    console.log('📊 点击导航项:', targetId);
+                    
+                    if (!targetId) return;
+                    
+                    // 更新导航项状态
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // 更新内容区域显示
+                    contentSections.forEach(section => {
+                        section.classList.remove('active');
+                        const expectedId = `${targetId}Section`;
+                        console.log('🔍 检查区域:', section.id, '期望:', expectedId);
+                        if (section.id === expectedId) {
+                            section.classList.add('active');
+                            console.log('✅ 激活区域:', section.id);
+                        }
+                    });
+                });
+            });
+            
+            // 处理导出PDF按钮
+            const exportPdfBtn = document.getElementById('exportPdfBtn');
+            if (exportPdfBtn) {
+                exportPdfBtn.addEventListener('click', function() {
+                    alert('导出PDF功能将在完整版中提供');
+                });
+            }
+            
+            // 处理导出飞书按钮
+            const exportFeishuBtn = document.getElementById('exportFeishuBtn');
+            if (exportFeishuBtn) {
+                exportFeishuBtn.addEventListener('click', function() {
+                    alert('导出飞书文档功能将在完整版中提供');
+                });
+            }
+            
+            // 处理保存按钮
+            const saveBtn = document.getElementById('saveBtn');
+            if (saveBtn) {
+                saveBtn.addEventListener('click', function() {
+                    alert('已保存到本地存储');
+                });
+            }
+            
+            // 处理思维导图切换
+            const mindmapToggleBtn = document.getElementById('mindmapToggleBtn');
+            if (mindmapToggleBtn) {
+                mindmapToggleBtn.addEventListener('click', function() {
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    document.querySelector('.nav-item[data-target="mindmap"]').classList.add('active');
+                    
+                    contentSections.forEach(section => {
+                        section.classList.remove('active');
+                        if (section.id === 'mindmapSection') {
+                            section.classList.add('active');
+                        }
+                    });
+                });
+            }
+            
+            // 处理面试题展开
+            const expandAllInterviewBtn = document.getElementById('expandAllInterview');
+            if (expandAllInterviewBtn) {
+                expandAllInterviewBtn.addEventListener('click', function() {
+                    alert('展开所有面试题功能将在完整版中提供');
+                });
+            }
+            
+            // 自动滚动到底部的函数
+            function scrollChatToBottom() {
+                const chatMessages = document.getElementById('chatMessages');
+                if (chatMessages) {
+                    // 使用requestAnimationFrame确保在DOM更新后执行
+                    requestAnimationFrame(() => {
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    });
+                }
+            }
+            
+            // 添加用户消息
+            function addUserMessage(message) {
+                const chatMessages = document.getElementById('chatMessages');
+                if (!chatMessages) return;
+                
+                // 移除欢迎消息
+                const welcomeMessage = chatMessages.querySelector('.welcome-message');
+                if (welcomeMessage) {
+                    welcomeMessage.remove();
+                }
+                
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message user-message';
+                messageElement.innerHTML = `
+                    <div class="message-content">
+                        <p>${message}</p>
+                    </div>
+                `;
+                
+                chatMessages.appendChild(messageElement);
+                scrollChatToBottom(); // 使用新的滚动函数
+            }
+            
+            // 添加助手消息
+            function addAssistantMessage(message) {
+                const chatMessages = document.getElementById('chatMessages');
+                if (!chatMessages) return;
+                
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message assistant-message';
+                messageElement.innerHTML = `
+                    <div class="message-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-content">
+                        <p>${message}</p>
+                    </div>
+                `;
+                
+                chatMessages.appendChild(messageElement);
+                scrollChatToBottom(); // 使用新的滚动函数
+            }
+            
+            // 添加流式助手消息容器
+            function addAssistantMessageStreaming() {
+                const chatMessages = document.getElementById('chatMessages');
+                if (!chatMessages) return null;
+                
+                // 移除欢迎消息
+                const welcomeMessage = chatMessages.querySelector('.welcome-message');
+                if (welcomeMessage) {
+                    welcomeMessage.remove();
+                }
+                
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message assistant-message';
+                messageElement.innerHTML = `
+                    <div class="message-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-content streaming">
+                        <p>🤔 正在思考中...</p>
+                    </div>
+                `;
+                
+                chatMessages.appendChild(messageElement);
+                scrollChatToBottom(); // 使用新的滚动函数
+                
+                return messageElement.querySelector('.message-content');
+            }
+            
+            // 更新流式消息内容
+            function updateStreamingMessage(contentElement, content) {
+                if (contentElement) {
+                    contentElement.innerHTML = `<p>${content}</p>`;
+                    scrollChatToBottom(); // 每次更新都滚动到底部
+                }
+            }
+            
+            // 获取存储的API密钥
+            function getStoredApiKey() {
+                return localStorage.getItem('ai_learning_companion_api_key') || '';
+            }
+            
+            // 调用流式DashScope API
+            async function callDashScopeAPIStream(message, onContent) {
+                console.log('🚀 调用流式百炼 API...');
+                
+                // 获取API密钥
+                const apiKey = getStoredApiKey();
+                if (!apiKey) {
+                    throw new Error('请先配置API密钥');
+                }
+                
+                // 构建对话历史（简化版，实际应用中可以从localStorage获取历史记录）
+                const messages = [
+                    {
+                        role: 'system',
+                        content: '你是一个专业的职业发展顾问，擅长提供技能学习、职业规划、面试指导等建议。请用中文回答，语言友好、专业。'
+                    },
+                    {
+                        role: 'user',
+                        content: message
+                    }
+                ];
+                
+                // 使用流式聊天接口
+                return new Promise((resolve, reject) => {
+                    // 发送POST请求数据
+                    fetch('/api/chat-stream-init', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            messages: messages,
+                            apiKey: apiKey
+                        })
+                    }).then(response => {
+                        if (!response.ok) {
+                            throw new Error(`初始化流式API失败: ${response.status}`);
+                        }
+                        return response.json();
+                    }).then(data => {
+                        const sessionId = data.sessionId;
+                        
+                        // 使用EventSource处理SSE
+                        const eventSource = new EventSource(`/api/chat-stream/${sessionId}`);
+                        
+                        console.log('🌊 建立SSE连接:', sessionId);
+                        
+                        let hasReceivedFirstMessage = false;
+                        let connectionStartTime = Date.now();
+                        let streamContent = '';
+                        
+                        // 设置连接超时检查
+                        const connectionTimeout = setTimeout(() => {
+                            if (!hasReceivedFirstMessage) {
+                                onContent('⏳ AI正在思考中，请稍等...');
+                            }
+                        }, 2000); // 2秒后显示思考中
+                        
+                        eventSource.onopen = () => {
+                            console.log('✅ EventSource连接已建立');
+                        };
+                        
+                        eventSource.addEventListener('message', (event) => {
+                            try {
+                                console.log('📨 收到message事件:', event.data);
+                                const data = JSON.parse(event.data);
+                                
+                                if (data.content) {
+                                    if (!hasReceivedFirstMessage) {
+                                        hasReceivedFirstMessage = true;
+                                        clearTimeout(connectionTimeout);
+                                        streamContent = '';
+                                        console.log('🎆 开始接收流式内容');
+                                    }
+                                    
+                                    console.log('💬 流式消息:', data.content);
+                                    streamContent += data.content;
+                                    onContent(streamContent);
+                                }
+                            } catch (parseError) {
+                                console.warn('⚠️ 解析message事件失败:', parseError.message);
+                            }
+                        });
+                        
+                        eventSource.addEventListener('done', (event) => {
+                            console.log('✅ 流式对话完成:', event.data);
+                            clearTimeout(connectionTimeout);
+                            eventSource.close();
+                            resolve();
+                        });
+                        
+                        eventSource.addEventListener('error', (event) => {
+                            try {
+                                const data = JSON.parse(event.data);
+                                console.error('❌ 流式错误:', data.error);
+                                clearTimeout(connectionTimeout);
+                                eventSource.close();
+                                reject(new Error(data.error));
+                            } catch (e) {
+                                console.error('❌ 流式错误事件:', event);
+                                clearTimeout(connectionTimeout);
+                                eventSource.close();
+                                reject(new Error('流式连接错误'));
+                            }
+                        });
+                        
+                        eventSource.onerror = (error) => {
+                            console.error('❌ EventSource连接错误:', error);
+                            clearTimeout(connectionTimeout);
+                            eventSource.close();
+                            reject(new Error('EventSource连接失败'));
+                        };
+                        
+                    }).catch(error => {
+                        console.error('❌ 初始化流式API失败:', error);
+                        reject(error);
+                    });
+                });
+            }
+            
+            // 处理AI助手发送按钮
+            if (sendBtn && chatInput) {
+                sendBtn.addEventListener('click', async function() {
+                    const message = chatInput.value.trim();
+                    if (message) {
+                        console.log('📝 发送消息:', message);
+                        
+                        // 立即清空输入框并禁用
+                        chatInput.value = '';
+                        // 移除blur()，保持焦点在输入框以便连续输入
+                        sendBtn.disabled = true; // 禁用发送按钮防止重复点击
+                        console.log('✅ 输入框已清空');
+                        
+                        // 添加用户消息
+                        addUserMessage(message);
+                        
+                        // 创建流式消息容器
+                        const aiMessageContent = addAssistantMessageStreaming();
+                        
+                        try {
+                            // 调用流式API
+                            await callDashScopeAPIStream(message, (content) => {
+                                updateStreamingMessage(aiMessageContent, content);
+                            });
+                            
+                            // 移除streaming类
+                            if (aiMessageContent) {
+                                aiMessageContent.classList.remove('streaming');
+                            }
+                        } catch (error) {
+                            console.error('❌ 聊天API调用失败:', error);
+                            if (aiMessageContent) {
+                                aiMessageContent.innerHTML = '<p>⚠️ 抱歉，我遇到了一些问题。请检查API配置或稍后再试。</p>';
+                                aiMessageContent.classList.remove('streaming');
+                            }
+                        } finally {
+                            // 恢复发送按钮状态
+                            sendBtn.disabled = false;
+                            // 再次确保输入框为空，但保持焦点
+                            setTimeout(() => {
+                                chatInput.value = '';
+                                chatInput.focus(); // 重新聚焦到输入框
+                            }, 100);
+                        }
+                    }
+                });
+                
+                chatInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        // 确保输入框有内容才触发发送
+                        if (chatInput.value.trim() && !sendBtn.disabled) {
+                            sendBtn.click();
+                        }
+                    }
+                });
+            }
+            
+            // AI助手头部按钮功能
+            const clearChatBtn = document.getElementById('clearChatBtn');
+            const downloadChatBtn = document.getElementById('downloadChatBtn');
+            const minimizeAssistantBtn = document.getElementById('minimizeAssistantBtn');
+            
+            // 清空聊天功能
+            if (clearChatBtn) {
+                clearChatBtn.addEventListener('click', function() {
+                    const chatMessages = document.getElementById('chatMessages');
+                    if (chatMessages) {
+                        chatMessages.innerHTML = `
+                            <div class="welcome-message">
+                                <div class="assistant-avatar">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <h3 class="welcome-title">您好！我是AI学习助手</h3>
+                                <p class="welcome-text">我可以回答您关于职业发展、技能提升的问题。请在下方输入您的问题！</p>
+                            </div>
+                        `;
+                        console.log('✅ 聊天记录已清空');
+                    }
+                });
+            }
+            
+            // 下载聊天记录功能
+            if (downloadChatBtn) {
+                downloadChatBtn.addEventListener('click', function() {
+                    const chatMessages = document.getElementById('chatMessages');
+                    if (!chatMessages) {
+                        alert('没有聊天记录可下载');
+                        return;
+                    }
+                    
+                    // 提取聊天内容
+                    let chatContent = '聊天记录\n===================\n\n';
+                    const messages = chatMessages.querySelectorAll('.message');
+                    
+                    messages.forEach((message, index) => {
+                        if (message.classList.contains('user-message')) {
+                            const content = message.querySelector('.message-content p');
+                            if (content) {
+                                chatContent += `用户: ${content.textContent}\n\n`;
+                            }
+                        } else if (message.classList.contains('assistant-message')) {
+                            const content = message.querySelector('.message-content p');
+                            if (content) {
+                                chatContent += `AI助手: ${content.textContent}\n\n`;
+                            }
+                        }
+                    });
+                    
+                    if (messages.length === 0) {
+                        alert('没有聊天记录可下载');
+                        return;
+                    }
+                    
+                    // 创建下载文件
+                    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+                    const filename = `AI助手聊天记录_${timestamp}.txt`;
+                    
+                    const blob = new Blob([chatContent], { type: 'text/plain;charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    
+                    console.log('💾 聊天记录已下载:', filename);
+                });
+            }
+            
+            // 缩小/扩大AI助手面板功能
+            if (minimizeAssistantBtn) {
+                minimizeAssistantBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    toggleAssistantSize();
+                });
+            }
+            
+            // 缩小后的点击事件
+            const aiAssistant = document.querySelector('.ai-assistant');
+            if (aiAssistant) {
+                aiAssistant.addEventListener('click', function(e) {
+                    // 只有在缩小状态下才响应点击
+                    if (this.classList.contains('minimized')) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        toggleAssistantSize();
+                    }
+                });
+            }
+            
+            // 切换AI助手大小的函数
+            function toggleAssistantSize() {
+                const aiAssistant = document.querySelector('.ai-assistant');
+                const minimizeBtn = document.getElementById('minimizeAssistantBtn');
+                const icon = minimizeBtn ? minimizeBtn.querySelector('i') : null;
+                
+                if (aiAssistant) {
+                    if (aiAssistant.classList.contains('minimized')) {
+                        // 扩大
+                        aiAssistant.classList.remove('minimized');
+                        if (icon) {
+                            icon.className = 'fas fa-compress';
+                        }
+                        if (minimizeBtn) {
+                            minimizeBtn.title = '缩小面板';
+                        }
+                        console.log('🔍 AI助手面板已扩大');
+                    } else {
+                        // 缩小
+                        aiAssistant.classList.add('minimized');
+                        if (icon) {
+                            icon.className = 'fas fa-expand';
+                        }
+                        if (minimizeBtn) {
+                            minimizeBtn.title = '扩大面板';
+                        }
+                        console.log('🔎 AI助手面板已缩小');
+                    }
+                }
+            }
+            
+            // 处理面试题交互
+            function initInterviewQuestions() {
+                // 获取面试题元素
+                const interviewListItems = document.querySelectorAll('.interview-list-item');
+                const refreshQuestionBtn = document.getElementById('refreshQuestion');
+                const interviewAnswerInput = document.querySelector('.interview-answer-input');
+                const checkAnswerBtn = document.querySelector('.interview-btn.secondary');
+                const learnedBtn = document.querySelector('.interview-btn.primary');
+                const noteBtn = document.querySelector('.interview-btn.outline');
+                
+                // 切换面试题
+                if (interviewListItems) {
+                    interviewListItems.forEach(item => {
+                        item.addEventListener('click', function() {
+                            // 获取题目标题和标签
+                            const title = this.querySelector('.interview-list-title').textContent;
+                            const tags = this.querySelectorAll('.interview-tag');
+                            const number = this.querySelector('.interview-list-number').textContent;
+                            
+                            // 更新当前显示的题目
+                            const questionTitle = document.querySelector('.interview-question');
+                            const questionTags = document.querySelector('.interview-tags');
+                            const questionProgress = document.querySelector('.interview-progress');
+                            
+                            if (questionTitle) questionTitle.textContent = title;
+                            if (questionProgress) {
+                                questionProgress.innerHTML = `<i class="fas fa-list-ol"></i> 第 ${number} 题 / 共 50 题`;
+                            }
+                            
+                            // 更新标签
+                            if (questionTags) {
+                                questionTags.innerHTML = '';
+                                tags.forEach(tag => {
+                                    questionTags.appendChild(tag.cloneNode(true));
+                                });
+                            }
+                            
+                            // 清空输入框
+                            if (interviewAnswerInput) {
+                                interviewAnswerInput.value = '';
+                                interviewAnswerInput.focus();
+                            }
+                            
+                            // 滚动到顶部
+                            document.querySelector('.interview-card').scrollIntoView({ behavior: 'smooth' });
+                        });
+                    });
+                }
+                
+                // 刷新题目
+                if (refreshQuestionBtn) {
+                    refreshQuestionBtn.addEventListener('click', function() {
+                        // 随机选择一个题目
+                        const randomIndex = Math.floor(Math.random() * interviewListItems.length);
+                        interviewListItems[randomIndex].click();
+                    });
+                }
+                
+                // 查看答案
+                if (checkAnswerBtn) {
+                    checkAnswerBtn.addEventListener('click', function() {
+                        const questionTitle = document.querySelector('.interview-question').textContent;
+                        // 将问题添加到AI助手输入框并发送
+                        const chatInput = document.getElementById('chatInput');
+                        const sendBtn = document.getElementById('sendBtn');
+                        
+                        if (chatInput && sendBtn && !sendBtn.disabled) {
+                            // 确保输入框先清空，再设置新内容
+                            chatInput.value = '';
+                            // 使用setTimeout确保清空操作完成
+                            setTimeout(() => {
+                                chatInput.value = `请给我详细解答这个面试题：${questionTitle}`;
+                                // 延迟发送，确保设置完成
+                                setTimeout(() => {
+                                    if (chatInput.value.trim()) {
+                                        sendBtn.click();
+                                    }
+                                }, 50);
+                            }, 50);
+                        }
+                    });
+                }
+                
+                // 我会了按钮
+                if (learnedBtn) {
+                    learnedBtn.addEventListener('click', function() {
+                        alert('太棒了！您已掌握这道题目。我们会记录您的学习进度。');
+                        // 随机切换到下一题
+                        refreshQuestionBtn.click();
+                    });
+                }
+                
+                // 记一下按钮
+                if (noteBtn) {
+                    noteBtn.addEventListener('click', function() {
+                        alert('题目已添加到您的学习笔记中，您可以稍后复习。');
+                    });
+                }
+            }
+            
+            // 初始化面试题功能
+            initInterviewQuestions();
+            
+            // 优化用户消息样式
+            function optimizeUserMessageStyle() {
+                const userMessages = document.querySelectorAll('.user-message .message-content');
+                userMessages.forEach(messageContent => {
+                    messageContent.style.setProperty('max-width', '220px', 'important');
+                    messageContent.style.setProperty('width', 'auto', 'important');
+                    messageContent.style.setProperty('min-width', 'auto', 'important');
+                    messageContent.style.setProperty('display', 'inline-flex', 'important');
+                    messageContent.style.setProperty('align-items', 'center', 'important');
+                    messageContent.style.setProperty('height', 'auto', 'important');
+                    messageContent.style.setProperty('padding', '0.35rem 0.6rem', 'important');
+                    messageContent.style.setProperty('line-height', '1.2', 'important');
+                    console.log('🔧 用户消息样式已优化');
+                });
+            }
+            
+            // 立即执行优化
+            optimizeUserMessageStyle();
+            
+            // 监听新消息的添加
+            const chatMessages = document.getElementById('chatMessages');
+            if (chatMessages) {
+                const observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        if (mutation.type === 'childList') {
+                            mutation.addedNodes.forEach(function(node) {
+                                if (node.nodeType === Node.ELEMENT_NODE && node.classList.contains('user-message')) {
+                                    const messageContent = node.querySelector('.message-content');
+                                    if (messageContent) {
+                                        messageContent.style.setProperty('max-width', '220px', 'important');
+                                        messageContent.style.setProperty('width', 'auto', 'important');
+                                        messageContent.style.setProperty('min-width', 'auto', 'important');
+                                        messageContent.style.setProperty('display', 'inline-flex', 'important');
+                                        messageContent.style.setProperty('align-items', 'center', 'important');
+                                        messageContent.style.setProperty('height', 'auto', 'important');
+                                        messageContent.style.setProperty('padding', '0.35rem 0.6rem', 'important');
+                                        messageContent.style.setProperty('line-height', '1.2', 'important');
+                                        console.log('🔧 新消息样式已优化');
+                                    }
+                                }
+                            });
+                        }
+                    });
+                });
+                
+                observer.observe(chatMessages, {
+                    childList: true,
+                    subtree: true
+                });
+            }
+            
+            // 定时检查和优化
+            setInterval(optimizeUserMessageStyle, 2000);
+
+        });
+    </script>
+</body>
+
+<!-- API配置模态框 -->
+<div class="modal" id="apiConfigModal">
+    <div class="modal-overlay"></div>
+    <div class="modal-container">
+        <div class="modal-header">
+            <h3>
+                <i class="fas fa-cog"></i>
+                配置API密钥
+            </h3>
+            <button class="modal-close" id="apiConfigClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p class="modal-description">请输入您的API密钥，以获得更好的AI功能体验。</p>
+            
+            <div class="input-group">
+                <label for="apiKey">大语言模型 API 密钥</label>
+                <div class="key-input-container">
+                    <input type="password" id="apiKey" placeholder="输入您的API密钥..." class="modal-input">
+                    <button class="toggle-btn" id="toggleApiKey">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="provider-select">
+                <label for="apiProvider">模型提供商</label>
+                <select id="apiProvider" class="modal-select">
+                    <option value="alibaba">阿里云 - DashScope</option>
+                    <option value="openai">OpenAI</option>
+                    <option value="anthropic">Anthropic Claude</option>
+                </select>
+            </div>
+            
+            <div class="provider-info alibaba-info">
+                <div class="provider-logo">
+                    <i class="fas fa-cloud" style="font-size: 32px; color: #ff6a00;"></i>
+                </div>
+                <div class="provider-details">
+                    <h4>阿里云 DashScope</h4>
+                    <p>使用通义大模型系列，包括模型通义千问2.0等</p>
+                    <a href="https://dashscope.aliyun.com/" target="_blank" class="provider-link">获取密钥</a>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn modal-btn-cancel" id="apiConfigCancel">取消</button>
+            <button class="modal-btn modal-btn-confirm" id="apiConfigConfirm">保存配置</button>
+        </div>
+    </div>
+</div>
+</html>
