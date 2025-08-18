@@ -226,6 +226,7 @@
             width: 100%;
             position: relative;
             overflow: visible;
+            pointer-events: auto; /* 确保可以响应点击 */
         }
         
         /* 左侧目录面板 */
@@ -237,7 +238,9 @@
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
-            overflow: hidden;
+            overflow: visible; /* 修改为visible确保内容不被剪裁 */
+            position: relative;
+            z-index: 5; /* 增加z-index确保在上层 */
         }
         
         .sidebar-header {
@@ -273,6 +276,9 @@
             margin: 0;
             padding: 0;
             list-style: none;
+            position: relative;
+            z-index: 20; /* 增加z-index确保在上层 */
+            pointer-events: auto; /* 确保可以响应点击 */
         }
         
         .nav-item {
@@ -284,6 +290,8 @@
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
+            pointer-events: auto; /* 确保可以响应点击 */
+            z-index: 20; /* 增加z-index确保在上层 */
         }
         
         .nav-item:hover {
@@ -1109,6 +1117,115 @@
             color: #9ca3af;
             font-style: italic;
             font-size: 0.9rem;
+        }
+        
+        /* 知识点笔记编辑框样式 */
+        .knowledge-notes {
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            border-top: 1px dashed #e5e7eb;
+            padding-top: 1rem;
+        }
+        
+        .knowledge-notes-input {
+            width: 100%;
+            min-height: 100px;
+            padding: 0.875rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: #4b5563;
+            resize: vertical;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            background-color: #f9fafb;
+        }
+        
+        .knowledge-notes-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            background-color: white;
+        }
+        
+        .knowledge-notes-input:hover {
+            border-color: #d1d5db;
+            background-color: white;
+        }
+        
+        .knowledge-notes-input::placeholder {
+            color: #9ca3af;
+            font-style: italic;
+        }
+        
+        /* 知识点通俗讲解样式 */
+        .knowledge-simple-explanation {
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background-color: #fef3c7;
+            border-radius: 8px;
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .knowledge-simple-explanation-title {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #92400e;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .knowledge-simple-explanation-title i {
+            margin-right: 0.5rem;
+        }
+        
+        .knowledge-simple-explanation-content {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #4b5563;
+        }
+        
+        /* 面试题笔记编辑框样式 */
+        .interview-notes {
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            border-top: 1px dashed #e5e7eb;
+            padding-top: 1rem;
+        }
+        
+        .interview-notes-input {
+            width: 100%;
+            min-height: 100px;
+            padding: 0.875rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: #4b5563;
+            resize: vertical;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            background-color: #f9fafb;
+        }
+        
+        .interview-notes-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            background-color: white;
+        }
+        
+        .interview-notes-input:hover {
+            border-color: #d1d5db;
+            background-color: white;
+        }
+        
+        .interview-notes-input::placeholder {
+            color: #9ca3af;
+            font-style: italic;
         }
         
         /* 书籍样式 */
@@ -3190,6 +3307,9 @@
                                 <span class="interview-tag secondary">前端开发</span>
                             </div>
                             <textarea class="interview-answer-input" placeholder="请输入您的答案..."></textarea>
+                            <div class="interview-notes">
+                                <textarea class="interview-notes-input" placeholder="在此添加您的笔记..."></textarea>
+                            </div>
                             <div class="interview-actions">
                                 <button class="interview-btn secondary">
                                     <i class="fas fa-eye"></i>
@@ -3236,6 +3356,17 @@
                                         • <strong>多态（Polymorphism）：</strong>同一个接口可以有多种不同的实现方式<br><br>
                                         <strong>实际应用：</strong>企业级应用开发、Android开发、大数据处理等领域
                                     </div>
+                                    <div class="knowledge-simple-explanation">
+                                        <div class="knowledge-simple-explanation-title">
+                                            <i class="fas fa-lightbulb"></i>通俗讲解
+                                        </div>
+                                        <div class="knowledge-simple-explanation-content">
+                                            想象Java就像一套万能工具箱，它可以在各种“工地”（平台）上使用。封装就像将工具和操作手册放在一起，不需要知道工具内部如何运作；继承就像新工具能够自动拥有旧工具的功能；多态就像一把瑞士军刀，可以根据需要变成不同的工具。Java应用广泛，从手机应用到大型银行系统都在使用它。
+                                        </div>
+                                    </div>
+                                    <div class="knowledge-notes">
+                                        <textarea class="knowledge-notes-input" placeholder="在此添加您的笔记..."></textarea>
+                                    </div>
                                     <div class="knowledge-actions">
                                         <button class="knowledge-btn primary">
                                             <i class="fas fa-check"></i>
@@ -3260,6 +3391,9 @@
                                         • <strong>Starter依赖：</strong>一站式解决各种功能模块的依赖问题<br>
                                         • <strong>生产级特性：</strong>内置监控、健康检查、指标统计等<br><br>
                                         <strong>实际应用：</strong>构建 RESTful API、微服务架构、企业级应用开发
+                                    </div>
+                                    <div class="knowledge-notes">
+                                        <textarea class="knowledge-notes-input" placeholder="在此添加您的笔记..."></textarea>
                                     </div>
                                     <div class="knowledge-actions">
                                         <button class="knowledge-btn primary">
@@ -3287,6 +3421,9 @@
                                         • <strong>存储引擎：</strong>InnoDB vs MyISAM的特点和选择<br><br>
                                         <strong>实际应用：</strong>数据库表设计、高并发场景优化、数据备份与恢复
                                     </div>
+                                    <div class="knowledge-notes">
+                                        <textarea class="knowledge-notes-input" placeholder="在此添加您的笔记..."></textarea>
+                                    </div>
                                     <div class="knowledge-actions">
                                         <button class="knowledge-btn primary">
                                             <i class="fas fa-check"></i>
@@ -3313,6 +3450,9 @@
                                         • <strong>Set/ZSet：</strong>集合和有序集合，适用于去重和排行<br><br>
                                         <strong>缓存策略：</strong>缓存雪崩、缓存击穿、缓存穿透的解决方案
                                     </div>
+                                    <div class="knowledge-notes">
+                                        <textarea class="knowledge-notes-input" placeholder="在此添加您的笔记..."></textarea>
+                                    </div>
                                     <div class="knowledge-actions">
                                         <button class="knowledge-btn primary">
                                             <i class="fas fa-check"></i>
@@ -3338,6 +3478,9 @@
                                         • <strong>并发集合：</strong>ConcurrentHashMap、BlockingQueue<br>
                                         • <strong>原子操作：</strong>AtomicInteger、CAS算法<br><br>
                                         <strong>常见问题：</strong>死锁、竞态条件、内存可见性问题的识别和解决
+                                    </div>
+                                    <div class="knowledge-notes">
+                                        <textarea class="knowledge-notes-input" placeholder="在此添加您的笔记..."></textarea>
                                     </div>
                                     <div class="knowledge-actions">
                                         <button class="knowledge-btn primary">
@@ -4060,11 +4203,17 @@
             
             // 处理导航项点击
             navItems.forEach(item => {
-                item.addEventListener('click', function() {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault(); // 阻止默认行为
+                    e.stopPropagation(); // 阻止事件冒泡
+                    
                     const targetId = this.getAttribute('data-target');
                     console.log('📊 点击导航项:', targetId);
                     
-                    if (!targetId) return;
+                    if (!targetId) {
+                        console.error('⚠️ 导航项缺少data-target属性');
+                        return;
+                    }
                     
                     // 更新导航项状态
                     navItems.forEach(nav => nav.classList.remove('active'));
@@ -4113,7 +4262,12 @@
             // 处理思维导图切换
             const mindmapToggleBtn = document.getElementById('mindmapToggleBtn');
             if (mindmapToggleBtn) {
-                mindmapToggleBtn.addEventListener('click', function() {
+                mindmapToggleBtn.addEventListener('click', function(e) {
+                    e.preventDefault(); // 阻止默认行为
+                    e.stopPropagation(); // 阻止事件冒泡
+                    
+                    console.log('📊 点击思维导图切换按钮');
+                    
                     navItems.forEach(nav => nav.classList.remove('active'));
                     document.querySelector('.nav-item[data-target="mindmap"]').classList.add('active');
                     
@@ -4121,6 +4275,7 @@
                         section.classList.remove('active');
                         if (section.id === 'mindmapSection') {
                             section.classList.add('active');
+                            console.log('✅ 激活思维导图区域');
                         }
                     });
                     
@@ -4602,6 +4757,69 @@
                 }
             }
             
+            // 初始化面试题笔记功能
+            function initInterviewNotes() {
+                console.log('📓 初始化面试题笔记功能...');
+                
+                // 获取所有笔记输入框
+                const notesInputs = document.querySelectorAll('.interview-notes-input');
+                
+                // 为每个输入框添加事件处理
+                notesInputs.forEach((input, index) => {
+                    // 获取面试题标题
+                    const interviewCard = input.closest('.interview-card');
+                    if (!interviewCard) return;
+                    
+                    const titleElement = interviewCard.querySelector('.interview-question');
+                    if (!titleElement) return;
+                    
+                    const interviewTitle = titleElement.textContent;
+                    const noteKey = `interview_note_${interviewTitle}`;
+                    
+                    // 设置标识以便区分
+                    input.setAttribute('data-note-key', noteKey);
+                    
+                    // 从localStorage加载已保存的笔记
+                    const savedNotes = JSON.parse(localStorage.getItem('interviewNotes') || '{}');
+                    if (savedNotes[noteKey]) {
+                        input.value = savedNotes[noteKey];
+                    }
+                    
+                    // 监听输入事件，自动保存
+                    input.addEventListener('input', function() {
+                        const notes = JSON.parse(localStorage.getItem('interviewNotes') || '{}');
+                        notes[noteKey] = this.value;
+                        localStorage.setItem('interviewNotes', JSON.stringify(notes));
+                        console.log(`✅ 已保存面试题笔记: ${noteKey}`);
+                        
+                        // 如果有内容，自动更新收藏按钮状态
+                        const noteBtn = interviewCard.querySelector('.interview-btn.outline');
+                        if (noteBtn) {
+                            if (this.value.trim() !== '') {
+                                if (!noteBtn.classList.contains('bookmarked')) {
+                                    noteBtn.innerHTML = '<i class="fas fa-bookmark"></i> 已收藏';
+                                    noteBtn.style.backgroundColor = '#f59e0b';
+                                    noteBtn.style.color = 'white';
+                                    noteBtn.style.borderColor = '#f59e0b';
+                                    noteBtn.classList.add('bookmarked');
+                                }
+                            } else {
+                                // 如果没有内容，则恢复收藏按钮状态
+                                if (noteBtn.classList.contains('bookmarked')) {
+                                    noteBtn.innerHTML = '<i class="fas fa-arrow-right"></i> 记一下';
+                                    noteBtn.style.backgroundColor = '';
+                                    noteBtn.style.color = '#4f46e5';
+                                    noteBtn.style.borderColor = '#4f46e5';
+                                    noteBtn.classList.remove('bookmarked');
+                                }
+                            }
+                        }
+                    });
+                });
+                
+                console.log(`✅ 面试题笔记功能初始化完成，共${notesInputs.length}个面试题`);
+            }
+            
             // 处理面试题交互
             function initInterviewQuestions() {
                 // 获取面试题元素
@@ -4688,22 +4906,153 @@
                 // 我会了按钮
                 if (learnedBtn) {
                     learnedBtn.addEventListener('click', function() {
-                        alert('太棒了！您已掌握这道题目。我们会记录您的学习进度。');
-                        // 随机切换到下一题
-                        refreshQuestionBtn.click();
+                        // 获取已掌握的面试题列表
+                        const learnedInterviews = JSON.parse(localStorage.getItem('learnedInterviews') || '[]');
+                        
+                        // 获取当前题目标题
+                        const questionTitleElement = document.querySelector('.interview-question');
+                        if (!questionTitleElement) return;
+                        
+                        const questionTitle = questionTitleElement.textContent;
+                        const isLearned = learnedInterviews.includes(questionTitle);
+                        
+                        const interviewCard = document.querySelector('.interview-card');
+                        
+                        if (isLearned) {
+                            // 取消掌握状态
+                            const updatedList = learnedInterviews.filter(title => title !== questionTitle);
+                            localStorage.setItem('learnedInterviews', JSON.stringify(updatedList));
+                            
+                            // 恢复样式
+                            if (interviewCard) {
+                                interviewCard.style.opacity = '1';
+                                interviewCard.style.background = 'white';
+                                interviewCard.style.border = '1px solid #f1f5f9';
+                            }
+                            
+                            // 恢复按钮状态
+                            learnedBtn.innerHTML = '<i class="fas fa-check"></i> 我会了';
+                            learnedBtn.style.backgroundColor = '#4f46e5';
+                            learnedBtn.disabled = false;
+                            
+                            // 显示提示
+                            alert(`已取消「${questionTitle}」的已掌握标记。`);
+                        } else {
+                            // 添加掌握状态
+                            learnedInterviews.push(questionTitle);
+                            localStorage.setItem('learnedInterviews', JSON.stringify(learnedInterviews));
+                            
+                            // 添加已掌握的视觉反馈
+                            if (interviewCard) {
+                                interviewCard.style.opacity = '0.6';
+                                interviewCard.style.background = '#f0f9ff';
+                                interviewCard.style.border = '2px solid #22c55e';
+                            }
+                            
+                            // 更新按钮状态
+                            learnedBtn.innerHTML = '<i class="fas fa-check"></i> 已掌握';
+                            learnedBtn.style.backgroundColor = '#22c55e';
+                            
+                            // 显示成功消息
+                            alert(`太棒了！您已掌握「${questionTitle}」面试题。我们会记录您的学习进度。`);
+                        }
                     });
                 }
                 
                 // 记一下按钮
                 if (noteBtn) {
                     noteBtn.addEventListener('click', function() {
-                        alert('题目已添加到您的学习笔记中，您可以稍后复习。');
+                        // 获取当前题目标题
+                        const questionTitleElement = document.querySelector('.interview-question');
+                        if (!questionTitleElement) return;
+                        
+                        const questionTitle = questionTitleElement.textContent;
+                        const noteKey = `interview_note_${questionTitle}`;
+                        const isBookmarked = noteBtn.classList.contains('bookmarked');
+                        
+                        if (isBookmarked) {
+                            // 取消收藏状态
+                            noteBtn.innerHTML = '<i class="fas fa-arrow-right"></i> 记一下';
+                            noteBtn.style.backgroundColor = '';
+                            noteBtn.style.color = '#4f46e5';
+                            noteBtn.style.borderColor = '#4f46e5';
+                            noteBtn.classList.remove('bookmarked');
+                            
+                            // 清空笔记内容如果用户确认
+                            const savedNotes = JSON.parse(localStorage.getItem('interviewNotes') || '{}');
+                            if (savedNotes[noteKey] && savedNotes[noteKey].trim() !== '' && confirm('是否同时清空笔记内容？')) {
+                                // 清空笔记内容
+                                const notesInput = document.querySelector('.interview-notes-input');
+                                if (notesInput) {
+                                    notesInput.value = '';
+                                    // 清空存储的笔记
+                                    savedNotes[noteKey] = '';
+                                    localStorage.setItem('interviewNotes', JSON.stringify(savedNotes));
+                                }
+                            }
+                            
+                            alert(`已取消「${questionTitle}」的收藏状态。`);
+                        } else {
+                            // 聚焦到笔记输入框
+                            const notesInput = document.querySelector('.interview-notes-input');
+                            if (notesInput) {
+                                notesInput.focus();
+                            }
+                            
+                            // 更新按钮状态
+                            noteBtn.innerHTML = '<i class="fas fa-bookmark"></i> 已收藏';
+                            noteBtn.style.backgroundColor = '#f59e0b';
+                            noteBtn.style.color = 'white';
+                            noteBtn.style.borderColor = '#f59e0b';
+                            noteBtn.classList.add('bookmarked');
+                            
+                            alert(`面试题「${questionTitle}」已添加到您的学习笔记中，您可以稍后复习。`);
+                        }
                     });
                 }
             }
             
             // 初始化面试题功能
             initInterviewQuestions();
+            
+            // 恢复已掌握的面试题状态
+            const learnedInterviews = JSON.parse(localStorage.getItem('learnedInterviews') || '[]');
+            const currentQuestionTitle = document.querySelector('.interview-question');
+            if (currentQuestionTitle && learnedInterviews.includes(currentQuestionTitle.textContent)) {
+                const learnedBtn = document.querySelector('.interview-btn.primary');
+                const interviewCard = document.querySelector('.interview-card');
+                
+                if (interviewCard) {
+                    interviewCard.style.opacity = '0.6';
+                    interviewCard.style.background = '#f0f9ff';
+                    interviewCard.style.border = '2px solid #22c55e';
+                }
+                
+                if (learnedBtn) {
+                    learnedBtn.innerHTML = '<i class="fas fa-check"></i> 已掌握';
+                    learnedBtn.style.backgroundColor = '#22c55e';
+                }
+            }
+            
+            // 恢复已收藏的面试题状态
+            const savedInterviewNotes = JSON.parse(localStorage.getItem('interviewNotes') || '{}');
+            const currentInterviewTitle = document.querySelector('.interview-question');
+            if (currentInterviewTitle) {
+                const noteBtn = document.querySelector('.interview-btn.outline');
+                const noteKey = `interview_note_${currentInterviewTitle.textContent}`;
+                
+                // 如果有笔记内容或者已被标记为收藏
+                if (savedInterviewNotes[noteKey] && savedInterviewNotes[noteKey].trim() !== '' && noteBtn) {
+                    noteBtn.innerHTML = '<i class="fas fa-bookmark"></i> 已收藏';
+                    noteBtn.style.backgroundColor = '#f59e0b';
+                    noteBtn.style.color = 'white';
+                    noteBtn.style.borderColor = '#f59e0b';
+                    noteBtn.classList.add('bookmarked');
+                }
+            }
+            
+            // 初始化面试题笔记功能
+            initInterviewNotes();
             
             // 初始化知识点按钮功能
             function initKnowledgeButtons() {
@@ -4717,24 +5066,43 @@
                     // "我会了"按钮功能
                     if (learnedBtn) {
                         learnedBtn.addEventListener('click', function() {
-                            // 添加已掌握的视觉反馈
-                            item.style.opacity = '0.6';
-                            item.style.background = '#f0f9ff';
-                            item.style.border = '2px solid #22c55e';
-                            
-                            // 显示成功消息
-                            alert(`太棒了！您已掌握「${knowledgeTitle}」知识点。我们会记录您的学习进度。`);
-                            
-                            // 禁用按钮
-                            learnedBtn.innerHTML = '<i class="fas fa-check"></i> 已掌握';
-                            learnedBtn.style.backgroundColor = '#22c55e';
-                            learnedBtn.disabled = true;
-                            
-                            // 保存到本地存储
+                            // 获取已掌握的知识点列表
                             const learnedKnowledge = JSON.parse(localStorage.getItem('learnedKnowledge') || '[]');
-                            if (!learnedKnowledge.includes(knowledgeTitle)) {
+                            const isLearned = learnedKnowledge.includes(knowledgeTitle);
+                            
+                            if (isLearned) {
+                                // 取消掌握状态
+                                const updatedList = learnedKnowledge.filter(title => title !== knowledgeTitle);
+                                localStorage.setItem('learnedKnowledge', JSON.stringify(updatedList));
+                                
+                                // 恢复样式
+                                item.style.opacity = '1';
+                                item.style.background = 'white';
+                                item.style.border = '1px solid #e5e7eb';
+                                
+                                // 恢复按钮状态
+                                learnedBtn.innerHTML = '<i class="fas fa-check"></i> 我会了';
+                                learnedBtn.style.backgroundColor = '#4f46e5';
+                                learnedBtn.disabled = false;
+                                
+                                // 显示提示
+                                alert(`已取消「${knowledgeTitle}」的已掌握标记。`);
+                            } else {
+                                // 添加掌握状态
                                 learnedKnowledge.push(knowledgeTitle);
                                 localStorage.setItem('learnedKnowledge', JSON.stringify(learnedKnowledge));
+                                
+                                // 添加已掌握的视觉反馈
+                                item.style.opacity = '0.6';
+                                item.style.background = '#f0f9ff';
+                                item.style.border = '2px solid #22c55e';
+                                
+                                // 更新按钮状态
+                                learnedBtn.innerHTML = '<i class="fas fa-check"></i> 已掌握';
+                                learnedBtn.style.backgroundColor = '#22c55e';
+                                
+                                // 显示成功消息
+                                alert(`太棒了！您已掌握「${knowledgeTitle}」知识点。我们会记录您的学习进度。`);
                             }
                         });
                     }
@@ -4742,25 +5110,48 @@
                     // "记一下"按钮功能
                     if (noteBtn) {
                         noteBtn.addEventListener('click', function() {
-                            alert(`知识点「${knowledgeTitle}」已添加到您的学习笔记中，您可以稍后复习。`);
+                            // 获取已收藏的知识点列表
+                            const savedNotes = JSON.parse(localStorage.getItem('knowledgeNotes') || '{}');
+                            const noteKey = `note_${knowledgeTitle}`;
+                            const isBookmarked = noteBtn.classList.contains('bookmarked');
                             
-                            // 保存到本地存储
-                            const savedNotes = JSON.parse(localStorage.getItem('knowledgeNotes') || '[]');
-                            const noteData = {
-                                title: knowledgeTitle,
-                                content: item.querySelector('.knowledge-text').textContent,
-                                timestamp: new Date().toISOString(),
-                                id: Date.now()
-                            };
-                            
-                            savedNotes.push(noteData);
-                            localStorage.setItem('knowledgeNotes', JSON.stringify(savedNotes));
-                            
-                            // 视觉反馈
-                            noteBtn.innerHTML = '<i class="fas fa-bookmark"></i> 已收藏';
-                            noteBtn.style.backgroundColor = '#f59e0b';
-                            noteBtn.style.color = 'white';
-                            noteBtn.style.borderColor = '#f59e0b';
+                            if (isBookmarked) {
+                                // 取消收藏状态
+                                noteBtn.innerHTML = '<i class="fas fa-arrow-right"></i> 记一下';
+                                noteBtn.style.backgroundColor = '';
+                                noteBtn.style.color = '#4f46e5';
+                                noteBtn.style.borderColor = '#4f46e5';
+                                noteBtn.classList.remove('bookmarked');
+                                
+                                // 清空笔记内容如果用户确认
+                                if (savedNotes[noteKey] && savedNotes[noteKey].trim() !== '' && confirm('是否同时清空笔记内容？')) {
+                                    // 清空笔记内容
+                                    const notesInput = item.querySelector('.knowledge-notes-input');
+                                    if (notesInput) {
+                                        notesInput.value = '';
+                                        // 清空存储的笔记
+                                        savedNotes[noteKey] = '';
+                                        localStorage.setItem('knowledgeNotes', JSON.stringify(savedNotes));
+                                    }
+                                }
+                                
+                                alert(`已取消「${knowledgeTitle}」的收藏状态。`);
+                            } else {
+                                // 聚焦到笔记输入框
+                                const notesInput = item.querySelector('.knowledge-notes-input');
+                                if (notesInput) {
+                                    notesInput.focus();
+                                }
+                                
+                                // 更新按钮状态
+                                noteBtn.innerHTML = '<i class="fas fa-bookmark"></i> 已收藏';
+                                noteBtn.style.backgroundColor = '#f59e0b';
+                                noteBtn.style.color = 'white';
+                                noteBtn.style.borderColor = '#f59e0b';
+                                noteBtn.classList.add('bookmarked');
+                                
+                                alert(`知识点「${knowledgeTitle}」已添加到您的学习笔记中，您可以稍后复习。`);
+                            }
                         });
                     }
                 });
@@ -4777,13 +5168,32 @@
                         item.style.border = '2px solid #22c55e';
                         learnedBtn.innerHTML = '<i class="fas fa-check"></i> 已掌握';
                         learnedBtn.style.backgroundColor = '#22c55e';
-                        learnedBtn.disabled = true;
+                    }
+                });
+                
+                // 恢复已收藏的知识点状态
+                const savedNotes = JSON.parse(localStorage.getItem('knowledgeNotes') || '{}');
+                knowledgeItems.forEach(item => {
+                    const title = item.querySelector('.knowledge-title').textContent;
+                    const noteBtn = item.querySelector('.knowledge-btn.outline');
+                    const noteKey = `note_${title}`;
+                    
+                    // 如果有笔记内容或者已被标记为收藏
+                    if (savedNotes[noteKey] && savedNotes[noteKey].trim() !== '' && noteBtn) {
+                        noteBtn.innerHTML = '<i class="fas fa-bookmark"></i> 已收藏';
+                        noteBtn.style.backgroundColor = '#f59e0b';
+                        noteBtn.style.color = 'white';
+                        noteBtn.style.borderColor = '#f59e0b';
+                        noteBtn.classList.add('bookmarked');
                     }
                 });
             }
             
             // 初始化知识点功能
             initKnowledgeButtons();
+            
+            // 初始化知识点笔记功能
+            initKnowledgeNotes();
             
             // 优化用户消息样式
             function optimizeUserMessageStyle() {
@@ -4838,6 +5248,69 @@
             
             // 定时检查和优化
             setInterval(optimizeUserMessageStyle, 2000);
+
+            // 初始化知识点笔记功能
+            function initKnowledgeNotes() {
+                console.log('📓 初始化知识点笔记功能...');
+                
+                // 获取所有笔记输入框
+                const notesInputs = document.querySelectorAll('.knowledge-notes-input');
+                
+                // 为每个输入框添加事件处理
+                notesInputs.forEach((input, index) => {
+                    // 获取知识点标题
+                    const knowledgeItem = input.closest('.knowledge-item');
+                    if (!knowledgeItem) return;
+                    
+                    const titleElement = knowledgeItem.querySelector('.knowledge-title');
+                    if (!titleElement) return;
+                    
+                    const knowledgeTitle = titleElement.textContent;
+                    const noteKey = `note_${knowledgeTitle}`;
+                    
+                    // 设置标识以便区分
+                    input.setAttribute('data-note-key', noteKey);
+                    
+                    // 从localStorage加载已保存的笔记
+                    const savedNotes = JSON.parse(localStorage.getItem('knowledgeNotes') || '{}');
+                    if (savedNotes[noteKey]) {
+                        input.value = savedNotes[noteKey];
+                    }
+                    
+                    // 监听输入事件，自动保存
+                    input.addEventListener('input', function() {
+                        const notes = JSON.parse(localStorage.getItem('knowledgeNotes') || '{}');
+                        notes[noteKey] = this.value;
+                        localStorage.setItem('knowledgeNotes', JSON.stringify(notes));
+                        console.log(`✅ 已保存笔记: ${noteKey}`);
+                        
+                        // 如果有内容，自动更新收藏按钮状态
+                        const noteBtn = knowledgeItem.querySelector('.knowledge-btn.outline');
+                        if (noteBtn) {
+                            if (this.value.trim() !== '') {
+                                if (!noteBtn.classList.contains('bookmarked')) {
+                                    noteBtn.innerHTML = '<i class="fas fa-bookmark"></i> 已收藏';
+                                    noteBtn.style.backgroundColor = '#f59e0b';
+                                    noteBtn.style.color = 'white';
+                                    noteBtn.style.borderColor = '#f59e0b';
+                                    noteBtn.classList.add('bookmarked');
+                                }
+                            } else {
+                                // 如果没有内容，则恢复收藏按钮状态
+                                if (noteBtn.classList.contains('bookmarked')) {
+                                    noteBtn.innerHTML = '<i class="fas fa-arrow-right"></i> 记一下';
+                                    noteBtn.style.backgroundColor = '';
+                                    noteBtn.style.color = '#4f46e5';
+                                    noteBtn.style.borderColor = '#4f46e5';
+                                    noteBtn.classList.remove('bookmarked');
+                                }
+                            }
+                        }
+                    });
+                });
+                
+                console.log(`✅ 知识点笔记功能初始化完成，共${notesInputs.length}个知识点`);
+            }
 
         });
     </script>
