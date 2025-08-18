@@ -41,7 +41,7 @@
             }
             
             // 显示模态框
-            apiConfigModal.style.display = 'block';
+            apiConfigModal.style.display = 'flex';
             apiConfigModal.classList.add('show');
             
             console.log('✅ API配置模态框已显示');
@@ -378,6 +378,20 @@
             color: #6366f1;
         }
         
+        /* 专门针对思维导图页面的按钮布局 - 标题在最左边，按钮在标题右边 */
+        #mindmapSection .section-header {
+            justify-content: flex-start !important;
+        }
+        
+        #mindmapSection .section-header h2 {
+            order: 1 !important;
+            margin-right: 1rem !important;
+        }
+        
+        #mindmapSection .section-header > div {
+            order: 2 !important;
+        }
+        
         .section-count {
             margin-left: 0.5rem;
             font-size: 0.875rem;
@@ -427,7 +441,7 @@
         .mindmap-controls {
             position: absolute;
             top: 1rem;
-            right: 1rem;
+            left: 1rem;
             z-index: 10;
             display: flex;
             gap: 0.5rem;
@@ -482,7 +496,7 @@
         /* AI助手缩小状态 */
         .ai-assistant.minimized {
             position: fixed !important;
-            top: 20px !important;
+            top: 80px !important;
             right: 20px !important;
             width: 60px !important;
             height: 60px !important;
@@ -941,6 +955,55 @@
 
         .knowledge-text br {
             margin-bottom: 0.5rem;
+        }
+
+        /* 知识点按钮样式 */
+        .knowledge-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #f3f4f6;
+        }
+
+        .knowledge-btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 100px;
+        }
+
+        .knowledge-btn i {
+            margin-right: 0.5rem;
+        }
+
+        .knowledge-btn.primary {
+            background-color: #4f46e5;
+            color: white;
+            border: none;
+        }
+
+        .knowledge-btn.primary:hover {
+            background-color: #4338ca;
+            transform: translateY(-1px);
+        }
+
+        .knowledge-btn.outline {
+            background-color: white;
+            color: #4f46e5;
+            border: 1px solid #4f46e5;
+        }
+
+        .knowledge-btn.outline:hover {
+            background-color: #f5f3ff;
+            transform: translateY(-1px);
         }
 
         .interview-actions {
@@ -2038,6 +2101,193 @@
                 max-width: 80%; /* 用户消息小屏幕下保持合理宽度 */
             }
         }
+        
+        /* API配置模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.show {
+            display: flex !important;
+        }
+        
+        .modal-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            z-index: 10001;
+        }
+        
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f9fafb;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #111827;
+            display: flex;
+            align-items: center;
+        }
+        
+        .modal-header h3 i {
+            margin-right: 0.75rem;
+            color: #6366f1;
+        }
+        
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            border: none;
+            background: #f3f4f6;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .modal-description {
+            margin: 0 0 1.5rem 0;
+            color: #6b7280;
+        }
+        
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #111827;
+        }
+        
+        .key-input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        
+        .modal-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            padding-right: 3rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            box-sizing: border-box;
+        }
+        
+        .toggle-btn {
+            position: absolute;
+            right: 0.75rem;
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: none;
+            color: #6b7280;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .provider-select {
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            background: white;
+            box-sizing: border-box;
+        }
+        
+        .provider-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #f9fafb;
+        }
+        
+        .provider-details h4 {
+            margin: 0 0 0.25rem 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #111827;
+        }
+        
+        .provider-details p {
+            margin: 0 0 0.5rem 0;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        
+        .provider-link {
+            font-size: 0.875rem;
+            color: #6366f1;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+            background: #f9fafb;
+        }
+        
+        .modal-btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .modal-btn-cancel {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        .modal-btn-confirm {
+            background: #6366f1;
+            color: white;
+        }
     </style>
     
     <!-- 直接在head中加载Markmap库和样式 -->
@@ -2257,15 +2507,14 @@
                     duration: 500,
                     zoom: true,
                     pan: true,
-                    autoFit: true,
+                    autoFit: true, // 启用自动适配，与折叠全部按钮保持一致
+                    initialExpandLevel: -1, // 显示所有节点，但通过其他参数控制大小
                     color: (d) => {
                         // 根据层级设置不同颜色
                         const colors = ['#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#ef4444'];
                         return colors[(d.depth || 0) % colors.length]; // 添加默认值0防止undefined
-                    },
-                    // 设置嵌套元素间距，防止相互重叠
-                    spacingHorizontal: 80,
-                    spacingVertical: 20
+                    }
+                    // 移除自定义间距和尺寸参数，让autoFit自动处理最佳显示效果
                 }, validatedRoot);
                 
                 // 添加额外处理，防止初始化过程中的错误
@@ -2282,85 +2531,290 @@
                 
                 console.log('✅ Markmap实例创建完成');
                 
-                // 默认展开所有节点并适配视图
-                setTimeout(() => {
-                    try {
-                        console.log('🔄 自动适配视图大小...');
-                        // 先检查根节点是否有效
-                        if (root && typeof root === 'object') {
-                            // 确保每个节点都有有效的坐标
-                            const validateNode = (node) => {
-                                if (node) {
-                                    // 确保节点有有效的位置属性
-                                    if (!node.x) node.x = 0;
-                                    if (!node.y) node.y = 0;
-                                    // 处理子节点
-                                    if (node.children && Array.isArray(node.children)) {
-                                        node.children.forEach(validateNode);
-                                    }
-                                }
-                            };
-                            
-                            // 验证所有节点
-                            validateNode(root);
-                            
-                            // 先修复现有的SVG元素
-                            try {
-                                // 获取所有可能有问题的SVG元素
-                                const gElements = svg.querySelectorAll('g');
-                                gElements.forEach(g => {
-                                    const transform = g.getAttribute('transform');
-                                    if (transform && transform.includes('NaN')) {
-                                        console.log('🚨 适配前修复无效transform:', transform);
-                                        g.setAttribute('transform', 'translate(0,0) scale(1)');
-                                    }
-                                });
-                            } catch (svgError) {
-                                console.warn('⚠️ 适配前修复SVG错误时出错:', svgError);
-                            }
-                            
-                            // 使用try-catch包裹fit调用
-                            try {
-                                if (markmapInstance && typeof markmapInstance.fit === 'function') {
-                                    // 调用fit适配视图
-                                    markmapInstance.fit();
-                                    console.log('✅ 视图适配完成');
-                                } else {
-                                    console.warn('⚠️ markmapInstance或fit方法不可用');
-                                }
-                            } catch (fitError) {
-                                console.error('❌ 调用fit方法时出错:', fitError);
-                                // 尝试备用方案：设置缩放级别
-                                try {
-                                    svg.setAttribute('viewBox', '0 0 1000 600');
-                                    console.log('✅ 使用备用方案设置viewBox');
-                                } catch (viewBoxError) {
-                                    console.error('❌ 设置viewBox时出错:', viewBoxError);
-                                }
-                            }
-                        } else {
-                            console.warn('⚠️ 根节点无效，跳过自动适配');
-                        }
-                    } catch (error) {
-                        console.error('❌ 自动适配视图时出错:', error);
+                // 保存实例到全局变量，供后续访问
+                window.currentMarkmapInstance = markmapInstance;
+                
+                // 添加专门的CSS样式来优化文字显示
+                const mindmapStyles = document.createElement('style');
+                mindmapStyles.innerHTML = `
+                    /* 优化思维导图文字显示效果 */
+                    #mindmapContent svg text {
+                        font-family: 'Segoe UI', 'Microsoft YaHei', Arial, sans-serif !important;
+                        font-size: 14px !important;
+                        font-weight: 500 !important;
+                        fill: #1f2937 !important;
+                        stroke: none !important;
+                        text-rendering: optimizeLegibility !important;
+                        -webkit-font-smoothing: antialiased !important;
+                        -moz-osx-font-smoothing: grayscale !important;
                     }
-                }, 400); // 增加延迟时间到400ms
+                    
+                    /* 根据层级调整字体大小 - autoFit会自动处理缩放 */
+                    #mindmapContent svg g[data-depth="0"] text {
+                        font-size: 18px !important;
+                        font-weight: 700 !important;
+                        fill: #111827 !important;
+                    }
+                    
+                    #mindmapContent svg g[data-depth="1"] text {
+                        font-size: 16px !important;
+                        font-weight: 600 !important;
+                        fill: #374151 !important;
+                    }
+                    
+                    #mindmapContent svg g[data-depth="2"] text {
+                        font-size: 14px !important;
+                        font-weight: 500 !important;
+                        fill: #4b5563 !important;
+                    }
+                    
+                    #mindmapContent svg g[data-depth="3"] text {
+                        font-size: 13px !important;
+                        font-weight: 500 !important;
+                        fill: #6b7280 !important;
+                    }
+                    
+                    #mindmapContent svg g[data-depth="4"] text {
+                        font-size: 12px !important;
+                        font-weight: 400 !important;
+                        fill: #9ca3af !important;
+                    }
+                    
+                    /* 优化节点圆圈和连接线 */
+                    #mindmapContent svg circle {
+                        stroke-width: 2 !important;
+                        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)) !important;
+                    }
+                    
+                    #mindmapContent svg path {
+                        stroke-width: 3 !important;
+                        opacity: 0.7 !important;
+                    }
+                    
+                    /* 优化整体SVG显示 */
+                    #mindmapContent svg {
+                        background: #fafbfc !important;
+                        border-radius: 8px !important;
+                    }
+                    
+                    /* 防止文字被截断 */
+                    #mindmapContent svg foreignObject {
+                        overflow: visible !important;
+                    }
+                    
+                    /* 确保文本包装正确 */
+                    #mindmapContent svg .mm-t {
+                        white-space: nowrap !important;
+                        overflow: visible !important;
+                    }
+                `;
+                document.head.appendChild(mindmapStyles);
+                
+                // 在创建完成后立即进行一次适配，确保内容可见
+                try {
+                    if (markmapInstance && typeof markmapInstance.fit === 'function') {
+                        markmapInstance.fit();
+                        console.log('🚀 初始适配完成');
+                    }
+                } catch (immediateError) {
+                    console.warn('⚠️ 初始适配失败:', immediateError);
+                }
+                
+                // 强化的多次重试适配机制
+                const autoFitWithRetry = () => {
+                    const maxRetries = 4;
+                    const delays = [100, 300, 600, 1000]; // 多次重试的延迟时间
+                    
+                    const attemptFit = (attempt) => {
+                        setTimeout(() => {
+                            try {
+                                console.log(`🔄 第${attempt + 1}次适配尝试...`);
+                                
+                                // 验证SVG内容是否正确渲染
+                                const hasValidContent = () => {
+                                    const gElements = svg.querySelectorAll('g');
+                                    const circles = svg.querySelectorAll('circle');
+                                    const texts = svg.querySelectorAll('text');
+                                    const paths = svg.querySelectorAll('path');
+                                    
+                                    return gElements.length > 0 && (circles.length > 0 || texts.length > 0 || paths.length > 0);
+                                };
+                                
+                                if (!hasValidContent()) {
+                                    console.log('🔍 SVG内容未正确渲染，跳过此次适配');
+                                    if (attempt < maxRetries - 1) {
+                                        attemptFit(attempt + 1);
+                                    }
+                                    return;
+                                }
+                                
+                                // 先检查根节点是否有效
+                                if (root && typeof root === 'object') {
+                                    // 确保每个节点都有有效的坐标
+                                    const validateNode = (node) => {
+                                        if (node) {
+                                            if (!node.x) node.x = 0;
+                                            if (!node.y) node.y = 0;
+                                            if (node.children && Array.isArray(node.children)) {
+                                                node.children.forEach(validateNode);
+                                            }
+                                        }
+                                    };
+                                    
+                                    validateNode(root);
+                                    
+                                    // 修复现有的SVG元素
+                                    const gElements = svg.querySelectorAll('g');
+                                    gElements.forEach(g => {
+                                        const transform = g.getAttribute('transform');
+                                        if (transform && transform.includes('NaN')) {
+                                            console.log('🚨 修复无效transform:', transform);
+                                            g.setAttribute('transform', 'translate(400, 300) scale(0.6)'); // 适应显示所有节点的缩放
+                                        }
+                                    });
+                                    
+                                    // 尝试适配
+                                    if (markmapInstance && typeof markmapInstance.fit === 'function') {
+                                        markmapInstance.fit();
+                                        console.log(`✅ 第${attempt + 1}次适配成功`);
+                                        
+                                        // 适配后再次检查并修复NaN问题
+                                        setTimeout(() => {
+                                            const postFitElements = svg.querySelectorAll('g');
+                                            postFitElements.forEach(g => {
+                                                const transform = g.getAttribute('transform');
+                                                if (transform && transform.includes('NaN')) {
+                                                    g.setAttribute('transform', 'translate(400, 300) scale(0.6)');
+                                                }
+                                            });
+                                        }, 100);
+                                        
+                                    } else {
+                                        console.warn('⚠️ markmapInstance或fit方法不可用');
+                                        // 备用方案：直接设置主群组的transform
+                                        const mainGroup = svg.querySelector('g');
+                                        if (mainGroup) {
+                                            mainGroup.setAttribute('transform', 'translate(400, 300) scale(0.55)');
+                                            console.log('✅ 使用备用方案设置Transform');
+                                        }
+                                    }
+                                    
+                                } else {
+                                    console.warn('⚠️ 根节点无效，跳过自动适配');
+                                }
+                                
+                            } catch (error) {
+                                console.error(`❌ 第${attempt + 1}次适配失败:`, error);
+                                if (attempt < maxRetries - 1) {
+                                    attemptFit(attempt + 1);
+                                }
+                            }
+                        }, delays[attempt]);
+                    };
+                    
+                    // 开始多次重试
+                    attemptFit(0);
+                };
+                
+                // 执行强化的适配
+                autoFitWithRetry();
                 
                 // 为控制按钮添加事件
+                
+                // 缩放控制变量
+                let currentScale = 1.0; // 使用标准缩放，autoFit会自动处理最佳显示
+                const scaleStep = 0.2;
+                const maxScale = 3.0;
+                const minScale = 0.3;
+                
+                // 放大按钮
+                const zoomInBtn = document.getElementById('zoomIn');
+                if (zoomInBtn) {
+                    zoomInBtn.addEventListener('click', () => {
+                        currentScale = Math.min(currentScale + scaleStep, maxScale);
+                        applyCustomScale(currentScale);
+                        console.log('🔍 放大到:', currentScale);
+                    });
+                }
+                
+                // 缩小按钮
+                const zoomOutBtn = document.getElementById('zoomOut');
+                if (zoomOutBtn) {
+                    zoomOutBtn.addEventListener('click', () => {
+                        currentScale = Math.max(currentScale - scaleStep, minScale);
+                        applyCustomScale(currentScale);
+                        console.log('🔍 缩小到:', currentScale);
+                    });
+                }
+                
+                // 重置缩放按钮
+                const resetZoomBtn = document.getElementById('resetZoom');
+                if (resetZoomBtn) {
+                    resetZoomBtn.addEventListener('click', () => {
+                        currentScale = 1.0;
+                        applyCustomScale(currentScale);
+                        console.log('🔄 重置缩放到:', currentScale);
+                    });
+                }
+                
+                // 应用缩放的函数
+                const applyCustomScale = (scale) => {
+                    try {
+                        const mainGroup = svg.querySelector('g');
+                        if (mainGroup) {
+                            // 计算中心位置
+                            const svgRect = svg.getBoundingClientRect();
+                            const centerX = svgRect.width / 2;
+                            const centerY = svgRect.height / 2;
+                            
+                            // 应用变换：先居中再缩放
+                            const transform = `translate(${centerX}, ${centerY}) scale(${scale})`;
+                            mainGroup.setAttribute('transform', transform);
+                            
+                            console.log(`✅ 应用缩放: ${scale}, Transform: ${transform}`);
+                        } else {
+                            console.warn('⚠️ 未找到主群组元素');
+                        }
+                    } catch (error) {
+                        console.error('❌ 应用缩放失败:', error);
+                    }
+                };
+                
                 const expandAllBtn = document.getElementById('expandAll');
                 if (expandAllBtn) {
                     expandAllBtn.addEventListener('click', () => {
                         console.log('🔍 展开所有节点');
                         try {
-                            // 防止坐标计算错误
-                            if (markmapInstance && typeof markmapInstance.fit === 'function') {
-                                markmapInstance.fit(); // 使用fit方法适配视图并显示全部内容
-                                console.log('✅ 视图适配完成');
+                            if (markmapInstance && markmapInstance.state && markmapInstance.state.data) {
+                                // 使用现有实例的展开功能
+                                const expandNodeRecursively = (node) => {
+                                    if (node) {
+                                        // 清除折叠状态
+                                        if (node.payload) {
+                                            delete node.payload.fold;
+                                        }
+                                        if (node.children && Array.isArray(node.children)) {
+                                            node.children.forEach(expandNodeRecursively);
+                                        }
+                                    }
+                                };
+                                
+                                const rootData = markmapInstance.state.data;
+                                expandNodeRecursively(rootData);
+                                
+                                // 重新渲染现有实例
+                                markmapInstance.setData(rootData);
+                                
+                                console.log('✅ 展开所有节点成功');
+                            } else if (markmapInstance && typeof markmapInstance.fit === 'function') {
+                                // 备用方案：重新适配视图
+                                console.log('⚠️ 使用备用方案：重新适配视图');
+                                markmapInstance.fit();
                             } else {
-                                console.warn('⚠️ Markmap实例无效，无法适配视图');
+                                console.warn('⚠️ Markmap实例或相关方法不可用');
                             }
                         } catch (error) {
-                            console.error('❌ 适配视图时出错:', error);
+                            console.error('❌ 展开节点时出错:', error);
                         }
                     });
                 }
@@ -2370,41 +2824,32 @@
                     collapseAllBtn.addEventListener('click', () => {
                         console.log('📋 折叠所有节点');
                         try {
-                            if (markmapInstance && root) {
-                                // 防止空数据或非法坐标
-                                const collapsedRoot = JSON.parse(JSON.stringify(root)); // 深拷贝根节点
-                                
-                                // 验证并修复坐标
-                                const validateNode = (node) => {
-                                    if (node) {
-                                        // 确保节点有有效的位置属性
-                                        if (!node.x || isNaN(node.x)) node.x = 0;
-                                        if (!node.y || isNaN(node.y)) node.y = 0;
-                                        
-                                        // 处理子节点
-                                        if (node.children && Array.isArray(node.children)) {
-                                            node.children.forEach(validateNode);
-                                        }
+                            if (markmapInstance && markmapInstance.state && markmapInstance.state.data) {
+                                // 使用现有实例的折叠功能
+                                const collapseNodeRecursively = (node, level = 0) => {
+                                    if (node && level > 0) {
+                                        // 折叠除了根节点以外的所有节点
+                                        node.payload = node.payload || {};
+                                        node.payload.fold = 1; // 1表示折叠
+                                    }
+                                    if (node.children && Array.isArray(node.children)) {
+                                        node.children.forEach(child => collapseNodeRecursively(child, level + 1));
                                     }
                                 };
                                 
-                                validateNode(collapsedRoot);
+                                const rootData = markmapInstance.state.data;
+                                collapseNodeRecursively(rootData);
                                 
-                                // 创建新的实例
-                                try {
-                                    const newInstance = window.markmap.Markmap.create(svg, {
-                                        duration: 500,
-                                        zoom: true,
-                                        pan: true,
-                                        autoFit: true
-                                    }, collapsedRoot);
-                                    
-                                    console.log('✅ 折叠所有节点成功');
-                                } catch (innerError) {
-                                    console.error('❌ 创建新实例时出错:', innerError);
-                                }
+                                // 重新渲染现有实例
+                                markmapInstance.setData(rootData);
+                                
+                                console.log('✅ 折叠所有节点成功');
+                            } else if (markmapInstance && typeof markmapInstance.fit === 'function') {
+                                // 备用方案：如果没有state数据，就简单重新适配
+                                console.log('⚠️ 使用备用方案：重新适配视图');
+                                markmapInstance.fit();
                             } else {
-                                console.warn('⚠️ Markmap实例或根节点无效');
+                                console.warn('⚠️ Markmap实例或相关方法不可用');
                             }
                         } catch (error) {
                             console.error('❌ 折叠节点时出错:', error);
@@ -2686,6 +3131,18 @@
                             思维导图
                         </h2>
                         <div>
+                            <button class="expand-all-btn" id="zoomIn">
+                                <i class="fas fa-search-plus"></i>
+                                放大
+                            </button>
+                            <button class="expand-all-btn" id="zoomOut">
+                                <i class="fas fa-search-minus"></i>
+                                缩小
+                            </button>
+                            <button class="expand-all-btn" id="resetZoom">
+                                <i class="fas fa-expand-arrows-alt"></i>
+                                重置
+                            </button>
                             <button class="expand-all-btn" id="expandAll">
                                 <i class="fas fa-expand-arrows-alt"></i>
                                 展开全部
@@ -2696,7 +3153,7 @@
                             </button>
                             <button class="expand-all-btn" id="downloadMindmap">
                                 <i class="fas fa-download"></i>
-                                下载思维导图
+                                下载
                             </button>
                         </div>
                     </div>
@@ -2773,6 +3230,16 @@
                                         • <strong>多态（Polymorphism）：</strong>同一个接口可以有多种不同的实现方式<br><br>
                                         <strong>实际应用：</strong>企业级应用开发、Android开发、大数据处理等领域
                                     </div>
+                                    <div class="knowledge-actions">
+                                        <button class="knowledge-btn primary">
+                                            <i class="fas fa-check"></i>
+                                            我会了
+                                        </button>
+                                        <button class="knowledge-btn outline">
+                                            <i class="fas fa-arrow-right"></i>
+                                            记一下
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             <div class="knowledge-item">
@@ -2787,6 +3254,16 @@
                                         • <strong>Starter依赖：</strong>一站式解决各种功能模块的依赖问题<br>
                                         • <strong>生产级特性：</strong>内置监控、健康检查、指标统计等<br><br>
                                         <strong>实际应用：</strong>构建 RESTful API、微服务架构、企业级应用开发
+                                    </div>
+                                    <div class="knowledge-actions">
+                                        <button class="knowledge-btn primary">
+                                            <i class="fas fa-check"></i>
+                                            我会了
+                                        </button>
+                                        <button class="knowledge-btn outline">
+                                            <i class="fas fa-arrow-right"></i>
+                                            记一下
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -2804,6 +3281,16 @@
                                         • <strong>存储引擎：</strong>InnoDB vs MyISAM的特点和选择<br><br>
                                         <strong>实际应用：</strong>数据库表设计、高并发场景优化、数据备份与恢复
                                     </div>
+                                    <div class="knowledge-actions">
+                                        <button class="knowledge-btn primary">
+                                            <i class="fas fa-check"></i>
+                                            我会了
+                                        </button>
+                                        <button class="knowledge-btn outline">
+                                            <i class="fas fa-arrow-right"></i>
+                                            记一下
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             <div class="knowledge-item">
@@ -2820,6 +3307,16 @@
                                         • <strong>Set/ZSet：</strong>集合和有序集合，适用于去重和排行<br><br>
                                         <strong>缓存策略：</strong>缓存雪崩、缓存击穿、缓存穿透的解决方案
                                     </div>
+                                    <div class="knowledge-actions">
+                                        <button class="knowledge-btn primary">
+                                            <i class="fas fa-check"></i>
+                                            我会了
+                                        </button>
+                                        <button class="knowledge-btn outline">
+                                            <i class="fas fa-arrow-right"></i>
+                                            记一下
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             <div class="knowledge-item">
@@ -2835,6 +3332,16 @@
                                         • <strong>并发集合：</strong>ConcurrentHashMap、BlockingQueue<br>
                                         • <strong>原子操作：</strong>AtomicInteger、CAS算法<br><br>
                                         <strong>常见问题：</strong>死锁、竞态条件、内存可见性问题的识别和解决
+                                    </div>
+                                    <div class="knowledge-actions">
+                                        <button class="knowledge-btn primary">
+                                            <i class="fas fa-check"></i>
+                                            我会了
+                                        </button>
+                                        <button class="knowledge-btn outline">
+                                            <i class="fas fa-arrow-right"></i>
+                                            记一下
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -3376,6 +3883,9 @@
                 }
             });
             
+            // 初始化AI助手状态
+            initializeAIAssistantState(activeSection);
+            
             // 初始化变量
             const currentApiKey = localStorage.getItem('ai_learning_companion_api_key') || '';
             
@@ -3564,6 +4074,9 @@
                             console.log('✅ 激活区域:', section.id);
                         }
                     });
+                    
+                    // 智能控制AI助手状态
+                    controlAIAssistantForSection(targetId);
                 });
             });
             
@@ -3604,6 +4117,9 @@
                             section.classList.add('active');
                         }
                     });
+                    
+                    // 智能控制AI助手状态
+                    controlAIAssistantForSection('mindmap');
                 });
             }
             
@@ -3985,6 +4501,70 @@
                 });
             }
             
+            // 智能控制AI助手状态的函数
+            function controlAIAssistantForSection(sectionType) {
+                const aiAssistant = document.querySelector('.ai-assistant');
+                const minimizeBtn = document.getElementById('minimizeAssistantBtn');
+                const icon = minimizeBtn ? minimizeBtn.querySelector('i') : null;
+                
+                if (!aiAssistant) return;
+                
+                console.log('🤖 根据页面类型控制AI助手:', sectionType);
+                
+                if (sectionType === 'mindmap') {
+                    // 思维导图页面：自动缩小
+                    if (!aiAssistant.classList.contains('minimized')) {
+                        aiAssistant.classList.add('minimized');
+                        if (icon) {
+                            icon.className = 'fas fa-expand';
+                        }
+                        if (minimizeBtn) {
+                            minimizeBtn.title = '扩大面板';
+                        }
+                        console.log('🔎 AI助手自动缩小（思维导图模式）');
+                    }
+                    
+                    // 触发思维导图的自动适配，确保内容可见
+                    setTimeout(() => {
+                        const mindmapContent = document.getElementById('mindmapContent');
+                        const svg = mindmapContent ? mindmapContent.querySelector('svg') : null;
+                        if (svg) {
+                            console.log('📊 思维导图页面激活，触发自动适配');
+                            // 尝试使用全局变量中的markmap实例
+                            if (window.currentMarkmapInstance && typeof window.currentMarkmapInstance.fit === 'function') {
+                                try {
+                                    window.currentMarkmapInstance.fit();
+                                    console.log('✅ 通过全局实例适配成功');
+                                } catch (e) {
+                                    console.warn('⚠️ 全局实例适配失败:', e);
+                                }
+                            }
+                        }
+                    }, 300);
+                } else {
+                    // 其他页面：自动展开
+                    if (aiAssistant.classList.contains('minimized')) {
+                        aiAssistant.classList.remove('minimized');
+                        if (icon) {
+                            icon.className = 'fas fa-compress';
+                        }
+                        if (minimizeBtn) {
+                            minimizeBtn.title = '缩小面板';
+                        }
+                        console.log('🔍 AI助手自动展开（非思维导图模式）');
+                    }
+                }
+            }
+            
+            // 初始化AI助手状态的函数
+            function initializeAIAssistantState(activeSection) {
+                console.log('🚀 初始化AI助手状态:', activeSection);
+                // 延迟执行，确保DOM完全加载
+                setTimeout(() => {
+                    controlAIAssistantForSection(activeSection);
+                }, 500);
+            }
+            
             // 切换AI助手大小的函数
             function toggleAssistantSize() {
                 const aiAssistant = document.querySelector('.ai-assistant');
@@ -4118,6 +4698,86 @@
             
             // 初始化面试题功能
             initInterviewQuestions();
+            
+            // 初始化知识点按钮功能
+            function initKnowledgeButtons() {
+                const knowledgeItems = document.querySelectorAll('.knowledge-item');
+                
+                knowledgeItems.forEach((item, index) => {
+                    const learnedBtn = item.querySelector('.knowledge-btn.primary');
+                    const noteBtn = item.querySelector('.knowledge-btn.outline');
+                    const knowledgeTitle = item.querySelector('.knowledge-title').textContent;
+                    
+                    // "我会了"按钮功能
+                    if (learnedBtn) {
+                        learnedBtn.addEventListener('click', function() {
+                            // 添加已掌握的视觉反馈
+                            item.style.opacity = '0.6';
+                            item.style.background = '#f0f9ff';
+                            item.style.border = '2px solid #22c55e';
+                            
+                            // 显示成功消息
+                            alert(`太棒了！您已掌握「${knowledgeTitle}」知识点。我们会记录您的学习进度。`);
+                            
+                            // 禁用按钮
+                            learnedBtn.innerHTML = '<i class="fas fa-check"></i> 已掌握';
+                            learnedBtn.style.backgroundColor = '#22c55e';
+                            learnedBtn.disabled = true;
+                            
+                            // 保存到本地存储
+                            const learnedKnowledge = JSON.parse(localStorage.getItem('learnedKnowledge') || '[]');
+                            if (!learnedKnowledge.includes(knowledgeTitle)) {
+                                learnedKnowledge.push(knowledgeTitle);
+                                localStorage.setItem('learnedKnowledge', JSON.stringify(learnedKnowledge));
+                            }
+                        });
+                    }
+                    
+                    // "记一下"按钮功能
+                    if (noteBtn) {
+                        noteBtn.addEventListener('click', function() {
+                            alert(`知识点「${knowledgeTitle}」已添加到您的学习笔记中，您可以稍后复习。`);
+                            
+                            // 保存到本地存储
+                            const savedNotes = JSON.parse(localStorage.getItem('knowledgeNotes') || '[]');
+                            const noteData = {
+                                title: knowledgeTitle,
+                                content: item.querySelector('.knowledge-text').textContent,
+                                timestamp: new Date().toISOString(),
+                                id: Date.now()
+                            };
+                            
+                            savedNotes.push(noteData);
+                            localStorage.setItem('knowledgeNotes', JSON.stringify(savedNotes));
+                            
+                            // 视觉反馈
+                            noteBtn.innerHTML = '<i class="fas fa-bookmark"></i> 已收藏';
+                            noteBtn.style.backgroundColor = '#f59e0b';
+                            noteBtn.style.color = 'white';
+                            noteBtn.style.borderColor = '#f59e0b';
+                        });
+                    }
+                });
+                
+                // 恢复已掌握的知识点状态
+                const learnedKnowledge = JSON.parse(localStorage.getItem('learnedKnowledge') || '[]');
+                knowledgeItems.forEach(item => {
+                    const title = item.querySelector('.knowledge-title').textContent;
+                    const learnedBtn = item.querySelector('.knowledge-btn.primary');
+                    
+                    if (learnedKnowledge.includes(title) && learnedBtn) {
+                        item.style.opacity = '0.6';
+                        item.style.background = '#f0f9ff';
+                        item.style.border = '2px solid #22c55e';
+                        learnedBtn.innerHTML = '<i class="fas fa-check"></i> 已掌握';
+                        learnedBtn.style.backgroundColor = '#22c55e';
+                        learnedBtn.disabled = true;
+                    }
+                });
+            }
+            
+            // 初始化知识点功能
+            initKnowledgeButtons();
             
             // 优化用户消息样式
             function optimizeUserMessageStyle() {
