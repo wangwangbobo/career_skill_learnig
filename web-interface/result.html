@@ -2451,6 +2451,9 @@
                 const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
                 svg.setAttribute('width', '100%');
                 svg.setAttribute('height', '600');
+                // 添加缩放效果的初始样式，使用小一点的比例，然后过渡到正常大小
+                svg.style.transform = 'scale(0.95)';
+                svg.style.opacity = '0.9';
                 svg.style.background = '#fff';
                 svg.style.border = '1px solid #e5e7eb';
                 svg.style.borderRadius = '8px';
@@ -2537,6 +2540,11 @@
                 // 添加专门的CSS样式来优化文字显示
                 const mindmapStyles = document.createElement('style');
                 mindmapStyles.innerHTML = `
+                    /* 温和的初始化过渡效果 */
+                    #mindmapContent svg {
+                        transition: all 0.5s ease-in-out;
+                    }
+                    
                     /* 优化思维导图文字显示效果 */
                     #mindmapContent svg text {
                         font-family: 'Segoe UI', 'Microsoft YaHei', Arial, sans-serif !important;
@@ -2610,20 +2618,13 @@
                 `;
                 document.head.appendChild(mindmapStyles);
                 
-                // 在创建完成后立即进行一次适配，确保内容可见
-                try {
-                    if (markmapInstance && typeof markmapInstance.fit === 'function') {
-                        markmapInstance.fit();
-                        console.log('🚀 初始适配完成');
-                    }
-                } catch (immediateError) {
-                    console.warn('⚠️ 初始适配失败:', immediateError);
-                }
+                // 不立即进行适配，等待完全初始化后再显示
+                console.log('✅ Markmap实例创建完成，等待初始化...');
                 
                 // 强化的多次重试适配机制
                 const autoFitWithRetry = () => {
-                    const maxRetries = 4;
-                    const delays = [100, 300, 600, 1000]; // 多次重试的延迟时间
+                    const maxRetries = 3; // 减少重试次数
+                    const delays = [200, 500, 800]; // 调整延迟时间
                     
                     const attemptFit = (attempt) => {
                         setTimeout(() => {
@@ -2641,7 +2642,7 @@
                                 };
                                 
                                 if (!hasValidContent()) {
-                                    console.log('🔍 SVG内容未正确渲染，跳过此次适配');
+                                    console.log('🔍 SVG内容未正确渲染，等待下次尝试');
                                     if (attempt < maxRetries - 1) {
                                         attemptFit(attempt + 1);
                                     }
@@ -2669,7 +2670,7 @@
                                         const transform = g.getAttribute('transform');
                                         if (transform && transform.includes('NaN')) {
                                             console.log('🚨 修复无效transform:', transform);
-                                            g.setAttribute('transform', 'translate(400, 300) scale(0.6)'); // 适应显示所有节点的缩放
+                                            g.setAttribute('transform', 'translate(400, 300) scale(0.6)');
                                         }
                                     });
                                     
@@ -2678,16 +2679,12 @@
                                         markmapInstance.fit();
                                         console.log(`✅ 第${attempt + 1}次适配成功`);
                                         
-                                        // 适配后再次检查并修复NaN问题
+                                        // 适配成功后，温和地过渡到正常大小
                                         setTimeout(() => {
-                                            const postFitElements = svg.querySelectorAll('g');
-                                            postFitElements.forEach(g => {
-                                                const transform = g.getAttribute('transform');
-                                                if (transform && transform.includes('NaN')) {
-                                                    g.setAttribute('transform', 'translate(400, 300) scale(0.6)');
-                                                }
-                                            });
+                                            svg.style.transform = 'scale(1)';
+                                            svg.style.opacity = '1';
                                         }, 100);
+                                        
                                         
                                     } else {
                                         console.warn('⚠️ markmapInstance或fit方法不可用');
@@ -2696,11 +2693,20 @@
                                         if (mainGroup) {
                                             mainGroup.setAttribute('transform', 'translate(400, 300) scale(0.55)');
                                             console.log('✅ 使用备用方案设置Transform');
+                                            
+                                            // 应用平滑过渡
+                                            setTimeout(() => {
+                                                svg.style.transform = 'scale(1)';
+                                                svg.style.opacity = '1';
+                                            }, 100);
                                         }
                                     }
                                     
                                 } else {
                                     console.warn('⚠️ 根节点无效，跳过自动适配');
+                                    if (attempt < maxRetries - 1) {
+                                        attemptFit(attempt + 1);
+                                    }
                                 }
                                 
                             } catch (error) {
@@ -2712,7 +2718,7 @@
                         }, delays[attempt]);
                     };
                     
-                    // 开始多次重试
+                    // 开始重试
                     attemptFit(0);
                 };
                 
