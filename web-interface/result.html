@@ -63,68 +63,6 @@
         window.openApiConfigModal = openApiConfigModal;
         window.closeApiConfigModal = closeApiConfigModal;
     </script>
-    
-    <style>
-        /* 强制样式覆盖 - 直接修复问题 */
-        .content-layout {
-            display: flex !important;
-            flex-direction: row !important;
-            width: 100% !important;
-            position: relative !important;
-            overflow: visible !important;
-            max-width: 100% !important;
-        }
-        
-        .content-sidebar {
-            width: 260px !important;
-            flex-shrink: 0 !important;
-            position: relative !important;
-            z-index: 1 !important;
-        }
-        
-        .content-main {
-            flex: 1 !important;
-            width: auto !important;
-            min-width: 0 !important;
-            position: relative !important;
-            display: flex !important;
-            flex-direction: column !important;
-            overflow: hidden !important;
-            z-index: 10 !important; /* 提高z-index确保内容在最上层 */
-            margin: 0 1rem !important;
-            background: white !important;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
-            border-radius: 8px !important;
-        }
-        
-        .ai-assistant {
-            width: 380px !important;
-            flex-shrink: 0 !important;
-            position: relative !important;
-            z-index: 2 !important;
-        }
-        
-        .books-grid,
-        .certificates-grid,
-        .courses-grid {
-            width: 100% !important;
-            display: grid !important;
-        }
-        
-        /* 移动端响应式布局 */
-        @media (max-width: 1024px) {
-            .content-layout {
-                flex-direction: column !important;
-            }
-            
-            .content-sidebar,
-            .content-main,
-            .ai-assistant {
-                width: 100% !important;
-                margin: 0 0 1rem 0 !important;
-            }
-        }
-    </style>
     <!-- 页面专用样式 -->
     <style>
         /* 结果页面专用样式 */
@@ -1003,6 +941,18 @@
             transform: translateY(-1px);
         }
 
+        .knowledge-btn.secondary {
+            background-color: white;
+            color: #6b7280;
+            border: 1px solid #d1d5db;
+        }
+
+        .knowledge-btn.secondary:hover {
+            background-color: #f9fafb;
+            color: #374151;
+            transform: translateY(-1px);
+        }
+
         .knowledge-btn.outline {
             background-color: white;
             color: #4f46e5;
@@ -1372,43 +1322,7 @@
             color: #475569;
         }
         
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            .books-grid,
-            .certificates-grid,
-            .courses-grid {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-                width: 100%;
-            }
-            
-            .book-card,
-            .certificate-card,
-            .course-card {
-                padding: 1rem;
-            }
-            
-            .book-actions,
-            .certificate-actions,
-            .course-actions {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-            
-            .chat-messages {
-                max-height: calc(400px - 130px);
-                padding: 0.75rem; /* 减小内边距 */
-            }
-            
-            .message-content {
-                max-width: 85%; /* AI消息小屏幕进一步增加消息宽度 */
-                padding: 0.4rem 0.6rem; /* 进一步减小内边距 */
-            }
-            
-            .user-message .message-content {
-                max-width: 80%; /* 用户消息小屏幕下保持合理宽度 */
-            }
-        }
+
         
         /* 证书样式 */
         .certificates-grid {
@@ -1846,277 +1760,6 @@
             gap: 0.5rem;
         }
 
-        /* 适配移动端 */
-        @media (max-width: 640px) {
-            .interview-actions {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-            
-            .interview-btn {
-                width: 100%;
-            }
-        }
-
-        /* 模态框样式 */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            display: none;
-            z-index: 9999; /* 确保在最顶层 */
-        }
-
-        .modal.show {
-            display: block !important; /* 强制显示 */
-        }
-
-        .modal-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(5px);
-            z-index: 10000;
-        }
-        
-        .modal-container {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            width: 95%;
-            max-width: 500px;
-            overflow: hidden;
-            z-index: 10001;
-        }
-        
-        .modal-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 1.25rem 1.5rem;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        
-        .modal-header h3 {
-            margin: 0;
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: #111827;
-            display: flex;
-            align-items: center;
-        }
-        
-        .modal-header h3 i {
-            margin-right: 0.75rem;
-            color: #6366f1;
-        }
-        
-        .modal-close {
-            background: none;
-            border: none;
-            width: 28px;
-            height: 28px;
-            border-radius: 6px;
-            color: #6b7280;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-        
-        .modal-close:hover {
-            background: #f3f4f6;
-            color: #111827;
-        }
-        
-        .modal-body {
-            padding: 1.5rem;
-        }
-        
-        .modal-description {
-            margin: 0 0 1.5rem 0;
-            font-size: 0.875rem;
-            line-height: 1.5;
-            color: #6b7280;
-        }
-        
-        .input-group {
-            margin-bottom: 1.5rem;
-        }
-        
-        .input-group label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: #374151;
-            margin-bottom: 0.5rem;
-        }
-        
-        .key-input-container {
-            position: relative;
-            display: flex;
-        }
-        
-        .modal-input {
-            flex: 1;
-            padding: 0.75rem 1rem;
-            border-radius: 6px;
-            border: 1px solid #d1d5db;
-            font-size: 0.875rem;
-            transition: border-color 0.3s ease;
-        }
-        
-        .modal-input:focus {
-            outline: none;
-            border-color: #6366f1;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        }
-        
-        .toggle-btn {
-            position: absolute;
-            right: 0.75rem;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: #6b7280;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .toggle-btn:hover {
-            color: #111827;
-        }
-        
-        .provider-select {
-            margin-bottom: 1.5rem;
-        }
-        
-        .provider-select label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: #374151;
-            margin-bottom: 0.5rem;
-        }
-        
-        .modal-select {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border-radius: 6px;
-            border: 1px solid #d1d5db;
-            font-size: 0.875rem;
-            background-color: white;
-        }
-        
-        .modal-select:focus {
-            outline: none;
-            border-color: #6366f1;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        }
-        
-        .provider-info {
-            display: flex;
-            background: #f9fafb;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-        }
-        
-        .provider-logo {
-            width: 48px;
-            height: 48px;
-            border-radius: 8px;
-            background: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 1rem;
-            flex-shrink: 0;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-        
-        .provider-details {
-            flex: 1;
-        }
-        
-        .provider-details h4 {
-            margin: 0 0 0.25rem 0;
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: #111827;
-        }
-        
-        .provider-details p {
-            margin: 0 0 0.5rem 0;
-            font-size: 0.75rem;
-            line-height: 1.4;
-            color: #6b7280;
-        }
-        
-        .provider-link {
-            font-size: 0.75rem;
-            color: #6366f1;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-        }
-        
-        .provider-link:hover {
-            text-decoration: underline;
-        }
-        
-        .modal-footer {
-            padding: 1rem 1.5rem;
-            border-top: 1px solid #e5e7eb;
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.75rem;
-        }
-        
-        .modal-btn {
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-size: 0.875rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .modal-btn-cancel {
-            background: white;
-            border: 1px solid #d1d5db;
-            color: #6b7280;
-        }
-        
-        .modal-btn-cancel:hover {
-            border-color: #9ca3af;
-            color: #111827;
-        }
-        
-        .modal-btn-confirm {
-            background: #6366f1;
-            border: 1px solid #6366f1;
-            color: white;
-        }
-        
-        .modal-btn-confirm:hover {
-            background: #4f46e5;
-            border-color: #4f46e5;
-        }
-        
         /* 响应式设计 */
         @media (max-width: 1400px) {
             .ai-assistant {
@@ -2170,6 +1813,27 @@
         }
         
         @media (max-width: 768px) {
+            .books-grid,
+            .certificates-grid,
+            .courses-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                width: 100%;
+            }
+            
+            .book-card,
+            .certificate-card,
+            .course-card {
+                padding: 1rem;
+            }
+            
+            .book-actions,
+            .certificate-actions,
+            .course-actions {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
             .results-header {
                 flex-direction: column;
                 align-items: flex-start;
@@ -2216,6 +1880,17 @@
             
             .user-message .message-content {
                 max-width: 80%; /* 用户消息小屏幕下保持合理宽度 */
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .interview-actions {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .interview-btn {
+                width: 100%;
             }
         }
         
@@ -2406,6 +2081,8 @@
             color: white;
         }
     </style>
+    
+
     
     <!-- 直接在head中加载Markmap库和样式 -->
     <!-- D3库 -->
@@ -3213,7 +2890,7 @@
                         <li class="nav-item" data-target="knowledge">
                             <i class="fas fa-lightbulb"></i>
                             <span>知识点</span>
-                            <span class="item-count" id="knowledgeCount">(20)</span>
+                            <span class="item-count" id="knowledgeCount">(1)</span>
                             <i class="fas fa-chevron-right nav-arrow"></i>
                         </li>
                         <li class="nav-item active" data-target="interview">
@@ -3338,7 +3015,7 @@
                         <h2>
                             <i class="fas fa-lightbulb"></i>
                             知识点
-                            <span class="section-count">(20)</span>
+                            <span class="section-count">(1)</span>
                         </h2>
                     </div>
                     <div class="section-content">
@@ -3368,121 +3045,10 @@
                                         <textarea class="knowledge-notes-input" placeholder="在此添加您的笔记..."></textarea>
                                     </div>
                                     <div class="knowledge-actions">
-                                        <button class="knowledge-btn primary">
-                                            <i class="fas fa-check"></i>
-                                            我会了
+                                        <button class="knowledge-btn secondary">
+                                            <i class="fas fa-forward"></i>
+                                            下一个
                                         </button>
-                                        <button class="knowledge-btn outline">
-                                            <i class="fas fa-arrow-right"></i>
-                                            记一下
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="knowledge-item">
-                                <div class="knowledge-header">
-                                    <div class="knowledge-title">Spring Boot微服务框架</div>
-                                </div>
-                                    <div class="knowledge-text">
-                                        <strong>核心概念：</strong>Spring Boot是由Pivotal团队提供的全新框架，旨在简化Spring应用的初始搭建和开发过程。<br><br>
-                                        <strong>主要特性：</strong><br>
-                                        • <strong>自动配置：</strong>根据项目依赖自动配置相关组件<br>
-                                        • <strong>内嵌服务器：</strong>无需部署WAR文件，直接运行JAR文件<br>
-                                        • <strong>Starter依赖：</strong>一站式解决各种功能模块的依赖问题<br>
-                                        • <strong>生产级特性：</strong>内置监控、健康检查、指标统计等<br><br>
-                                        <strong>实际应用：</strong>构建 RESTful API、微服务架构、企业级应用开发
-                                    </div>
-                                    <div class="knowledge-notes">
-                                        <textarea class="knowledge-notes-input" placeholder="在此添加您的笔记..."></textarea>
-                                    </div>
-                                    <div class="knowledge-actions">
-                                        <button class="knowledge-btn primary">
-                                            <i class="fas fa-check"></i>
-                                            我会了
-                                        </button>
-                                        <button class="knowledge-btn outline">
-                                            <i class="fas fa-arrow-right"></i>
-                                            记一下
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="knowledge-item">
-                                <div class="knowledge-header">
-                                    <div class="knowledge-title">MySQL数据库设计和优化</div>
-                                </div>
-                                <div class="knowledge-content">
-                                    <div class="knowledge-text">
-                                        <strong>核心概念：</strong>MySQL是世界上最流行的关系型数据库管理系统，支持ACID事务和完整的SQL标准。<br><br>
-                                        <strong>关键技术点：</strong><br>
-                                        • <strong>索引优化：</strong>B+树索引、联合索引、覆盖索引策略<br>
-                                        • <strong>查询优化：</strong>EXPLAIN分析、慢查询日志、查询缓存<br>
-                                        • <strong>事务管理：</strong>ACID特性、隔离级别、死锁避免<br>
-                                        • <strong>存储引擎：</strong>InnoDB vs MyISAM的特点和选择<br><br>
-                                        <strong>实际应用：</strong>数据库表设计、高并发场景优化、数据备份与恢复
-                                    </div>
-                                    <div class="knowledge-notes">
-                                        <textarea class="knowledge-notes-input" placeholder="在此添加您的笔记..."></textarea>
-                                    </div>
-                                    <div class="knowledge-actions">
-                                        <button class="knowledge-btn primary">
-                                            <i class="fas fa-check"></i>
-                                            我会了
-                                        </button>
-                                        <button class="knowledge-btn outline">
-                                            <i class="fas fa-arrow-right"></i>
-                                            记一下
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="knowledge-item">
-                                <div class="knowledge-header">
-                                    <div class="knowledge-title">Redis缓存策略和数据结构</div>
-                                </div>
-                                <div class="knowledge-content">
-                                    <div class="knowledge-text">
-                                        <strong>核心概念：</strong>Redis是一个开源的内存数据结构存储，用作数据库、缓存和消息代理。<br><br>
-                                        <strong>数据结构类型：</strong><br>
-                                        • <strong>String：</strong>简单键值对，适用于计数器、缓存等<br>
-                                        • <strong>Hash：</strong>键值对集合，适用于存储对象属性<br>
-                                        • <strong>List：</strong>有序列表，适用于队列、栈等场景<br>
-                                        • <strong>Set/ZSet：</strong>集合和有序集合，适用于去重和排行<br><br>
-                                        <strong>缓存策略：</strong>缓存雪崩、缓存击穿、缓存穿透的解决方案
-                                    </div>
-                                    <div class="knowledge-notes">
-                                        <textarea class="knowledge-notes-input" placeholder="在此添加您的笔记..."></textarea>
-                                    </div>
-                                    <div class="knowledge-actions">
-                                        <button class="knowledge-btn primary">
-                                            <i class="fas fa-check"></i>
-                                            我会了
-                                        </button>
-                                        <button class="knowledge-btn outline">
-                                            <i class="fas fa-arrow-right"></i>
-                                            记一下
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="knowledge-item">
-                                <div class="knowledge-header">
-                                    <div class="knowledge-title">多线程和并发编程</div>
-                                </div>
-                                <div class="knowledge-content">
-                                    <div class="knowledge-text">
-                                        <strong>核心概念：</strong>多线程编程是现代软件开发中提高程序性能和响应速度的关键技术。<br><br>
-                                        <strong>核心概念：</strong><br>
-                                        • <strong>线程池：</strong>ThreadPoolExecutor、工作队列、拒绝策略<br>
-                                        • <strong>锁机制：</strong>synchronized、ReentrantLock、读写锁<br>
-                                        • <strong>并发集合：</strong>ConcurrentHashMap、BlockingQueue<br>
-                                        • <strong>原子操作：</strong>AtomicInteger、CAS算法<br><br>
-                                        <strong>常见问题：</strong>死锁、竞态条件、内存可见性问题的识别和解决
-                                    </div>
-                                    <div class="knowledge-notes">
-                                        <textarea class="knowledge-notes-input" placeholder="在此添加您的笔记..."></textarea>
-                                    </div>
-                                    <div class="knowledge-actions">
                                         <button class="knowledge-btn primary">
                                             <i class="fas fa-check"></i>
                                             我会了
@@ -4575,6 +4141,7 @@
                 clearChatBtn.addEventListener('click', function() {
                     const chatMessages = document.getElementById('chatMessages');
                     if (chatMessages) {
+                        // 重置为欢迎消息
                         chatMessages.innerHTML = `
                             <div class="welcome-message">
                                 <div class="assistant-avatar">
@@ -4584,7 +4151,7 @@
                                 <p class="welcome-text">我可以回答您关于职业发展、技能提升的问题。请在下方输入您的问题！</p>
                             </div>
                         `;
-                        console.log('✅ 聊天记录已清空');
+                        console.log('🧽 聊天记录已清空');
                     }
                 });
             }
@@ -4598,20 +4165,19 @@
                         return;
                     }
                     
-                    // 提取聊天内容
-                    let chatContent = '聊天记录\n===================\n\n';
-                    const messages = chatMessages.querySelectorAll('.message');
+                    const messages = chatMessages.querySelectorAll('.user-message, .assistant-message');
+                    let chatContent = '聊天记录 - ' + new Date().toLocaleString() + '\n\n';
                     
-                    messages.forEach((message, index) => {
+                    messages.forEach(message => {
                         if (message.classList.contains('user-message')) {
-                            const content = message.querySelector('.message-content p');
+                            const content = message.querySelector('p');
                             if (content) {
-                                chatContent += `用户: ${content.textContent}\n\n`;
+                                chatContent += '用户： ' + content.textContent + '\n\n';
                             }
                         } else if (message.classList.contains('assistant-message')) {
-                            const content = message.querySelector('.message-content p');
+                            const content = message.querySelector('.message-content');
                             if (content) {
-                                chatContent += `AI助手: ${content.textContent}\n\n`;
+                                chatContent += 'AI助手： ' + content.textContent + '\n\n';
                             }
                         }
                     });
@@ -4661,6 +4227,8 @@
                     }
                 });
             }
+            
+
             
             // 智能控制AI助手状态的函数
             function controlAIAssistantForSection(sectionType) {
@@ -5054,14 +4622,91 @@
             // 初始化面试题笔记功能
             initInterviewNotes();
             
+            // 初始化知识点功能
+            initKnowledgeButtons();
+            
+            // 初始化知识点笔记功能
+            initKnowledgeNotes();
+            
+            // 初始化知识点笔记功能
+            function initKnowledgeNotes() {
+                console.log('📃 初始化知识点笔记功能...');
+                
+                // 获取所有笔记输入框
+                const notesInputs = document.querySelectorAll('.knowledge-notes-input');
+                
+                // 为每个输入框添加事件处理
+                notesInputs.forEach((input, index) => {
+                    // 获取知识点标题
+                    const knowledgeItem = input.closest('.knowledge-item');
+                    if (!knowledgeItem) return;
+                    
+                    const titleElement = knowledgeItem.querySelector('.knowledge-title');
+                    if (!titleElement) return;
+                    
+                    const knowledgeTitle = titleElement.textContent;
+                    const noteKey = `knowledge_note_${knowledgeTitle}`;
+                    
+                    // 设置标识以便区分
+                    input.setAttribute('data-note-key', noteKey);
+                    
+                    // 从localStorage加载已保存的笔记
+                    const savedNotes = JSON.parse(localStorage.getItem('knowledgeNotes') || '{}');
+                    if (savedNotes[noteKey]) {
+                        input.value = savedNotes[noteKey];
+                    }
+                    
+                    // 监听输入事件，自动保存
+                    input.addEventListener('input', function() {
+                        const notes = JSON.parse(localStorage.getItem('knowledgeNotes') || '{}');
+                        notes[noteKey] = this.value;
+                        localStorage.setItem('knowledgeNotes', JSON.stringify(notes));
+                        console.log(`✅ 已保存知识点笔记: ${noteKey}`);
+                        
+                        // 如果有内容，自动更新收藏按钮状态
+                        const noteBtn = knowledgeItem.querySelector('.knowledge-btn.outline');
+                        if (noteBtn) {
+                            if (this.value.trim() !== '') {
+                                if (!noteBtn.classList.contains('bookmarked')) {
+                                    noteBtn.innerHTML = '<i class="fas fa-bookmark"></i> 已收藏';
+                                    noteBtn.style.backgroundColor = '#f59e0b';
+                                    noteBtn.style.color = 'white';
+                                    noteBtn.style.borderColor = '#f59e0b';
+                                    noteBtn.classList.add('bookmarked');
+                                }
+                            } else {
+                                // 如果没有内容，则恢复收藏按钮状态
+                                if (noteBtn.classList.contains('bookmarked')) {
+                                    noteBtn.innerHTML = '<i class="fas fa-arrow-right"></i> 记一下';
+                                    noteBtn.style.backgroundColor = '';
+                                    noteBtn.style.color = '#4f46e5';
+                                    noteBtn.style.borderColor = '#4f46e5';
+                                    noteBtn.classList.remove('bookmarked');
+                                }
+                            }
+                        }
+                    });
+                });
+                
+                console.log(`✅ 知识点笔记功能初始化完成，共${notesInputs.length}个知识点`);
+            }
+            
             // 初始化知识点按钮功能
             function initKnowledgeButtons() {
                 const knowledgeItems = document.querySelectorAll('.knowledge-item');
                 
                 knowledgeItems.forEach((item, index) => {
+                    const nextBtn = item.querySelector('.knowledge-btn.secondary');
                     const learnedBtn = item.querySelector('.knowledge-btn.primary');
                     const noteBtn = item.querySelector('.knowledge-btn.outline');
                     const knowledgeTitle = item.querySelector('.knowledge-title').textContent;
+                    
+                    // "下一个"按钮功能
+                    if (nextBtn) {
+                        nextBtn.addEventListener('click', function() {
+                            alert(`已切换到下一个知识点！这里可以实现知识点切换逻辑。`);
+                        });
+                    }
                     
                     // "我会了"按钮功能
                     if (learnedBtn) {
@@ -5112,7 +4757,7 @@
                         noteBtn.addEventListener('click', function() {
                             // 获取已收藏的知识点列表
                             const savedNotes = JSON.parse(localStorage.getItem('knowledgeNotes') || '{}');
-                            const noteKey = `note_${knowledgeTitle}`;
+                            const noteKey = `knowledge_note_${knowledgeTitle}`;
                             const isBookmarked = noteBtn.classList.contains('bookmarked');
                             
                             if (isBookmarked) {
@@ -5176,7 +4821,7 @@
                 knowledgeItems.forEach(item => {
                     const title = item.querySelector('.knowledge-title').textContent;
                     const noteBtn = item.querySelector('.knowledge-btn.outline');
-                    const noteKey = `note_${title}`;
+                    const noteKey = `knowledge_note_${title}`;
                     
                     // 如果有笔记内容或者已被标记为收藏
                     if (savedNotes[noteKey] && savedNotes[noteKey].trim() !== '' && noteBtn) {
@@ -5189,129 +4834,6 @@
                 });
             }
             
-            // 初始化知识点功能
-            initKnowledgeButtons();
-            
-            // 初始化知识点笔记功能
-            initKnowledgeNotes();
-            
-            // 优化用户消息样式
-            function optimizeUserMessageStyle() {
-                const userMessages = document.querySelectorAll('.user-message .message-content');
-                userMessages.forEach(messageContent => {
-                    messageContent.style.setProperty('max-width', '220px', 'important');
-                    messageContent.style.setProperty('width', 'auto', 'important');
-                    messageContent.style.setProperty('min-width', 'auto', 'important');
-                    messageContent.style.setProperty('display', 'inline-flex', 'important');
-                    messageContent.style.setProperty('align-items', 'center', 'important');
-                    messageContent.style.setProperty('height', 'auto', 'important');
-                    messageContent.style.setProperty('padding', '0.35rem 0.6rem', 'important');
-                    messageContent.style.setProperty('line-height', '1.2', 'important');
-                    console.log('🔧 用户消息样式已优化');
-                });
-            }
-            
-            // 立即执行优化
-            optimizeUserMessageStyle();
-            
-            // 监听新消息的添加
-            const chatMessages = document.getElementById('chatMessages');
-            if (chatMessages) {
-                const observer = new MutationObserver(function(mutations) {
-                    mutations.forEach(function(mutation) {
-                        if (mutation.type === 'childList') {
-                            mutation.addedNodes.forEach(function(node) {
-                                if (node.nodeType === Node.ELEMENT_NODE && node.classList.contains('user-message')) {
-                                    const messageContent = node.querySelector('.message-content');
-                                    if (messageContent) {
-                                        messageContent.style.setProperty('max-width', '220px', 'important');
-                                        messageContent.style.setProperty('width', 'auto', 'important');
-                                        messageContent.style.setProperty('min-width', 'auto', 'important');
-                                        messageContent.style.setProperty('display', 'inline-flex', 'important');
-                                        messageContent.style.setProperty('align-items', 'center', 'important');
-                                        messageContent.style.setProperty('height', 'auto', 'important');
-                                        messageContent.style.setProperty('padding', '0.35rem 0.6rem', 'important');
-                                        messageContent.style.setProperty('line-height', '1.2', 'important');
-                                        console.log('🔧 新消息样式已优化');
-                                    }
-                                }
-                            });
-                        }
-                    });
-                });
-                
-                observer.observe(chatMessages, {
-                    childList: true,
-                    subtree: true
-                });
-            }
-            
-            // 定时检查和优化
-            setInterval(optimizeUserMessageStyle, 2000);
-
-            // 初始化知识点笔记功能
-            function initKnowledgeNotes() {
-                console.log('📓 初始化知识点笔记功能...');
-                
-                // 获取所有笔记输入框
-                const notesInputs = document.querySelectorAll('.knowledge-notes-input');
-                
-                // 为每个输入框添加事件处理
-                notesInputs.forEach((input, index) => {
-                    // 获取知识点标题
-                    const knowledgeItem = input.closest('.knowledge-item');
-                    if (!knowledgeItem) return;
-                    
-                    const titleElement = knowledgeItem.querySelector('.knowledge-title');
-                    if (!titleElement) return;
-                    
-                    const knowledgeTitle = titleElement.textContent;
-                    const noteKey = `note_${knowledgeTitle}`;
-                    
-                    // 设置标识以便区分
-                    input.setAttribute('data-note-key', noteKey);
-                    
-                    // 从localStorage加载已保存的笔记
-                    const savedNotes = JSON.parse(localStorage.getItem('knowledgeNotes') || '{}');
-                    if (savedNotes[noteKey]) {
-                        input.value = savedNotes[noteKey];
-                    }
-                    
-                    // 监听输入事件，自动保存
-                    input.addEventListener('input', function() {
-                        const notes = JSON.parse(localStorage.getItem('knowledgeNotes') || '{}');
-                        notes[noteKey] = this.value;
-                        localStorage.setItem('knowledgeNotes', JSON.stringify(notes));
-                        console.log(`✅ 已保存笔记: ${noteKey}`);
-                        
-                        // 如果有内容，自动更新收藏按钮状态
-                        const noteBtn = knowledgeItem.querySelector('.knowledge-btn.outline');
-                        if (noteBtn) {
-                            if (this.value.trim() !== '') {
-                                if (!noteBtn.classList.contains('bookmarked')) {
-                                    noteBtn.innerHTML = '<i class="fas fa-bookmark"></i> 已收藏';
-                                    noteBtn.style.backgroundColor = '#f59e0b';
-                                    noteBtn.style.color = 'white';
-                                    noteBtn.style.borderColor = '#f59e0b';
-                                    noteBtn.classList.add('bookmarked');
-                                }
-                            } else {
-                                // 如果没有内容，则恢复收藏按钮状态
-                                if (noteBtn.classList.contains('bookmarked')) {
-                                    noteBtn.innerHTML = '<i class="fas fa-arrow-right"></i> 记一下';
-                                    noteBtn.style.backgroundColor = '';
-                                    noteBtn.style.color = '#4f46e5';
-                                    noteBtn.style.borderColor = '#4f46e5';
-                                    noteBtn.classList.remove('bookmarked');
-                                }
-                            }
-                        }
-                    });
-                });
-                
-                console.log(`✅ 知识点笔记功能初始化完成，共${notesInputs.length}个知识点`);
-            }
-
         });
     </script>
 </body>
