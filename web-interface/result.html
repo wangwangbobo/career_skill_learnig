@@ -374,14 +374,39 @@
             width: 100%;
         }
         
-        /* 思维导图 */
+        /* 思维导图相关样式优化 */
         .mindmap-card {
             position: relative;
             border-radius: 8px;
             overflow: hidden;
-            height: 100%;
+            height: calc(100vh - 280px); /* 自适应高度 */
+            min-height: 70vh; /* 最小70%视口高度 */
+            max-height: 85vh; /* 最大85%视口高度 */
             display: flex;
             flex-direction: column;
+        }
+        
+        /* 思维导图内容区域（SVG或降级显示） */
+        #mindmapContent {
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* 防止滚动条 */
+        }
+        
+        /* SVG样式优化 */
+        #mindmapContent svg {
+            width: 100%;
+            height: 100%;
+            display: block; /* 移除默认的inline间隙 */
+        }
+        
+        /* 降级方案样式优化 */
+        .mindmap-fallback {
+            width: 100%;
+            height: 100%;
+            padding: 2rem;
+            box-sizing: border-box;
+            overflow-y: auto; /* 允许垂直滚动 */
         }
         
         .mindmap-controls {
@@ -417,7 +442,9 @@
             flex: 1;
             border: 1px solid #e5e7eb;
             border-radius: 8px;
-            min-height: 600px;
+            min-height: 70vh; /* 使用视口高度，自适应屏幕大小 */
+            max-height: 85vh; /* 限制最大高度 */
+            height: calc(100vh - 300px); /* 动态计算高度，减去顶部导航和底部空间 */
             width: 100%;
             box-sizing: border-box;
         }
@@ -1760,6 +1787,26 @@
             gap: 0.5rem;
         }
 
+        /* 大屏幕思维导图优化 */
+        @media (min-height: 900px) and (min-width: 1400px) {
+            .mindmap-card {
+                height: calc(100vh - 300px);
+                max-height: 90vh;
+            }
+            
+            .mindmap-content {
+                min-height: 75vh;
+            }
+        }
+        
+        /* 超大屏幕优化 */
+        @media (min-height: 1080px) {
+            .mindmap-card {
+                height: calc(100vh - 320px);
+                max-height: 95vh;
+            }
+        }
+        
         /* 响应式设计 */
         @media (max-width: 1400px) {
             .ai-assistant {
@@ -1809,6 +1856,13 @@
             
             .mindmap-content {
                 min-height: 400px;
+            }
+            
+            /* 移动设备思维导图高度优化 */
+            .mindmap-card {
+                height: calc(100vh - 200px);
+                min-height: 50vh;
+                max-height: 80vh;
             }
         }
         
