@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>职位选择 - 职途助手AI求职大师</title>
+    
+    <!-- 加载样式文件 -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- 加载 Font Awesome 图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- 页面专用样式 -->
+    <style>
+        /* 职位选择页面专用样式 */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .job-input-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 1.5rem;
+            box-sizing: border-box;
+        }
+        
+        .input-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        
+        /* 欢迎区域 */
+        .welcome-section {
+            text-align: center;
+            padding: 3rem 2rem 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .robot-avatar {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+        
+        .welcome-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0 0 0.5rem 0;
+        }
+        
+        .welcome-subtitle {
+            font-size: 1.75rem;
+            font-weight: 500;
+            margin: 0 0 1rem 0;
+        }
+        
+        .welcome-description {
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto 1.5rem;
+            line-height: 1.5;
+        }
+        
+        /* 职位选择区域 */
+        .job-selection {
+            padding: 2rem;
+            background: white;
+        }
+        
+        .question-title {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0 0 1.5rem 0;
+            color: #111827;
+        }
+        
+        /* 选项卡片 */
+        .choice-options {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .choice-option {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            background: #f9fafb;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .choice-option:hover {
+            border-color: #6366f1;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+        }
+        
+        .choice-option.selected {
+            border-color: #6366f1;
+            background: rgba(99, 102, 241, 0.05);
+        }
+        
+        .choice-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: #6366f1;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .choice-content {
+            flex: 1;
+        }
+        
+        .choice-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin: 0 0 0.25rem 0;
+            color: #111827;
+        }
+        
+        .choice-description {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin: 0;
+        }
+        
+        /* 输入详情卡片 */
+        .input-details {
+            padding: 0 2rem 2rem;
+            display: none;
+        }
+        
+        .input-section {
+            margin-bottom: 2rem;
+            display: none;
+        }
+        
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #111827;
+        }
+        
+        .section-header i {
+            margin-right: 0.5rem;
+            color: #6366f1;
+        }
+        
+        /* 上传方式选项卡 */
+        .upload-method-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .method-tab {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            background: #f9fafb;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #4b5563;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .method-tab.active {
+            background: #6366f1;
+            color: white;
+            border-color: #6366f1;
+        }
+        
+        /* 上传区域 */
+        .upload-content {
+            display: none;
+            margin-bottom: 1.5rem;
+        }
+        
+        .upload-content.active {
+            display: block;
+        }
+        
+        .upload-area {
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            transition: border-color 0.3s ease;
+        }
+        
+        .upload-area:hover {
+            border-color: #6366f1;
+        }
+        
+        .upload-area.active {
+            border-color: #6366f1;
+            background: rgba(99, 102, 241, 0.05);
+        }
+        
+        .upload-icon {
+            font-size: 2.5rem;
+            color: #9ca3af;
+            margin-bottom: 1rem;
+        }
+        
+        .upload-text {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #111827;
+        }
+        
+        .upload-hint {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 1.5rem;
+        }
+        
+        .upload-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            background: #6366f1;
+            color: white;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .upload-btn:hover {
+            background: #4f46e5;
+        }
+        
+        /* 文本输入区域 */
+        .text-input-area {
+            margin-bottom: 1.5rem;
+        }
+        
+        .job-textarea {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            resize: vertical;
+            min-height: 120px;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
+        }
+        
+        .job-textarea:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        /* 热门职位 */
+        .popular-jobs {
+            margin-bottom: 1.5rem;
+        }
+        
+        .popular-jobs-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        
+        .popular-jobs-header i {
+            color: #ef4444;
+            margin-right: 0.5rem;
+        }
+        
+        .popular-label {
+            margin-right: 0.5rem;
+        }
+        
+        .selected-job {
+            font-weight: 500;
+            color: #111827;
+        }
+        
+        .job-tags-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        
+        .job-tag {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            background: #f9fafb;
+            font-size: 0.875rem;
+            text-align: center;
+            color: #4b5563;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .job-tag:hover {
+            border-color: #6366f1;
+            color: #4f46e5;
+        }
+        
+        .job-tag.selected {
+            background: #6366f1;
+            color: white;
+            border-color: #6366f1;
+        }
+        
+        /* 自定义输入 */
+        .custom-job-input {
+            margin-top: 1rem;
+            display: none;
+        }
+        
+        .job-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            font-size: 0.875rem;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
+        }
+        
+        .job-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        /* 确认区域 */
+        .confirm-section {
+            text-align: center;
+            padding: 2rem;
+            background: #f9fafb;
+            border-radius: 12px;
+            margin-top: 1rem;
+        }
+        
+        .ready-question {
+            margin-bottom: 1.5rem;
+        }
+        
+        .ready-question h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0 0 0.5rem 0;
+            color: #111827;
+        }
+        
+        .ready-question p {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin: 0;
+        }
+        
+        .generate-btn {
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            background: #10b981;
+            color: white;
+            font-size: 1rem;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .generate-btn:not(:disabled):hover {
+            background: #059669;
+        }
+        
+        .generate-btn:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+        }
+        
+        .generate-btn i {
+            margin-right: 0.5rem;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .choice-options {
+                flex-direction: column;
+            }
+            
+            .job-input-container {
+                padding: 1rem;
+            }
+            
+            .welcome-section {
+                padding: 2rem 1rem;
+            }
+            
+            .welcome-title {
+                font-size: 2rem;
+            }
+            
+            .welcome-subtitle {
+                font-size: 1.5rem;
+            }
+            
+            .job-selection {
+                padding: 1.5rem;
+            }
+            
+            .confirm-section {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="job-input-container">
+        <!-- 欢迎区域 -->
+        <div class="input-card">
+            <div class="welcome-section">
+                <div class="robot-avatar">
+                    🤖
+                </div>
+                <h1 class="welcome-title">职途助手</h1>
+                <h2 class="welcome-subtitle">Hi 同学！</h2>
+                <p class="welcome-description">根据职位描述为你制定专属学习路线，提供从岗位分析到面试准备的全方位支持，轻松拿下offer~</p>
+            </div>
+            
+            <!-- 职位选择区域 -->
+            <div class="job-selection">
+                <h2 class="question-title">您是否有目标职位？</h2>
+                
+                <!-- 选择选项 -->
+                <div class="choice-options">
+                    <!-- 选项1：有目标职位 -->
+                    <div class="choice-option" id="hasTargetJob" data-choice="has-target">
+                        <div class="choice-icon">
+                            <i class="fas fa-upload"></i>
+                        </div>
+                        <div class="choice-content">
+                            <h3 class="choice-title">是，我有目标职位</h3>
+                            <p class="choice-description">上传职位描述文件或粘贴JD内容</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 选项2：没有目标职位 -->
+                    <div class="choice-option" id="noTargetJob" data-choice="no-target">
+                        <div class="choice-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="choice-content">
+                            <h3 class="choice-title">没有，我想探索岗位</h3>
+                            <p class="choice-description">从热门职位中选择或输入感兴趣的岗位名称</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 具体输入区域（初始隐藏） -->
+                <div class="input-details" id="inputDetails">
+                    <!-- 上传职位描述区域 -->
+                    <div class="input-section" id="uploadSection">
+                        <div class="section-header">
+                            <i class="fas fa-upload"></i>
+                            <span>上传或输入职位信息</span>
+                        </div>
+                        
+                        <div class="upload-method-tabs">
+                            <button class="method-tab active" id="fileUploadTab">上传职位描述</button>
+                            <button class="method-tab" id="textInputTab">或者直接输入</button>
+                        </div>
+                        
+                        <!-- 文件上传区域 -->
+                        <div class="upload-content active" id="fileUploadContent">
+                            <div class="upload-area" id="uploadArea">
+                                <div class="upload-icon">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                </div>
+                                <p class="upload-text">拖拽文件到此处，或点击选择文件</p>
+                                <p class="upload-hint">支持 TXT、DOC、DOCX、PDF 格式，最大 10MB</p>
+                                <input type="file" id="fileInput" accept=".txt,.doc,.docx,.pdf,image/*" style="display: none;">
+                                <button class="upload-btn" id="uploadBtn">
+                                    选择文件
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- 文本输入区域 -->
+                        <div class="upload-content" id="textInputContent">
+                            <div class="text-input-area">
+                                <textarea 
+                                    id="jobDescription" 
+                                    placeholder="粘贴职位描述内容..."
+                                    class="job-textarea"
+                                    rows="8"
+                                ></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 选择岗位区域 -->
+                    <div class="input-section" id="selectJobSection">
+                        <div class="section-header">
+                            <i class="fas fa-search"></i>
+                            <span>选择或输入岗位</span>
+                        </div>
+                        
+                        <!-- 热门职位标签 -->
+                        <div class="popular-jobs">
+                            <div class="popular-jobs-header">
+                                <i class="fas fa-fire"></i>
+                                <span class="popular-label">热门职位：</span>
+                                <span class="selected-job" id="selectedJobDisplay">已选择：后端工程师</span>
+                            </div>
+                            <div class="job-tags-grid">
+                                <button class="job-tag" data-job="前端工程师">前端工程师</button>
+                                <button class="job-tag selected" data-job="后端工程师">后端工程师</button>
+                                <button class="job-tag" data-job="AI工程师">AI工程师</button>
+                                <button class="job-tag" data-job="产品经理">产品经理</button>
+                                <button class="job-tag" data-job="数据分析师">数据分析师</button>
+                                <button class="job-tag" data-job="UI设计师">UI设计师</button>
+                                <button class="job-tag" data-job="测试工程师">测试工程师</button>
+                                <button class="job-tag" data-job="DevOps工程师">DevOps工程师</button>
+                                <button class="job-tag" data-job="移动端开发">移动端开发</button>
+                                <button class="job-tag" data-job="全栈工程师">全栈工程师</button>
+                                <button class="job-tag custom-input" data-job="custom">其他职位</button>
+                            </div>
+                            
+                            <!-- 自定义输入框（紧跟在热门职位下面） -->
+                            <div class="custom-job-input" id="customJobInput">
+                                <input 
+                                    type="text" 
+                                    id="jobTitle" 
+                                    placeholder="请输入您感兴趣的职位名称..." 
+                                    class="job-input"
+                                >
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 确认按钮区域 -->
+                    <div class="confirm-section">
+                        <div class="ready-question">
+                            <h3>准备好了吗？</h3>
+                            <p>点击下方按钮开始生成您的专属学习路线</p>
+                        </div>
+                        <button id="generateBtn" class="generate-btn">
+                            <i class="fas fa-book"></i>
+                            <span>生成学习路线</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 页面脚本 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化元素
+            const hasTargetJob = document.getElementById('hasTargetJob');
+            const noTargetJob = document.getElementById('noTargetJob');
+            const inputDetails = document.getElementById('inputDetails');
+            const uploadSection = document.getElementById('uploadSection');
+            const selectJobSection = document.getElementById('selectJobSection');
+            const fileUploadTab = document.getElementById('fileUploadTab');
+            const textInputTab = document.getElementById('textInputTab');
+            const fileUploadContent = document.getElementById('fileUploadContent');
+            const textInputContent = document.getElementById('textInputContent');
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const uploadBtn = document.getElementById('uploadBtn');
+            const jobTags = document.querySelectorAll('.job-tag');
+            const selectedJobDisplay = document.getElementById('selectedJobDisplay');
+            const customJobInput = document.getElementById('customJobInput');
+            const jobTitle = document.getElementById('jobTitle');
+            const jobDescription = document.getElementById('jobDescription');
+            const generateBtn = document.getElementById('generateBtn');
+            
+            // 当前选择状态
+            let currentChoice = null;
+            let selectedJob = '后端工程师';
+            let uploadedFile = null;
+            
+            // 1. 处理职位选择选项点击
+            hasTargetJob.addEventListener('click', function() {
+                // 更新选择状态
+                currentChoice = 'has-target';
+                hasTargetJob.classList.add('selected');
+                noTargetJob.classList.remove('selected');
+                
+                // 显示相应的输入区域
+                inputDetails.style.display = 'block';
+                uploadSection.style.display = 'block';
+                selectJobSection.style.display = 'none';
+                
+                // 更新生成按钮状态
+                updateGenerateButtonState();
+            });
+            
+            noTargetJob.addEventListener('click', function() {
+                // 更新选择状态
+                currentChoice = 'no-target';
+                noTargetJob.classList.add('selected');
+                hasTargetJob.classList.remove('selected');
+                
+                // 显示相应的输入区域
+                inputDetails.style.display = 'block';
+                uploadSection.style.display = 'none';
+                selectJobSection.style.display = 'block';
+                
+                // 更新生成按钮状态
+                updateGenerateButtonState();
+            });
+            
+            // 2. 处理上传方式选项卡
+            fileUploadTab.addEventListener('click', function() {
+                fileUploadTab.classList.add('active');
+                textInputTab.classList.remove('active');
+                fileUploadContent.classList.add('active');
+                textInputContent.classList.remove('active');
+                
+                // 更新生成按钮状态
+                updateGenerateButtonState();
+            });
+            
+            textInputTab.addEventListener('click', function() {
+                textInputTab.classList.add('active');
+                fileUploadTab.classList.remove('active');
+                textInputContent.classList.add('active');
+                fileUploadContent.classList.remove('active');
+                
+                // 更新生成按钮状态
+                updateGenerateButtonState();
+            });
+            
+            // 3. 处理文件上传
+            uploadBtn.addEventListener('click', function() {
+                fileInput.click();
+            });
+            
+            fileInput.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    uploadedFile = e.target.files[0];
+                    handleFileUpload(uploadedFile);
+                }
+            });
+            
+            // 拖放文件上传
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight() {
+                uploadArea.classList.add('active');
+            }
+            
+            function unhighlight() {
+                uploadArea.classList.remove('active');
+            }
+            
+            uploadArea.addEventListener('drop', handleDrop, false);
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                
+                if (files.length > 0) {
+                    uploadedFile = files[0];
+                    handleFileUpload(uploadedFile);
+                }
+            }
+            
+            function handleFileUpload(file) {
+                // 显示文件名
+                const uploadText = document.querySelector('.upload-text');
+                uploadText.textContent = `已选择文件: ${file.name}`;
+                
+                // 可以在这里添加文件类型验证等逻辑
+                console.log('文件已上传:', file.name, file.type, file.size);
+                
+                // 更新生成按钮状态
+                updateGenerateButtonState();
+            }
+            
+            // 4. 处理职位标签选择
+            jobTags.forEach(tag => {
+                tag.addEventListener('click', function() {
+                    const jobName = this.getAttribute('data-job');
+                    
+                    // 特殊处理自定义输入
+                    if (jobName === 'custom') {
+                        // 选中"其他职位"标签
+                        jobTags.forEach(t => t.classList.remove('selected'));
+                        this.classList.add('selected');
+                        
+                        // 显示自定义输入框
+                        customJobInput.style.display = 'block';
+                        selectedJob = '';
+                        selectedJobDisplay.textContent = '请输入职位名称';
+                        
+                        // 聚焦到输入框
+                        jobTitle.focus();
+                    } else {
+                        // 选中标签
+                        jobTags.forEach(t => t.classList.remove('selected'));
+                        this.classList.add('selected');
+                        
+                        // 隐藏自定义输入框
+                        customJobInput.style.display = 'none';
+                        
+                        // 更新选中的职位
+                        selectedJob = jobName;
+                        selectedJobDisplay.textContent = `已选择：${selectedJob}`;
+                    }
+                    
+                    // 更新生成按钮状态
+                    updateGenerateButtonState();
+                });
+            });
+            
+            // 5. 处理自定义职位输入
+            jobTitle.addEventListener('input', function() {
+                selectedJob = this.value.trim();
+                
+                if (selectedJob) {
+                    selectedJobDisplay.textContent = `已选择：${selectedJob}`;
+                } else {
+                    selectedJobDisplay.textContent = '请输入职位名称';
+                }
+                
+                // 更新生成按钮状态
+                updateGenerateButtonState();
+            });
+            
+            // 6. 处理文本输入
+            jobDescription.addEventListener('input', function() {
+                // 更新生成按钮状态
+                updateGenerateButtonState();
+            });
+            
+            // 7. 更新生成按钮状态
+            function updateGenerateButtonState() {
+                if (currentChoice === 'has-target') {
+                    if (fileUploadTab.classList.contains('active')) {
+                        // 文件上传模式
+                        generateBtn.disabled = !uploadedFile;
+                    } else {
+                        // 文本输入模式
+                        generateBtn.disabled = !jobDescription.value.trim();
+                    }
+                } else if (currentChoice === 'no-target') {
+                    // 职位选择模式
+                    generateBtn.disabled = !selectedJob;
+                } else {
+                    // 未选择任何选项
+                    generateBtn.disabled = true;
+                }
+            }
+            
+            // 8. 处理生成按钮点击
+            generateBtn.addEventListener('click', function() {
+                if (generateBtn.disabled) return;
+                
+                // 保存当前选择到本地存储
+                localStorage.setItem('currentJob', selectedJob);
+                
+                if (currentChoice === 'has-target' && textInputTab.classList.contains('active')) {
+                    localStorage.setItem('jobDescription', jobDescription.value.trim());
+                }
+                
+                // 显示加载进度界面
+                window.location.href = 'progress.html?job=' + encodeURIComponent(selectedJob);
+            });
+            
+            // 初始化设置
+            updateGenerateButtonState();
+        });
+    </script>
+</body>
+</html>

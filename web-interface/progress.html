@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>生成中 - 职途助手AI求职大师</title>
+    
+    <!-- 加载样式文件 -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- 加载 Font Awesome 图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- 页面专用样式 -->
+    <style>
+        /* 进度页面专用布局 */
+        .progress-page {
+            min-height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 50;
+        }
+        
+        /* 主要内容区域 */
+        .progress-main {
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 1600px;
+            height: 90vh;
+            display: flex;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        /* 左侧步骤面板 */
+        .steps-panel {
+            width: 420px;
+            background: #f9fafb;
+            border-right: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+        
+        .steps-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .steps-header h2 {
+            margin: 0 0 1.5rem 0;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #111827;
+        }
+        
+        .job-info {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .job-info .label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            font-weight: 500;
+            letter-spacing: 0.025em;
+        }
+        
+        .job-info .value {
+            font-weight: 600;
+            color: #111827;
+            font-size: 0.9rem;
+        }
+        
+        /* 总体进度 */
+        .overall-progress {
+            margin-top: 0;
+        }
+        
+        .overall-progress .progress-text {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .overall-progress .progress-text .progress-percentage {
+            margin-left: auto;
+            font-weight: 600;
+        }
+        
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: #3b82f6;
+            border-radius: 4px;
+            transition: width 0.5s ease-out;
+        }
+        
+        /* 步骤列表 */
+        .steps-list {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+        
+        /* 步骤图标 */
+        .step-icon {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-right: 0.75rem;
+            position: relative;
+            background: transparent;
+        }
+        
+        /* 添加右侧红线 */
+        .step-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            background: white;
+            position: relative;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        
+        .step-item.completed {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .step-item.active {
+            background: #eff6ff;
+            border: 1px solid #dbeafe;
+        }
+        
+        .step-item::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: -1px;
+            width: 2px;
+            background: #f87171;
+            opacity: 0.3;
+        }
+        
+        .step-item.active::after {
+            opacity: 1;
+        }
+        
+        /* 自定义圆圈图标 */
+        .circle-icon {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border-width: 2px;
+            border-style: solid;
+            position: relative;
+            box-sizing: border-box;
+            background: transparent;
+        }
+        
+        .step-item:not(.completed):not(.active) .circle-icon {
+            border-color: #d1d5db;
+        }
+        
+        .step-item.completed .circle-icon {
+            border-color: #22c55e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+        }
+        
+        .step-item.active .circle-icon {
+            border: 2px solid #3b82f6;
+            border-left-color: transparent;
+            background: transparent;
+        }
+        
+        /* 旋转动画 - 无闪烁持续旋转 */
+        .circle-icon.spinning {
+            animation: spin 1.5s linear infinite;
+        }
+        
+        /* 对勒图标 - 使用单个元素 */
+        .circle-icon .checkmark {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-right: 2px solid #22c55e;
+            border-bottom: 2px solid #22c55e;
+            transform: rotate(45deg);
+        }
+        
+        .step-item.active .step-icon i {
+            animation: spin 1s linear infinite;
+        }
+        
+        .step-item.completed .step-icon i {
+            animation: checkPop 0.5s ease-out;
+        }
+        
+        @keyframes checkPop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 步骤内容 */
+        .step-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .step-content h3 {
+            margin: 0 0 0.25rem 0;
+            font-size: 0.875rem;
+            font-weight: 500;
+            line-height: 1.25;
+        }
+        
+        .step-item:not(.completed):not(.active) .step-content h3 {
+            color: #6b7280;
+        }
+        
+        .step-item.completed .step-content h3 {
+            color: #166534;
+        }
+        
+        .step-item.active .step-content h3 {
+            color: #1d4ed8;
+        }
+        
+        .step-content p {
+            margin: 0;
+            font-size: 0.75rem;
+            line-height: 1.5;
+        }
+        
+        .step-item:not(.completed):not(.active) .step-content p {
+            color: #9ca3af;
+        }
+        
+        .step-item.completed .step-content p {
+            color: #16a34a;
+        }
+        
+        .step-item.active .step-content p {
+            color: #2563eb;
+        }
+        
+        /* 右侧日志面板 */
+        .logs-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .logs-header {
+            padding: 1.5rem;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .logs-header h2 {
+            margin: 0 0 0.25rem 0;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #111827;
+        }
+        
+        .logs-header p {
+            margin: 0;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        
+        /* 日志内容区域 */
+        .logs-content {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            background: #111827;
+            color: #22c55e;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.4;
+        }
+        
+        .log-entry {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.4rem;
+            line-height: 1.5;
+        }
+        
+        .log-time {
+            color: #6b7280;
+            font-size: 0.75rem;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+            width: 95px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .log-icon {
+            width: 18px;
+            height: 18px;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+            margin-top: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .log-icon.success {
+            color: #22c55e;
+        }
+        
+        .log-icon.error {
+            color: #ef4444;
+        }
+        
+        .log-icon.info {
+            color: #60a5fa;
+        }
+        
+        .log-icon.warning {
+            color: #f59e0b;
+        }
+        
+        .log-icon.processing {
+            color: #8b5cf6;
+        }
+        
+        .log-message {
+            flex: 1;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+        
+        .log-message.success {
+            color: #22c55e;
+        }
+        
+        .log-message.error {
+            color: #ef4444;
+        }
+        
+        .log-message.info {
+            color: #e5e7eb;
+        }
+        
+        .log-message.warning {
+            color: #fbbf24;
+        }
+        
+        .log-message.processing {
+            color: #c4b5fd;
+        }
+        
+        /* 光标 */
+        .log-cursor {
+            display: flex;
+            align-items: center;
+            margin-top: 0.25rem;
+        }
+        
+        .log-cursor .log-time {
+            color: #6b7280;
+        }
+        
+        .log-cursor .cursor {
+            color: #22c55e;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        /* 底部状态栏 */
+        .logs-controls {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #e5e7eb;
+            background: #f9fafb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .status-info {
+            display: flex;
+            align-items: center;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            background: #22c55e;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+            animation: pulse-dot 2s infinite;
+        }
+        
+        @keyframes pulse-dot {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+        
+        .completion-info {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .steps-panel {
+                width: 380px;
+            }
+            
+            .progress-main {
+                max-width: 1400px;
+            }
+        }
+        
+        @media (max-width: 1024px) {
+            .steps-panel {
+                width: 340px;
+            }
+            
+            .progress-main {
+                max-width: 1200px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .progress-page {
+                padding: 0.5rem;
+            }
+            
+            .progress-main {
+                flex-direction: column;
+                height: 90vh;
+                max-width: 100%;
+            }
+            
+            .steps-panel {
+                width: 100%;
+                max-height: 45vh;
+            }
+            
+            .steps-header {
+                padding: 1rem;
+            }
+            
+            .steps-list {
+                padding: 1rem;
+            }
+            
+            .logs-header {
+                padding: 1rem;
+            }
+            
+            .logs-content {
+                padding: 1rem;
+            }
+            
+            .step-item {
+                padding: 0.75rem;
+                margin-bottom: 0.75rem;
+            }
+            
+            .step-icon {
+                width: 20px;
+                height: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-page">
+        <!-- 主要内容区域 -->
+        <main class="progress-main">
+            <!-- 左侧步骤面板 -->
+            <section class="steps-panel">
+                <div class="steps-header">
+                    <h2>生成步骤</h2>
+                    
+                    <!-- 目标职位标签已移除 -->
+                    
+                    <div class="overall-progress">
+                        <div class="progress-text">
+                            <span>总体进度</span>
+                            <span class="progress-percentage" id="overallProgressText">0%</span>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="overallProgressBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="steps-list">
+                    <div class="step-item active" id="progressStep1">
+                        <div class="step-icon">
+                            <div class="circle-icon spinning"></div>
+                        </div>
+                        <div class="step-content">
+                            <h3>步骤 1: 分析职位需求</h3>
+                            <p>解析职位描述，提取关键技能需求和能力要求</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item" id="progressStep2">
+                        <div class="step-icon">
+                            <div class="circle-icon"></div>
+                        </div>
+                        <div class="step-content">
+                            <h3>步骤 2: 构建技能图谱</h3>
+                            <p>根据职位要求构建完整的技能知识图谱</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item" id="progressStep3">
+                        <div class="step-icon">
+                            <div class="circle-icon"></div>
+                        </div>
+                        <div class="step-content">
+                            <h3>步骤 3: 生成学习内容</h3>
+                            <p>为智能体能够生成对应的学习资料和练习题</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item" id="progressStep4">
+                        <div class="step-icon">
+                            <div class="circle-icon"></div>
+                        </div>
+                        <div class="step-content">
+                            <h3>步骤 4: 优化内容质量</h3>
+                            <p>检查并优化生成内容的准确性和实用性</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item" id="progressStep5">
+                        <div class="step-icon">
+                            <div class="circle-icon"></div>
+                        </div>
+                        <div class="step-content">
+                            <h3>步骤 5: 完成生成</h3>
+                            <p>整理所有学习资料，准备展示给用户</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 右侧日志面板 -->
+            <section class="logs-panel">
+                <div class="logs-header">
+                    <h2><span id="jobTitle" style="color: #4f46e5;">后端工程师</span>学习资料生成日志</h2>
+                    <p>实时显示生成过程的详细信息</p>
+                </div>
+                
+                <div class="logs-content" id="progressLogContent">
+                </div>
+                
+                <div class="logs-controls">
+                    <div class="status-info">
+                        <div class="status-indicator"></div>
+                        <span id="progressStatusText">正在生成中...</span>
+                    </div>
+                    <div class="completion-info" id="completionInfo" style="display: none;">
+                        2秒后自动跳转到学习资料页面
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <!-- 加载JavaScript -->
+    <script src="app.js"></script>
+    <script>
+        // 进度页面专用脚本
+        class ProgressPage {
+            constructor() {
+                this.initElements();
+                this.bindEvents();
+                this.loadJobInfo();
+                this.startProgress();
+            }
+            
+            initElements() {
+                this.jobTitleEl = document.getElementById('jobTitle');
+                this.overallProgressText = document.getElementById('overallProgressText');
+                this.overallProgressBar = document.getElementById('overallProgressBar');
+                this.progressStatusText = document.getElementById('progressStatusText');
+                this.progressLogContent = document.getElementById('progressLogContent');
+                
+                this.progressSteps = {
+                    step1: document.getElementById('progressStep1'),
+                    step2: document.getElementById('progressStep2'),
+                    step3: document.getElementById('progressStep3'),
+                    step4: document.getElementById('progressStep4'),
+                    step5: document.getElementById('progressStep5')
+                };
+            }
+            
+            bindEvents() {
+                // 移除清空日志按钮的事件绑定，因为我们已经移除了该按钮
+                console.log('🔗 进度页面事件绑定完成');
+            }
+            
+            loadJobInfo() {
+                // 从URL参数或localStorage加载职位信息
+                const urlParams = new URLSearchParams(window.location.search);
+                const jobTitle = urlParams.get('job') || localStorage.getItem('currentJob') || '前端工程师';
+                const contentTypes = urlParams.get('types') || localStorage.getItem('contentTypes') || '知识点,面试题';
+                
+                this.jobTitleEl.textContent = jobTitle;
+                this.addLog('info', `🎯 目标职位: ${jobTitle}`);
+                this.addLog('info', `📋 生成内容: ${contentTypes}`);
+            }
+            
+            async startProgress() {
+                this.addLog('info', '🚀 开始生成学习资料...');
+                this.updateStatus('正在初始化生成环境...');
+                
+                const steps = [
+                    { 
+                        step: 1, 
+                        duration: 3000, 
+                        logs: [
+                            { level: 'processing', message: '🔍 正在分析职位描述...', delay: 500 },
+                            { level: 'info', message: '📋 职位信息: 后端工程师', delay: 1000 },
+                            { level: 'info', message: '📝 选择内容: 知识点, 面试题, 推荐书籍, 证书, 课程', delay: 1500 },
+                            { level: 'processing', message: '🔍 正在分析职位描述...', delay: 2000 },
+                            { level: 'success', message: '✅ 识别到前端开发相关技能要求', delay: 2500 }
+                        ]
+                    },
+                    { 
+                        step: 2, 
+                        duration: 4000, 
+                        logs: [
+                            { level: 'info', message: '📚 提取关键技术栈: React, JavaScript, CSS, HTML', delay: 500 },
+                            { level: 'processing', message: '🎨 构建技能知识图谱...', delay: 1500 },
+                            { level: 'success', message: '✅ 生成Web前端开发技能树', delay: 2500 },
+                            { level: 'success', message: '✅ 生成JavaScript核心技术分支', delay: 3000 },
+                            { level: 'success', message: '✅ 生成React框架技能分支', delay: 3500 }
+                        ]
+                    },
+                    { 
+                        step: 3, 
+                        duration: 6000, 
+                        logs: [
+                            { level: 'success', message: '✅ 生成开发工具与工程化分支', delay: 500 },
+                            { level: 'processing', message: '📖 开始生成学习内容...', delay: 1000 },
+                            { level: 'info', message: '📚 生成知识点内容...', delay: 2000 },
+                            { level: 'success', message: '✅ 知识点内容生成完成 (20项)', delay: 4000 },
+                            { level: 'error', message: '❓ 生成面试题内容...', delay: 5000 }
+                        ]
+                    },
+                    { 
+                        step: 4, 
+                        duration: 3000, 
+                        logs: [
+                            { level: 'success', message: '✅ 面试题内容生成完成 (15题)', delay: 1000 },
+                            { level: 'processing', message: '📖 生成推荐书籍...', delay: 1500 },
+                            { level: 'success', message: '✅ 推荐书籍生成完成 (8本)', delay: 2500 }
+                        ]
+                    },
+                    { 
+                        step: 5, 
+                        duration: 2000, 
+                        logs: [
+                            { level: 'success', message: '✅ 证书推荐生成完成 (5个)', delay: 500 },
+                            { level: 'success', message: '✅ 课程推荐生成完成 (12门)', delay: 1000 },
+                            { level: 'success', message: '🎉 所有学习资料生成完成！', delay: 1500 }
+                        ]
+                    }
+                ];
+                
+                for (let i = 0; i < steps.length; i++) {
+                    const { step, duration, logs } = steps[i];
+                    
+                    // 设置当前步骤为活跃状态
+                    this.updateProgressStep(step, 'active');
+                    
+                    // 添加该步骤的所有日志
+                    for (const log of logs) {
+                        await this.sleep(log.delay);
+                        this.addLog(log.level, log.message);
+                    }
+                    
+                    // 设置当前步骤为完成状态
+                    this.updateProgressStep(step, 'completed');
+                }
+                
+                // 生成完成
+                this.updateStatus('生成完成！准备跳转到结果页面...');
+                this.showCompletionMessage();
+                
+                // 延迟后跳转到结果页面
+                setTimeout(() => {
+                    localStorage.setItem('showResults', 'true');
+                    localStorage.setItem('generationCompleted', 'true');
+                    
+                    // 获取当前职位名称
+                    const jobTitle = this.jobTitleEl.textContent || localStorage.getItem('currentJob') || '职位';
+                    
+                    // 跳转到结果页面
+                    window.location.href = `result.html?job=${encodeURIComponent(jobTitle)}`;
+                }, 3000);
+            }
+            
+            updateProgressStep(stepNumber, status) {
+                const step = this.progressSteps[`step${stepNumber}`];
+                if (!step) return;
+                
+                // 移除所有状态类
+                step.classList.remove('completed', 'active');
+                
+                const icon = step.querySelector('.step-icon');
+                if (icon) {
+                    switch (status) {
+                        case 'completed':
+                            step.classList.add('completed');
+                            icon.innerHTML = '<div class="circle-icon"><div class="checkmark"></div></div>';
+                            break;
+                        case 'active':
+                            step.classList.add('active');
+                            icon.innerHTML = '<div class="circle-icon spinning"></div>';
+                            break;
+                        default:
+                            // 未开始的步骤显示空心圆圈
+                            icon.innerHTML = '<div class="circle-icon"></div>';
+                            break;
+                    }
+                }
+                
+                // 计算总体进度
+                const completedSteps = Object.values(this.progressSteps).filter(s => 
+                    s && s.classList.contains('completed')
+                ).length;
+                const progressPercent = Math.round((completedSteps / 5) * 100);
+                
+                // 更新总体进度
+                this.updateOverallProgress(progressPercent);
+            }
+            
+            updateOverallProgress(percent) {
+                if (this.overallProgressBar) {
+                    this.overallProgressBar.style.width = `${percent}%`;
+                }
+                
+                if (this.overallProgressText) {
+                    this.overallProgressText.textContent = `${percent}%`;
+                }
+            }
+            
+            updateStatus(text) {
+                if (this.progressStatusText) {
+                    this.progressStatusText.textContent = text;
+                }
+            }
+            
+            showCompletionMessage() {
+                const completionInfo = document.getElementById('completionInfo');
+                if (completionInfo) {
+                    completionInfo.style.display = 'block';
+                }
+                
+                if (this.progressStatusText) {
+                    this.progressStatusText.textContent = '生成完成';
+                }
+            }
+            
+            addLog(level, message) {
+                if (!this.progressLogContent) return;
+                
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = document.createElement('div');
+                logEntry.className = 'log-entry';
+                
+                let iconClass = 'fas fa-info-circle';
+                switch(level) {
+                    case 'success':
+                        iconClass = 'fas fa-check-circle';
+                        break;
+                    case 'error':
+                        iconClass = 'fas fa-question-circle';
+                        break;
+                    case 'info':
+                        iconClass = 'fas fa-clock';
+                        break;
+                    case 'warning':
+                        iconClass = 'fas fa-exclamation-triangle';
+                        break;
+                    case 'processing':
+                        iconClass = 'fas fa-cog';
+                        break;
+                    default:
+                        iconClass = 'fas fa-info-circle';
+                }
+                
+                logEntry.innerHTML = `
+                    <span class="log-time">[${timestamp}]</span>
+                    <i class="log-icon ${level} ${iconClass}"></i>
+                    <span class="log-message ${level}">${message}</span>
+                `;
+                
+                this.progressLogContent.appendChild(logEntry);
+                
+                // 自动滚动到底部
+                this.progressLogContent.scrollTop = this.progressLogContent.scrollHeight;
+                
+                // 更新光标
+                this.updateCursor();
+            }
+            
+            updateCursor() {
+                // 移除旧的光标
+                const oldCursor = this.progressLogContent.querySelector('.log-cursor');
+                if (oldCursor) {
+                    oldCursor.remove();
+                }
+                
+                // 添加新的光标
+                const cursor = document.createElement('div');
+                cursor.className = 'log-cursor';
+                cursor.innerHTML = `
+                    <span class="log-time">[${new Date().toLocaleTimeString()}]</span>
+                    <span class="cursor">▋</span>
+                `;
+                this.progressLogContent.appendChild(cursor);
+            }
+            
+            clearLogs() {
+                if (this.progressLogContent) {
+                    this.progressLogContent.innerHTML = `
+                        <div class="log-welcome">
+                            <i class="fas fa-rocket"></i>
+                            日志已清空...
+                        </div>
+                    `;
+                }
+            }
+            
+            sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            new ProgressPage();
+        });
+    </script>
+</body>
+</html>
