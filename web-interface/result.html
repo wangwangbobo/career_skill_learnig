@@ -3332,33 +3332,7 @@ console.log(counter()); // 2</code></pre>
                                 </div>
                             </div>
                             
-                            <!-- 答案显示区域 -->
-                            <div class="answer-area" id="answer-js-closure">
-                                <div class="answer-title">
-                                    <i class="fas fa-check-circle"></i>
-                                    参考答案
-                                </div>
-                                <div class="answer-content">
-                                    <h4>标准答案要点</h4>
-                                    <p>这里会显示该面试题的详细参考答案，包括核心概念、实际应用、代码示例等内容。</p>
-                                    
-                                    <h4>评分标准</h4>
-                                    <ul>
-                                        <li><strong>基础概念理解</strong>：能够准确说出核心定义</li>
-                                        <li><strong>原理阐述</strong>：能够解释工作机制和原理</li>
-                                        <li><strong>实际应用</strong>：能够举出具体的应用场景</li>
-                                        <li><strong>代码示例</strong>：能够提供相关的代码演示</li>
-                                    </ul>
-                                    
-                                    <h4>加分项</h4>
-                                    <ul>
-                                        <li>主动提及相关的扩展知识点</li>
-                                        <li>分析可能的优缺点或注意事项</li>
-                                        <li>展示实际项目经验</li>
-                                    </ul>
-                                </div>
-                            </div>
-                            
+
                             <!-- 答案显示区域 -->
                             <div class="answer-area" id="answer-js-closure">
                                 <div class="answer-title">
@@ -5340,18 +5314,24 @@ console.log(person.getAge()); // 25</code></pre>
                 const answerArea = document.getElementById(`answer-${questionId}`);
                 const answerBtn = document.querySelector(`[onclick="showAnswer('${questionId}')"]`);
                 
+                console.log('🔍 查找答案区域:', `answer-${questionId}`, answerArea);
+                console.log('🔍 查找答案按钮:', answerBtn);
+                
                 if (!answerArea) {
                     console.error('未找到答案区域');
+                    alert('未找到答案区域，请检查页面结构');
                     return;
                 }
                 
                 // 切换显示状态
                 if (answerArea.classList.contains('show')) {
+                    console.log('🙈 隐藏答案');
                     answerArea.classList.remove('show');
                     if (answerBtn) {
                         answerBtn.innerHTML = '<i class="fas fa-eye"></i>查看答案';
                     }
                 } else {
+                    console.log('👀 显示答案');
                     answerArea.classList.add('show');
                     if (answerBtn) {
                         answerBtn.innerHTML = '<i class="fas fa-eye-slash"></i>隐藏答案';
