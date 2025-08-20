@@ -14,6 +14,60 @@
     <!-- 加载 Font Awesome 图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     
+    <!-- API配置相关全局函数 -->
+    <script>
+        // 全局API配置函数
+        function openApiConfigModal() {
+            console.log('🚀 打开API配置模态框');
+            const apiConfigModal = document.getElementById('apiConfigModal');
+            const apiKeyInput = document.getElementById('apiKey');
+            const apiProviderSelect = document.getElementById('apiProvider');
+            
+            if (!apiConfigModal) {
+                console.error('找不到API配置模态框');
+                alert('API配置模态框未找到，请刷新页面重试');
+                return;
+            }
+            
+            // 从localStorage加载已保存的配置
+            if (apiKeyInput) {
+                const savedApiKey = localStorage.getItem('ai_learning_companion_api_key');
+                apiKeyInput.value = savedApiKey || '';
+            }
+            
+            if (apiProviderSelect) {
+                const savedApiProvider = localStorage.getItem('apiProvider');
+                apiProviderSelect.value = savedApiProvider || 'alibaba';
+                // 显示对应的提供商信息
+                if (typeof switchProviderInfo === 'function') {
+                    switchProviderInfo(apiProviderSelect.value);
+                }
+            }
+            
+            // 显示模态框
+            apiConfigModal.style.display = 'flex';
+            apiConfigModal.classList.add('show');
+            
+            console.log('✅ API配置模态框已显示');
+        }
+        
+        // 全局关闭模态框函数
+        function closeApiConfigModal() {
+            console.log('关闭API配置模态框');
+            const apiConfigModal = document.getElementById('apiConfigModal');
+            if (apiConfigModal) {
+                apiConfigModal.classList.remove('show');
+                setTimeout(() => {
+                    apiConfigModal.style.display = 'none';
+                }, 300);
+            }
+        }
+        
+        // 确保函数也在window对象上
+        window.openApiConfigModal = openApiConfigModal;
+        window.closeApiConfigModal = closeApiConfigModal;
+    </script>
+
     <!-- 页面专用样式 -->
     <style>
         /* 职位选择页面专用样式 */
@@ -25,6 +79,57 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+        }
+        
+        /* 顶部工具栏 */
+        .top-toolbar {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1000;
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .toolbar-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            font-size: 0.875rem;
+            color: #4b5563;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .toolbar-btn:hover {
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-color: #6366f1;
+            color: #6366f1;
+            transform: translateY(-1px);
+        }
+        
+        .toolbar-btn.configured {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: #10b981;
+            color: #10b981;
+        }
+        
+        .toolbar-btn.configured:hover {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: #059669;
+            color: #059669;
+        }
+        
+        .toolbar-btn i {
+            margin-right: 0.5rem;
+            font-size: 0.875rem;
         }
         
         .job-input-container {
@@ -371,7 +476,7 @@
         /* 确认区域 */
         .confirm-section {
             text-align: center;
-            padding: 2rem;
+            padding: 2.5rem 2rem;
             background: #f9fafb;
             border-radius: 12px;
             margin-top: 1rem;
@@ -395,21 +500,22 @@
         }
         
         .generate-btn {
-            padding: 0.75rem 2rem;
+            padding: 1rem 2rem;
             border-radius: 8px;
-            background: #10b981;
+            background: #6366f1;
             color: white;
-            font-size: 1rem;
+            font-size: 1.125rem;
             font-weight: 500;
             border: none;
             cursor: pointer;
             transition: background 0.3s ease;
             display: inline-flex;
             align-items: center;
+            min-height: 56px;
         }
         
         .generate-btn:not(:disabled):hover {
-            background: #059669;
+            background: #4f46e5;
         }
         
         .generate-btn:disabled {
@@ -421,6 +527,233 @@
             margin-right: 0.5rem;
         }
         
+        /* API配置模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.show {
+            display: flex !important;
+        }
+        
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .modal-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            z-index: 10001;
+            position: relative;
+        }
+        
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f9fafb;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #111827;
+            display: flex;
+            align-items: center;
+        }
+        
+        .modal-header h3 i {
+            margin-right: 0.75rem;
+            color: #6366f1;
+        }
+        
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            border: none;
+            background: #f3f4f6;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .modal-description {
+            margin: 0 0 1.5rem 0;
+            color: #6b7280;
+        }
+        
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #111827;
+        }
+        
+        .key-input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        
+        .modal-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            padding-right: 3rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            box-sizing: border-box;
+        }
+        
+        .toggle-btn {
+            position: absolute;
+            right: 0.75rem;
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: none;
+            color: #6b7280;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .provider-select {
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            background: white;
+            box-sizing: border-box;
+        }
+        
+        .provider-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #f9fafb;
+        }
+        
+        .provider-details h4 {
+            margin: 0 0 0.25rem 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #111827;
+        }
+        
+        .provider-details p {
+            margin: 0 0 0.5rem 0;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        
+        .provider-link {
+            font-size: 0.875rem;
+            color: #6366f1;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 0.75rem;
+            justify-content: space-between;
+            background: #f9fafb;
+        }
+        
+        .modal-btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .modal-btn-test {
+            background: #3b82f6;
+            color: white;
+            margin-right: auto;
+        }
+        
+        .modal-btn-test:hover {
+            background: #2563eb;
+        }
+        
+        .modal-btn-test:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        .modal-btn-test.testing {
+            background: #f59e0b;
+        }
+        
+        .modal-btn-test.success {
+            background: #10b981;
+        }
+        
+        .modal-btn-test.error {
+            background: #ef4444;
+        }
+        
+        .modal-btn-cancel {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        .modal-btn-confirm {
+            background: #6366f1;
+            color: white;
+        }
+
         /* 响应式设计 */
         @media (max-width: 768px) {
             .choice-options {
@@ -450,10 +783,23 @@
             .confirm-section {
                 padding: 1.5rem;
             }
+            
+            .top-toolbar {
+                top: 0.5rem;
+                right: 0.5rem;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- 顶部工具栏 -->
+    <div class="top-toolbar">
+        <button class="toolbar-btn" onclick="openApiConfigModal()">
+            <i class="fas fa-cog"></i>
+            配置API密钥
+        </button>
+    </div>
+
     <div class="job-input-container">
         <!-- 欢迎区域 -->
         <div class="input-card">
@@ -827,7 +1173,455 @@
             
             // 初始化设置
             updateGenerateButtonState();
+            
+            // 检查并更新API配置按钮状态
+            updateApiConfigButtonState();
+            
+            // API配置相关事件处理
+            setTimeout(() => {
+                const apiConfigModal = document.getElementById('apiConfigModal');
+                const apiConfigClose = document.getElementById('apiConfigClose');
+                const apiConfigCancel = document.getElementById('apiConfigCancel');
+                const apiConfigConfirm = document.getElementById('apiConfigConfirm');
+                const testConnectionBtn = document.getElementById('testConnectionBtn');
+                const toggleApiKey = document.getElementById('toggleApiKey');
+                const apiKey = document.getElementById('apiKey');
+                
+                // 初始化模态框事件监听器
+                if (apiConfigClose) {
+                    apiConfigClose.addEventListener('click', closeApiConfigModal);
+                }
+                
+                if (apiConfigCancel) {
+                    apiConfigCancel.addEventListener('click', closeApiConfigModal);
+                }
+                
+                // 点击遮罩层关闭模态框
+                const modalOverlay = apiConfigModal ? apiConfigModal.querySelector('.modal-overlay') : null;
+                if (modalOverlay) {
+                    modalOverlay.addEventListener('click', closeApiConfigModal);
+                }
+                
+                // 密码可见性切换
+                if (toggleApiKey && apiKey) {
+                    toggleApiKey.addEventListener('click', function() {
+                        if (apiKey.type === 'password') {
+                            apiKey.type = 'text';
+                            this.querySelector('i').className = 'fas fa-eye-slash';
+                        } else {
+                            apiKey.type = 'password';
+                            this.querySelector('i').className = 'fas fa-eye';
+                        }
+                    });
+                }
+                
+                // 模型提供商切换事件
+                const apiProviderSelect = document.getElementById('apiProvider');
+                if (apiProviderSelect) {
+                    // 初始化显示
+                    switchProviderInfo(apiProviderSelect.value);
+                    
+                    // 监听选择变化
+                    apiProviderSelect.addEventListener('change', function() {
+                        switchProviderInfo(this.value);
+                    });
+                }
+                
+                // 连通性测试按钮事件
+                if (testConnectionBtn) {
+                    testConnectionBtn.addEventListener('click', function() {
+                        testApiConnection();
+                    });
+                }
+                
+                // 保存API配置
+                if (apiConfigConfirm) {
+                    apiConfigConfirm.addEventListener('click', function() {
+                        const apiKeyValue = apiKey ? apiKey.value.trim() : '';
+                        const apiProvider = document.getElementById('apiProvider');
+                        const apiProviderValue = apiProvider ? apiProvider.value : 'alibaba';
+                        
+                        if (apiKeyValue) {
+                            // 保存到localStorage
+                            localStorage.setItem('ai_learning_companion_api_key', apiKeyValue);
+                            localStorage.setItem('apiProvider', apiProviderValue);
+                            
+                            console.log('API配置已保存:', { provider: apiProviderValue, keyLength: apiKeyValue.length });
+                            
+                            // 更新按钮状态
+                            updateApiConfigButtonState();
+                            
+                            // 关闭模态框
+                            closeApiConfigModal();
+                            
+                            console.log('✅ API配置已保存成功');
+                        } else {
+                            alert('请输入API密钥');
+                        }
+                    });
+                }
+            }, 100);
+            
+            // 更新API配置按钮状态的函数
+            function updateApiConfigButtonState() {
+                const configBtn = document.querySelector('.toolbar-btn');
+                const savedApiKey = localStorage.getItem('ai_learning_companion_api_key');
+                
+                if (configBtn) {
+                    // 清除内联样式
+                    configBtn.style.color = '';
+                    configBtn.style.borderColor = '';
+                    configBtn.style.background = '';
+                    
+                    if (savedApiKey && savedApiKey.trim()) {
+                        // 已配置状态
+                        configBtn.innerHTML = '<i class="fas fa-check-circle"></i> 已配置API';
+                        configBtn.classList.add('configured');
+                        console.log('✅ API已配置，按钮状态已更新');
+                    } else {
+                        // 未配置状态
+                        configBtn.innerHTML = '<i class="fas fa-cog"></i> 配置API密钥';
+                        configBtn.classList.remove('configured');
+                        console.log('⚠️ API未配置，按钮状态已重置');
+                    }
+                }
+            }
+            
+            // 切换模型提供商信息显示
+            function switchProviderInfo(provider) {
+                // 隐藏所有提供商信息
+                const allProviderInfos = document.querySelectorAll('.provider-info');
+                allProviderInfos.forEach(info => {
+                    info.style.display = 'none';
+                });
+                
+                // 显示选中的提供商信息
+                let targetInfo = null;
+                switch(provider) {
+                    case 'alibaba':
+                        targetInfo = document.getElementById('alibabaInfo');
+                        break;
+                    case 'openai':
+                        targetInfo = document.getElementById('openaiInfo');
+                        break;
+                    case 'anthropic':
+                        targetInfo = document.getElementById('anthropicInfo');
+                        break;
+                }
+                
+                if (targetInfo) {
+                    targetInfo.style.display = 'flex';
+                    console.log(`✅ 已切换到 ${provider} 提供商信息`);
+                }
+            }
+            
+            // API连通性测试函数
+            async function testApiConnection() {
+                const apiKeyInput = document.getElementById('apiKey');
+                const apiProviderSelect = document.getElementById('apiProvider');
+                const testBtn = document.getElementById('testConnectionBtn');
+                
+                if (!apiKeyInput || !apiProviderSelect || !testBtn) {
+                    console.error('缺少必要的表单元素');
+                    return;
+                }
+                
+                const apiKey = apiKeyInput.value.trim();
+                const provider = apiProviderSelect.value;
+                
+                if (!apiKey) {
+                    alert('请先输入API密钥');
+                    return;
+                }
+                
+                // 基本的API密钥格式验证
+                const validationResult = validateApiKeyFormat(provider, apiKey);
+                if (!validationResult.valid) {
+                    alert(`❌ API密钥格式错误：${validationResult.message}`);
+                    return;
+                }
+                
+                // 更新按钮状态为测试中
+                testBtn.disabled = true;
+                testBtn.className = 'modal-btn modal-btn-test testing';
+                testBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 测试中...';
+                
+                try {
+                    console.log(`🔌 开始测试 ${provider} API连通性...`);
+                    
+                    // 执行真实API连通性测试
+                    const testResult = await performApiTest(provider, apiKey);
+                    
+                    if (testResult.success) {
+                        // 测试成功
+                        testBtn.className = 'modal-btn modal-btn-test success';
+                        testBtn.innerHTML = '<i class="fas fa-check"></i> 连通成功';
+                        
+                        console.log('✅ API连通性测试成功');
+                    } else {
+                        // 测试失败
+                        testBtn.className = 'modal-btn modal-btn-test error';
+                        testBtn.innerHTML = '<i class="fas fa-times"></i> 连通失败';
+                        
+                        console.error('❌ API连通性测试失败:', testResult.error);
+                    }
+                } catch (error) {
+                    // 异常处理
+                    testBtn.className = 'modal-btn modal-btn-test error';
+                    testBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> 测试异常';
+                    
+                    console.error('❌ API测试异常:', error);
+                }
+                
+                // 3秒后恢复按钮状态
+                setTimeout(() => {
+                    testBtn.disabled = false;
+                    testBtn.className = 'modal-btn modal-btn-test';
+                    testBtn.innerHTML = '<i class="fas fa-plug"></i> 测试连通性';
+                }, 3000);
+            }
+            
+            // API密钥格式验证
+            function validateApiKeyFormat(provider, apiKey) {
+                switch(provider) {
+                    case 'alibaba':
+                        // 阿里云DashScope API Key通常以sk-开头
+                        if (!apiKey.startsWith('sk-') || apiKey.length < 20) {
+                            return {
+                                valid: false,
+                                message: '阿里云DashScope API密钥通常以"sk-"开头且长度较长'
+                            };
+                        }
+                        break;
+                        
+                    case 'openai':
+                        // OpenAI API Key通常以sk-开头
+                        if (!apiKey.startsWith('sk-') || apiKey.length < 40) {
+                            return {
+                                valid: false,
+                                message: 'OpenAI API密钥通常以"sk-"开头且长度较长'
+                            };
+                        }
+                        break;
+                        
+                    case 'anthropic':
+                        // Anthropic API Key通常以sk-ant-开头
+                        if (!apiKey.startsWith('sk-ant-') || apiKey.length < 30) {
+                            return {
+                                valid: false,
+                                message: 'Anthropic API密钥通常以"sk-ant-"开头且长度较长'
+                            };
+                        }
+                        break;
+                }
+                
+                return { valid: true };
+            }
+            
+            // 执行API测试的具体逻辑
+            async function performApiTest(provider, apiKey) {
+                try {
+                    let testUrl = '';
+                    let testPayload = {};
+                    let headers = {};
+                    
+                    // 根据不同提供商设置测试参数
+                    switch(provider) {
+                        case 'alibaba':
+                            // 阿里云DashScope测试
+                            testUrl = '/api/test-dashscope';
+                            headers = {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${apiKey}`
+                            };
+                            testPayload = {
+                                model: 'qwen-turbo',
+                                input: {
+                                    messages: [{
+                                        role: 'user',
+                                        content: '测试连接'
+                                    }]
+                                },
+                                parameters: {
+                                    max_tokens: 10
+                                }
+                            };
+                            break;
+                            
+                        case 'openai':
+                            // OpenAI测试
+                            testUrl = '/api/test-openai';
+                            headers = {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${apiKey}`
+                            };
+                            testPayload = {
+                                model: 'gpt-3.5-turbo',
+                                messages: [{
+                                    role: 'user',
+                                    content: '测试连接'
+                                }],
+                                max_tokens: 10
+                            };
+                            break;
+                            
+                        case 'anthropic':
+                            // Anthropic Claude测试
+                            testUrl = '/api/test-anthropic';
+                            headers = {
+                                'Content-Type': 'application/json',
+                                'x-api-key': apiKey,
+                                'anthropic-version': '2023-06-01'
+                            };
+                            testPayload = {
+                                model: 'claude-3-haiku-20240307',
+                                max_tokens: 10,
+                                messages: [{
+                                    role: 'user',
+                                    content: '测试连接'
+                                }]
+                            };
+                            break;
+                            
+                        default:
+                            throw new Error('不支持的模型提供商');
+                    }
+                    
+                    console.log(`🔍 开始测试 ${getProviderName(provider)} API...`);
+                    
+                    // 发送测试请求
+                    const response = await fetch(testUrl, {
+                        method: 'POST',
+                        headers: headers,
+                        body: JSON.stringify(testPayload)
+                    });
+                    
+                    const responseData = await response.json();
+                    
+                    if (response.ok) {
+                        return {
+                            success: true,
+                            message: responseData.message || 'API连接成功，密钥有效'
+                        };
+                    } else {
+                        return {
+                            success: false,
+                            error: responseData.error || `HTTP ${response.status}: ${response.statusText}`
+                        };
+                    }
+                    
+                } catch (error) {
+                    console.error('API测试请求失败:', error);
+                    
+                    // 根据错误类型返回不同的错误信息
+                    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                        return {
+                            success: false,
+                            error: '网络连接失败，请检查网络设置或服务器状态'
+                        };
+                    } else if (error.message.includes('401') || error.message.includes('403')) {
+                        return {
+                            success: false,
+                            error: 'API密钥无效或权限不足'
+                        };
+                    } else {
+                        return {
+                            success: false,
+                            error: error.message || '未知错误'
+                        };
+                    }
+                }
+            }
+            
+            // 获取提供商显示名称
+            function getProviderName(provider) {
+                const names = {
+                    'alibaba': '阿里云 DashScope',
+                    'openai': 'OpenAI',
+                    'anthropic': 'Anthropic Claude'
+                };
+                return names[provider] || provider;
+            }
         });
     </script>
+    
+    <!-- API配置模态框 -->
+    <div class="modal" id="apiConfigModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>
+                    <i class="fas fa-cog"></i>
+                    配置API密钥
+                </h3>
+                <button class="modal-close" id="apiConfigClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-description">请输入您的API密钥，以获得更好的AI功能体验。</p>
+                
+                <div class="input-group">
+                    <label for="apiKey">大语言模型 API 密钥</label>
+                    <div class="key-input-container">
+                        <input type="password" id="apiKey" placeholder="输入您的API密钥..." class="modal-input">
+                        <button class="toggle-btn" id="toggleApiKey">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="provider-select">
+                    <label for="apiProvider">模型提供商</label>
+                    <select id="apiProvider" class="modal-select">
+                        <option value="alibaba">阿里云 - DashScope</option>
+                        <option value="openai">OpenAI</option>
+                        <option value="anthropic">Anthropic Claude</option>
+                    </select>
+                </div>
+                
+                <div class="provider-info alibaba-info" id="alibabaInfo">
+                    <div class="provider-logo">
+                        <i class="fas fa-cloud" style="font-size: 32px; color: #ff6a00;"></i>
+                    </div>
+                    <div class="provider-details">
+                        <h4>阿里云 DashScope</h4>
+                        <p>使用通义大模型系列，包括模型通义千问2.0等</p>
+                        <a href="https://dashscope.aliyun.com/" target="_blank" class="provider-link">获取密钥</a>
+                    </div>
+                </div>
+                
+                <div class="provider-info openai-info" id="openaiInfo" style="display: none;">
+                    <div class="provider-logo">
+                        <i class="fas fa-robot" style="font-size: 32px; color: #00a67e;"></i>
+                    </div>
+                    <div class="provider-details">
+                        <h4>OpenAI</h4>
+                        <p>使用GPT-4、GPT-3.5等先进的语言模型</p>
+                        <a href="https://platform.openai.com/api-keys" target="_blank" class="provider-link">获取密钥</a>
+                    </div>
+                </div>
+                
+                <div class="provider-info anthropic-info" id="anthropicInfo" style="display: none;">
+                    <div class="provider-logo">
+                        <i class="fas fa-brain" style="font-size: 32px; color: #d4a574;"></i>
+                    </div>
+                    <div class="provider-details">
+                        <h4>Anthropic Claude</h4>
+                        <p>使用Claude 3.5、Claude 3等高性能AI模型</p>
+                        <a href="https://console.anthropic.com/" target="_blank" class="provider-link">获取密钥</a>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-test" id="testConnectionBtn">
+                    <i class="fas fa-plug"></i>
+                    测试连通性
+                </button>
+                <button class="modal-btn modal-btn-cancel" id="apiConfigCancel">取消</button>
+                <button class="modal-btn modal-btn-confirm" id="apiConfigConfirm">保存配置</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

@@ -32,6 +32,138 @@ app.use(compression({
 // 中间件配置
 app.use(express.json());
 
+// API连通性测试端点
+
+// 阿里云DashScope API测试
+app.post('/api/test-dashscope', async (req, res) => {
+    console.log('🔍 测试阿里云DashScope API连通性...');
+    
+    try {
+        const apiKey = req.headers.authorization?.replace('Bearer ', '');
+        
+        if (!apiKey) {
+            return res.status(400).json({
+                error: '缺少API密钥'
+            });
+        }
+        
+        // 调用阿里云DashScope API
+        const response = await fetch('https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify(req.body)
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.output) {
+            res.json({
+                success: true,
+                message: 'DashScope API连接成功，密钥有效'
+            });
+        } else {
+            res.status(400).json({
+                error: data.message || 'API密钥无效或请求失败'
+            });
+        }
+    } catch (error) {
+        console.error('DashScope API测试失败:', error);
+        res.status(500).json({
+            error: 'API测试请求失败: ' + error.message
+        });
+    }
+});
+
+// OpenAI API测试
+app.post('/api/test-openai', async (req, res) => {
+    console.log('🔍 测试OpenAI API连通性...');
+    
+    try {
+        const apiKey = req.headers.authorization?.replace('Bearer ', '');
+        
+        if (!apiKey) {
+            return res.status(400).json({
+                error: '缺少API密钥'
+            });
+        }
+        
+        // 调用OpenAI API
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify(req.body)
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.choices) {
+            res.json({
+                success: true,
+                message: 'OpenAI API连接成功，密钥有效'
+            });
+        } else {
+            res.status(400).json({
+                error: data.error?.message || 'API密钥无效或请求失败'
+            });
+        }
+    } catch (error) {
+        console.error('OpenAI API测试失败:', error);
+        res.status(500).json({
+            error: 'API测试请求失败: ' + error.message
+        });
+    }
+});
+
+// Anthropic Claude API测试
+app.post('/api/test-anthropic', async (req, res) => {
+    console.log('🔍 测试Anthropic Claude API连通性...');
+    
+    try {
+        const apiKey = req.headers['x-api-key'];
+        
+        if (!apiKey) {
+            return res.status(400).json({
+                error: '缺少API密钥'
+            });
+        }
+        
+        // 调用Anthropic Claude API
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': apiKey,
+                'anthropic-version': req.headers['anthropic-version'] || '2023-06-01'
+            },
+            body: JSON.stringify(req.body)
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.content) {
+            res.json({
+                success: true,
+                message: 'Anthropic Claude API连接成功，密钥有效'
+            });
+        } else {
+            res.status(400).json({
+                error: data.error?.message || 'API密钥无效或请求失败'
+            });
+        }
+    } catch (error) {
+        console.error('Anthropic API测试失败:', error);
+        res.status(500).json({
+            error: 'API测试请求失败: ' + error.message
+        });
+    }
+});
+
 // 请求日志中间件
 app.use((req, res, next) => {
     const timestamp = new Date().toLocaleTimeString();
