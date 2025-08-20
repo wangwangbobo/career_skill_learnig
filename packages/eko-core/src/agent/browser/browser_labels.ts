@@ -736,13 +736,23 @@ function do_click(params: {
     }
     for (let n = 0; n < num_clicks; n++) {
       for (let i = 0; i < eventTypes.length; i++) {
-        const event = new MouseEvent(eventTypes[i], {
+        const eventType = eventTypes[i];
+
+        const event = new MouseEvent(eventType, {
           view: window,
           bubbles: true,
           cancelable: true,
           button, // 0 left; 1 middle; 2 right
         });
-        element.dispatchEvent(event);
+
+        if (eventType === 'click' && element.click) {
+          // support shadow dom element
+          element.click();
+        } else {
+          element.dispatchEvent(event);
+        }
+
+        element.focus?.();
       }
     }
     return true;

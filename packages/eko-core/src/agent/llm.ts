@@ -23,7 +23,37 @@ import {
   LanguageModelV2ToolChoice,
   LanguageModelV2ToolResultOutput,
   LanguageModelV2ToolResultPart,
+  SharedV2ProviderOptions,
 } from "@ai-sdk/provider";
+
+export function defaultLLMProviderOptions(): SharedV2ProviderOptions {
+  return {
+    openai: {
+      stream_options: {
+        include_usage: true,
+      }
+    },
+    openrouter: {
+      reasoning: {
+        max_tokens: 10,
+      },
+    },
+  }
+}
+
+export function defaultMessageProviderOptions(): SharedV2ProviderOptions {
+  return {
+    anthropic: {
+      cacheControl: { "type": "ephemeral" }
+    },
+    bedrock: {
+      cachePoint: { type: 'default' }
+    },
+    openrouter: {
+      cacheControl: { type: 'ephemeral' },
+    },
+  }
+}
 
 export function convertTools(
   tools: Tool[] | DialogueTool[]
@@ -33,6 +63,7 @@ export function convertTools(
     name: tool.name,
     description: tool.description,
     inputSchema: tool.parameters,
+    // providerOptions: defaultMessageProviderOptions()
   }));
 }
 

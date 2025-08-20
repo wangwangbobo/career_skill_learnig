@@ -1,6 +1,7 @@
 import { LanguageModelV2Message } from "@ai-sdk/provider";
 import { toFile, uuidv4, getMimeType } from "../common/utils";
 import { EkoMessage, LanguageModelV2Prompt } from "../types";
+import { defaultMessageProviderOptions } from "../agent/llm";
 
 export interface MemoryConfig {
   maxMessages?: number;
@@ -248,7 +249,9 @@ export class EkoMemory {
   }
 
   public getLastUserMessage(): EkoMessage | undefined {
-    const userMessages = this.messages.filter((message) => message.role === "user");
+    const userMessages = this.messages.filter(
+      (message) => message.role === "user"
+    );
     return userMessages[userMessages.length - 1];
   }
 
@@ -289,6 +292,7 @@ export class EkoMemory {
                     };
                   }
                 }),
+          providerOptions: defaultMessageProviderOptions(),
         });
       } else if (message.role == "assistant") {
         llmMessages.push({
@@ -343,6 +347,7 @@ export class EkoMemory {
       {
         role: "system",
         content: this.getSystemPrompt(),
+        providerOptions: defaultMessageProviderOptions(),
       },
       ...llmMessages,
     ];

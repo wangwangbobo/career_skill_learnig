@@ -1,6 +1,7 @@
-import { createOpenAI } from "@ai-sdk/openai";
-import { LanguageModelV2, LanguageModelV2StreamPart } from "@ai-sdk/provider";
 import dotenv from "dotenv";
+import { createOpenAI } from "@ai-sdk/openai";
+import { defaultMessageProviderOptions } from "../../src/agent/llm";
+import { LanguageModelV2, LanguageModelV2StreamPart } from "@ai-sdk/provider";
 
 dotenv.config();
 
@@ -16,7 +17,7 @@ export async function testOpenaiPrompt() {
   const client: LanguageModelV2 = createOpenAI({
     apiKey: apiKey,
     baseURL: baseURL,
-  }).languageModel("gpt-4.1-mini");
+  }).languageModel("gpt-5-mini");
 
   let result = await client.doGenerate({
     prompt: [{ role: "user", content: [{ type: "text", text: "Hello" }] }],
@@ -33,19 +34,13 @@ export async function testOpenaiStream() {
   const client: LanguageModelV2 = createOpenAI({
     apiKey: apiKey,
     baseURL: baseURL,
-  }).languageModel("gpt-4.1-mini");
+  }).languageModel("gpt-5-mini");
 
   let result = await client.doStream({
     prompt: [{ role: "user", content: [{ type: "text", text: "Hello" }] }],
     maxOutputTokens: 1024,
     temperature: 0.7,
-    providerOptions: {
-      openai: {
-        stream_options: {
-          include_usage: true,
-        },
-      },
-    },
+    providerOptions: defaultMessageProviderOptions(),
   });
 
   console.log(JSON.stringify(result, null, 2));
@@ -70,7 +65,7 @@ export async function testToolsPrompt() {
   const client: LanguageModelV2 = createOpenAI({
     apiKey: apiKey,
     baseURL: baseURL,
-  }).languageModel("gpt-4.1-mini");
+  }).languageModel("gpt-5-mini");
 
   let result = await client.doGenerate({
     tools: [
@@ -118,7 +113,7 @@ export async function testToolsPrompt() {
     ],
     maxOutputTokens: 1024,
     temperature: 0.7,
-    providerOptions: {},
+    providerOptions: defaultMessageProviderOptions(),
   });
 
   console.log(JSON.stringify(result, null, 2));

@@ -218,7 +218,7 @@ export class Eko {
     };
   }
 
-  private async runAgent(
+  protected async runAgent(
     context: Context,
     agent: Agent,
     agentNode: NormalAgentNode,

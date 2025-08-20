@@ -20,7 +20,7 @@ export type LLMprovider =
   | "google"
   | "aws"
   | "openrouter"
-  | "alibaba-dashscope"
+  | "openai-compatible"
   | ProviderV2;
 
 export type LLMConfig = {
