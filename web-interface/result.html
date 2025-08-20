@@ -1098,6 +1098,19 @@
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
         }
+                                
+        .interview-btn.solution {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            position: relative;
+        }
+                                
+        .interview-btn.solution:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
         
         /* 面试题答案输入框样式优化 */
         .interview-answer-input {
@@ -1114,7 +1127,7 @@
             font-family: inherit;
             background: #fafafa;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-            margin: 1.5rem 0; /* 增加上下间距 */
+            margin: 0 0 1.5rem 0; /* 修改上边距，因为上方已经有按钮区域 */
         }
         
         .interview-answer-input:focus {
@@ -1205,6 +1218,91 @@
             color: #4b5563;
         }
         
+        /* 解题思路和答案按钮区域样式 */
+        .interview-helper-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin: 1.5rem 0;
+        }
+        
+        .interview-helper-actions .interview-btn {
+            flex: 1;
+            justify-content: center;
+            padding: 0.75rem 1rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        /* 解题思路显示区域样式 */
+        .solution-area {
+            margin: 0 0 1.5rem 0; /* 调整上下边距，与新布局协调 */
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #ecfdf5, #f0fdf4);
+            border-radius: 12px;
+            border-left: 4px solid #10b981;
+            display: none;
+            transition: all 0.3s ease;
+        }
+                                
+        .solution-area.show {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+                                
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+                                
+        .solution-title {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #065f46;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+                                
+        .solution-title i {
+            margin-right: 0.5rem;
+            color: #10b981;
+        }
+                                
+        .solution-content {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #374151;
+        }
+                                
+        .solution-content h4 {
+            font-weight: 600;
+            color: #1f2937;
+            margin: 1rem 0 0.5rem 0;
+        }
+                                
+        .solution-content ul {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+        }
+                                
+        .solution-content li {
+            margin-bottom: 0.25rem;
+        }
+                                
+        .solution-content code {
+            background: #f3f4f6;
+            color: #1f2937;
+            padding: 0.125rem 0.25rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+        }
+                                
         /* 面试题笔记编辑框样式 */
         .interview-notes {
             margin-top: 1rem;
@@ -3082,15 +3180,67 @@
                                 <span class="interview-tag tech">JavaScript</span>
                                 <span class="interview-tag secondary">前端开发</span>
                             </div>
+                                                    
+                            <!-- 解题思路和答案按钮区域 -->
+                            <div class="interview-helper-actions" style="display: flex; gap: 0.75rem; margin: 1.5rem 0;">
+                                <button class="interview-btn solution" onclick="showSolution('js-closure')" style="flex: 1;">
+                                    <i class="fas fa-lightbulb"></i>
+                                    解题思路
+                                </button>
+                                <button class="interview-btn secondary" style="flex: 1;">
+                                    <i class="fas fa-eye"></i>
+                                    查看答案
+                                </button>
+                            </div>
+                            
+                            <!-- 解题思路区域 -->
+                            <div class="solution-area" id="solution-js-closure">
+                                <div class="solution-title">
+                                    <i class="fas fa-lightbulb"></i>
+                                    JavaScript闭包解题思路
+                                </div>
+                                <div class="solution-content">
+                                    <h4>1. 理解题目要求</h4>
+                                    <p>面试官想了解你对闭包概念的掌握程度，包括：</p>
+                                    <ul>
+                                        <li>闭包的定义和原理</li>
+                                        <li>闭包的实际应用场景</li>
+                                        <li>闭包可能带来的问题</li>
+                                    </ul>
+                                    
+                                    <h4>2. 回答要点</h4>
+                                    <ul>
+                                        <li><strong>定义：</strong>闭包是指有权访问另一个函数作用域中变量的函数</li>
+                                        <li><strong>原理：</strong>内部函数引用外部函数的变量，即使外部函数执行完毕，这些变量仍然被保存在内存中</li>
+                                        <li><strong>应用：</strong>模块化编程、私有变量、回调函数等</li>
+                                    </ul>
+                                    
+                                    <h4>3. 示例代码</h4>
+                                    <p>准备一个简单的闭包示例：</p>
+                                    <pre style="background: #f8f9fa; padding: 1rem; border-radius: 6px; overflow-x: auto;"><code>function createCounter() {
+    let count = 0;
+    return function() {
+        return ++count;
+    };
+}
+const counter = createCounter();
+console.log(counter()); // 1
+console.log(counter()); // 2</code></pre>
+                                    
+                                    <h4>4. 注意事项</h4>
+                                    <ul>
+                                        <li>提到内存泄漏的风险</li>
+                                        <li>说明如何避免闭包陷阱</li>
+                                        <li>强调合理使用的重要性</li>
+                                    </ul>
+                                </div>
+                            </div>
+                                                    
                             <textarea class="interview-answer-input" placeholder="请输入您的答案..."></textarea>
                             <div class="interview-notes">
                                 <textarea class="interview-notes-input" placeholder="在此添加您的笔记..."></textarea>
                             </div>
                             <div class="interview-actions">
-                                <button class="interview-btn secondary">
-                                    <i class="fas fa-eye"></i>
-                                    查看答案
-                                </button>
                                 <button class="interview-btn ai-score">
                                     <i class="fas fa-star"></i>
                                     AI评分
@@ -4932,6 +5082,198 @@
                     }
                 });
             }
+            
+            // 解题思路功能
+            function showSolution(questionId) {
+                console.log('🧠 显示解题思路:', questionId);
+                
+                // 获取对应的解题思路区域
+                const solutionArea = document.getElementById(`solution-${questionId}`);
+                const solutionBtn = document.querySelector(`[onclick="showSolution('${questionId}')"]`);
+                
+                if (!solutionArea) {
+                    console.error('未找到解题思路区域');
+                    return;
+                }
+                
+                // 切换显示状态
+                if (solutionArea.classList.contains('show')) {
+                    solutionArea.classList.remove('show');
+                    if (solutionBtn) {
+                        solutionBtn.innerHTML = '<i class="fas fa-lightbulb"></i>解题思路';
+                    }
+                } else {
+                    solutionArea.classList.add('show');
+                    if (solutionBtn) {
+                        solutionBtn.innerHTML = '<i class="fas fa-eye-slash"></i>隐藏思路';
+                    }
+                }
+            }
+            
+            // 示例解题思路数据
+            const solutionData = {
+                'js-closure': {
+                    title: 'JavaScript闭包解题思路',
+                    content: `
+                        <h4>1. 理解题目要求</h4>
+                        <p>面试官想了解你对闭包概念的掌握程度，包括：</p>
+                        <ul>
+                            <li>闭包的定义和原理</li>
+                            <li>闭包的实际应用场景</li>
+                            <li>闭包可能带来的问题</li>
+                        </ul>
+                        
+                        <h4>2. 回答要点</h4>
+                        <ul>
+                            <li><strong>定义：</strong>闭包是指有权访问另一个函数作用域中变量的函数</li>
+                            <li><strong>原理：</strong>内部函数引用外部函数的变量，即使外部函数执行完毕，这些变量仍然被保存在内存中</li>
+                            <li><strong>应用：</strong>模块化编程、私有变量、回调函数等</li>
+                        </ul>
+                        
+                        <h4>3. 示例代码</h4>
+                        <p>准备一个简单的闭包示例：</p>
+                        <pre><code>function createCounter() {
+    let count = 0;
+    return function() {
+        return ++count;
+    };
+}
+const counter = createCounter();
+console.log(counter()); // 1
+console.log(counter()); // 2</code></pre>
+                        
+                        <h4>4. 注意事项</h4>
+                        <ul>
+                            <li>提到内存泄漏的风险</li>
+                            <li>说明如何避免闭包陷阱</li>
+                            <li>强调合理使用的重要性</li>
+                        </ul>
+                    `
+                }
+            };
+            
+            // 动态生成解题思路内容
+            function generateSolutionContent(questionId) {
+                const solution = solutionData[questionId];
+                if (!solution) {
+                    return `
+                        <div class="solution-title">
+                            <i class="fas fa-lightbulb"></i>
+                            解题思路
+                        </div>
+                        <div class="solution-content">
+                            <h4>1. 分析题目关键点</h4>
+                            <p>首先理解面试官的真实意图，明确要考查的技术点。</p>
+                            
+                            <h4>2. 组织答案结构</h4>
+                            <ul>
+                                <li>先给出核心概念的定义</li>
+                                <li>详细解释工作原理</li>
+                                <li>举例说明实际应用</li>
+                                <li>总结优缺点和注意事项</li>
+                            </ul>
+                            
+                            <h4>3. 回答技巧</h4>
+                            <ul>
+                                <li>保持逻辑清晰，由浅入深</li>
+                                <li>结合具体代码示例</li>
+                                <li>主动提及相关技术点</li>
+                                <li>展示解决问题的思维过程</li>
+                            </ul>
+                            
+                            <h4>4. 加分项</h4>
+                            <p>主动扩展相关知识点，展示技术深度和广度。</p>
+                        </div>
+                    `;
+                }
+                
+                return `
+                    <div class="solution-title">
+                        <i class="fas fa-lightbulb"></i>
+                        ${solution.title}
+                    </div>
+                    <div class="solution-content">
+                        ${solution.content}
+                    </div>
+                `;
+            }
+            
+            // 为所有面试题卡片添加解题思路区域
+            function initSolutionFeature() {
+                console.log('🔧 初始化解题思路功能...');
+                
+                const interviewCards = document.querySelectorAll('.interview-card');
+                
+                interviewCards.forEach((card, index) => {
+                    const questionId = `question-${index + 1}`;
+                    
+                    // 检查是否已经有helper-actions区域
+                    let helperActionsDiv = card.querySelector('.interview-helper-actions');
+                    
+                    // 如果没有helper-actions区域，则创建一个
+                    if (!helperActionsDiv) {
+                        helperActionsDiv = document.createElement('div');
+                        helperActionsDiv.className = 'interview-helper-actions';
+                        helperActionsDiv.style.cssText = 'display: flex; gap: 0.75rem; margin: 1.5rem 0;';
+                        
+                        // 找到适合的插入位置（tags之后，answer-input之前）
+                        const tagsDiv = card.querySelector('.interview-tags');
+                        const answerInput = card.querySelector('.interview-answer-input');
+                        
+                        if (tagsDiv && answerInput) {
+                            // 在tags之后、answer-input之前插入
+                            answerInput.parentNode.insertBefore(helperActionsDiv, answerInput);
+                            
+                            // 添加解题思路按钮
+                            const solutionBtn = document.createElement('button');
+                            solutionBtn.className = 'interview-btn solution';
+                            solutionBtn.style.flex = '1';
+                            solutionBtn.innerHTML = '<i class="fas fa-lightbulb"></i>解题思路';
+                            solutionBtn.onclick = () => showSolution(questionId);
+                            
+                            // 添加查看答案按钮
+                            const answerBtn = document.createElement('button');
+                            answerBtn.className = 'interview-btn secondary';
+                            answerBtn.style.flex = '1';
+                            answerBtn.innerHTML = '<i class="fas fa-eye"></i>查看答案';
+                            answerBtn.onclick = () => alert('查看答案功能开发中...');
+                            
+                            helperActionsDiv.appendChild(solutionBtn);
+                            helperActionsDiv.appendChild(answerBtn);
+                        }
+                    }
+                    
+                    // 在面试题卡片中添加解题思路显示区域（在答案输入框之前）
+                    const existingSolutionArea = card.querySelector(`#solution-${questionId}`);
+                    if (!existingSolutionArea) {
+                        const solutionDiv = document.createElement('div');
+                        solutionDiv.id = `solution-${questionId}`;
+                        solutionDiv.className = 'solution-area';
+                        solutionDiv.innerHTML = generateSolutionContent(questionId);
+                        
+                        // 插入到答案输入框之前
+                        const answerInput = card.querySelector('.interview-answer-input');
+                        if (answerInput) {
+                            answerInput.parentNode.insertBefore(solutionDiv, answerInput);
+                        } else {
+                            // 如果没有找到答案输入框，就插入到helper-actions之后
+                            if (helperActionsDiv.nextSibling) {
+                                helperActionsDiv.parentNode.insertBefore(solutionDiv, helperActionsDiv.nextSibling);
+                            } else {
+                                helperActionsDiv.parentNode.appendChild(solutionDiv);
+                            }
+                        }
+                    }
+                });
+                
+                console.log('✅ 解题思路功能初始化完成');
+            }
+            
+            // 全局暴露showSolution函数
+            window.showSolution = showSolution;
+            
+            // 初始化解题思路功能
+            initSolutionFeature();
             
         });
     </script>
