@@ -876,9 +876,14 @@
             font-size: 1.375rem; /* 增大字体 */
             font-weight: 700; /* 加粗 */
             color: #1f2937;
-            margin-bottom: 1.5rem;
+            margin: 0; /* 重置默认margin */
             line-height: 1.4;
             letter-spacing: -0.025em; /* 细微调整字符间距 */
+            background: linear-gradient(135deg, #6366f1, #8b5cf6); /* 恢复蓝色背景 */
+            color: white; /* 改为白色文字 */
+            padding: 1.5rem 2rem; /* 增加内边距 */
+            border-radius: 12px; /* 圆角 */
+            margin-bottom: 0; /* 移除下边距 */
         }
 
         .interview-tags {
@@ -1301,6 +1306,73 @@
             padding: 0.125rem 0.25rem;
             border-radius: 4px;
             font-size: 0.875rem;
+        }
+        
+        /* 答案显示区域样式 */
+        .answer-area {
+            margin: 0 0 1.5rem 0;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border-radius: 12px;
+            border-left: 4px solid #3b82f6;
+            display: none;
+            transition: all 0.3s ease;
+        }
+        
+        .answer-area.show {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        .answer-title {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #1e40af;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .answer-title i {
+            margin-right: 0.5rem;
+            color: #3b82f6;
+        }
+        
+        .answer-content {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #374151;
+        }
+        
+        .answer-content h4 {
+            font-weight: 600;
+            color: #1f2937;
+            margin: 1rem 0 0.5rem 0;
+        }
+        
+        .answer-content ul {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+        }
+        
+        .answer-content li {
+            margin-bottom: 0.25rem;
+        }
+        
+        .answer-content code {
+            background: #f3f4f6;
+            color: #1f2937;
+            padding: 0.125rem 0.25rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+        }
+        
+        /* AI聊天按钮样式 */
+        .ai-chat-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            background: white !important;
+            color: #6366f1 !important;
         }
                                 
         /* 面试题笔记编辑框样式 */
@@ -3174,7 +3246,31 @@
                     <div class="section-content">
                         <!-- 面试题卡片 -->
                         <div class="interview-card">
-                            <h3 class="interview-question">解释JavaScript中的闭包概念，并举例说明其应用场景</h3>
+                            <div class="interview-question-container" style="position: relative; margin-bottom: 1rem;">
+                                <h3 class="interview-question">解释JavaScript中的闭包概念，并举例说明其应用场景</h3>
+                                <button class="ai-chat-btn" onclick="startAIChat('js-closure')" title="与AI助手讨论此题目" style="
+                                    position: absolute;
+                                    top: 50%;
+                                    right: 12px;
+                                    transform: translateY(-50%);
+                                    width: 36px;
+                                    height: 36px;
+                                    border: none;
+                                    background: rgba(255, 255, 255, 0.9);
+                                    color: #6366f1;
+                                    border-radius: 50%;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    cursor: pointer;
+                                    transition: all 0.3s ease;
+                                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+                                    backdrop-filter: blur(4px);
+                                    z-index: 10;
+                                ">
+                                    <i class="fas fa-robot" style="font-size: 16px;"></i>
+                                </button>
+                            </div>
                             <div class="interview-tags">
                                 <span class="interview-tag primary">中等</span>
                                 <span class="interview-tag tech">JavaScript</span>
@@ -3187,7 +3283,7 @@
                                     <i class="fas fa-lightbulb"></i>
                                     解题思路
                                 </button>
-                                <button class="interview-btn secondary" style="flex: 1;">
+                                <button class="interview-btn secondary" onclick="showAnswer('js-closure')" style="flex: 1;">
                                     <i class="fas fa-eye"></i>
                                     查看答案
                                 </button>
@@ -3235,6 +3331,126 @@ console.log(counter()); // 2</code></pre>
                                     </ul>
                                 </div>
                             </div>
+                            
+                            <!-- 答案显示区域 -->
+                            <div class="answer-area" id="answer-js-closure">
+                                <div class="answer-title">
+                                    <i class="fas fa-check-circle"></i>
+                                    参考答案
+                                </div>
+                                <div class="answer-content">
+                                    <h4>标准答案要点</h4>
+                                    <p>这里会显示该面试题的详细参考答案，包括核心概念、实际应用、代码示例等内容。</p>
+                                    
+                                    <h4>评分标准</h4>
+                                    <ul>
+                                        <li><strong>基础概念理解</strong>：能够准确说出核心定义</li>
+                                        <li><strong>原理阐述</strong>：能够解释工作机制和原理</li>
+                                        <li><strong>实际应用</strong>：能够举出具体的应用场景</li>
+                                        <li><strong>代码示例</strong>：能够提供相关的代码演示</li>
+                                    </ul>
+                                    
+                                    <h4>加分项</h4>
+                                    <ul>
+                                        <li>主动提及相关的扩展知识点</li>
+                                        <li>分析可能的优缺点或注意事项</li>
+                                        <li>展示实际项目经验</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <!-- 答案显示区域 -->
+                            <div class="answer-area" id="answer-js-closure">
+                                <div class="answer-title">
+                                    <i class="fas fa-check-circle"></i>
+                                    参考答案
+                                </div>
+                                <div class="answer-content">
+                                    <h4>闭包的定义和原理</h4>
+                                    <p><strong>定义：</strong>闭包是指有权访问另一个函数作用域中变量的函数。即使外部函数已经返回，闭包仍然能够访问到那些变量。</p>
+                                    
+                                    <p><strong>工作原理：</strong>当一个内部函数被定义在另一个函数内部时，内部函数可以访问外部函数的变量。即使外部函数执行完毕，这些变量仍然会被保留在内存中，供内部函数使用。</p>
+                                    
+                                    <h4>实际应用场景</h4>
+                                    <ul>
+                                        <li><strong>模块化编程：</strong>创建私有作用域，防止变量污染全局命名空间</li>
+                                        <li><strong>回调函数：</strong>在事件处理、定时器中保持对外部变量的引用</li>
+                                        <li><strong>函数工厂：</strong>创建具有特定功能的函数</li>
+                                        <li><strong>数据隐藏：</strong>实现类似私有属性的效果</li>
+                                    </ul>
+                                    
+                                    <h4>代码示例</h4>
+                                    <pre style="background: #f8f9fa; padding: 1rem; border-radius: 6px; overflow-x: auto;"><code>// 示例1：计数器
+function createCounter() {
+    let count = 0;
+    return function() {
+        return ++count;
+    };
+}
+const counter = createCounter();
+console.log(counter()); // 1
+console.log(counter()); // 2
+
+// 示例2：私有变量
+function createPerson(name) {
+    let age = 0;
+    return {
+        getName: function() { return name; },
+        getAge: function() { return age; },
+        setAge: function(newAge) { age = newAge; },
+        growUp: function() { age++; }
+    };
+}
+const person = createPerson('Alice');
+person.setAge(25);
+</`
+
+// 生成答案内容的函数
+function generateAnswerContent(questionId) {
+    // 根据题目ID返回对应的答案，这里提供一个默认的答案格式
+    return `
+        <div class="answer-title">
+            <i class="fas fa-check-circle"></i>
+            参考答案
+        </div>
+        <div class="answer-content">
+            <h4>标准答案要点</h4>
+            <p>这里会显示该面试题的详细参考答案，包括核心概念、实际应用、代码示例等内容。</p>
+            
+            <h4>评分标准</h4>
+            <ul>
+                <li><strong>基础概念理解</strong>：能够准确说出核心定义</li>
+                <li><strong>原理阐述</strong>：能够解释工作机制和原理</li>
+                <li><strong>实际应用</strong>：能够举出具体的应用场景</li>
+                <li><strong>代码示例</strong>：能够提供相关的代码演示</li>
+            </ul>
+            
+            <h4>加分项</h4>
+            <ul>
+                <li>主动提及相关的扩展知识点</li>
+                <li>分析可能的优缺点或注意事项</li>
+                <li>展示实际项目经验</li>
+            </ul>
+        </div>
+    `;
+}
+
+// 全局暴露新函数
+window.showAnswer = showAnswer;
+window.startAIChat = startAIChat;
+window.sendMessageToAI = sendMessageToAI;
+
+// 更新initSolutionFeature函数，同时初始化答案功能
+console.log(person.getAge()); // 25</code></pre>
+                                    
+                                    <h4>注意事项和陷阱</h4>
+                                    <ul>
+                                        <li><strong>内存泄漏：</strong>闭包会防止垃圾回收，如果不正确使用可能导致内存泄漏</li>
+                                        <li><strong>性能影响：</strong>过度使用闭包可能影响性能</li>
+                                        <li><strong>循环引用：</strong>需要注意在循环中创建闭包的问题</li>
+                                    </ul>
+                                </div>
+                            </div>
                                                     
                             <textarea class="interview-answer-input" placeholder="请输入您的答案..."></textarea>
                             <div class="interview-notes">
@@ -3270,8 +3486,30 @@ console.log(counter()); // 2</code></pre>
                     <div class="section-content">
                         <div class="knowledge-list">
                             <div class="knowledge-item">
-                                <div class="knowledge-header">
+                                <div class="knowledge-header" style="position: relative;">
                                     <div class="knowledge-title">Java基础语法和面向对象编程</div>
+                                    <button class="ai-chat-btn" onclick="startAIKnowledgeChat('java-basics')" title="与AI助手讨论此知识点" style="
+                                        position: absolute;
+                                        top: 50%;
+                                        right: 12px;
+                                        transform: translateY(-50%);
+                                        width: 36px;
+                                        height: 36px;
+                                        border: none;
+                                        background: rgba(255, 255, 255, 0.9);
+                                        color: #6366f1;
+                                        border-radius: 50%;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        cursor: pointer;
+                                        transition: all 0.3s ease;
+                                        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+                                        backdrop-filter: blur(4px);
+                                        z-index: 10;
+                                    ">
+                                        <i class="fas fa-robot" style="font-size: 16px;"></i>
+                                    </button>
                                 </div>
                                 <div class="knowledge-content">
                                     <div class="knowledge-text">
@@ -5110,6 +5348,114 @@ console.log(counter()); // 2</code></pre>
                 }
             }
             
+            // 查看答案功能
+            function showAnswer(questionId) {
+                console.log('📝 显示答案:', questionId);
+                
+                // 获取对应的答案区域
+                const answerArea = document.getElementById(`answer-${questionId}`);
+                const answerBtn = document.querySelector(`[onclick="showAnswer('${questionId}')"]`);
+                
+                if (!answerArea) {
+                    console.error('未找到答案区域');
+                    return;
+                }
+                
+                // 切换显示状态
+                if (answerArea.classList.contains('show')) {
+                    answerArea.classList.remove('show');
+                    if (answerBtn) {
+                        answerBtn.innerHTML = '<i class="fas fa-eye"></i>查看答案';
+                    }
+                } else {
+                    answerArea.classList.add('show');
+                    if (answerBtn) {
+                        answerBtn.innerHTML = '<i class="fas fa-eye-slash"></i>隐藏答案';
+                    }
+                }
+            }
+            
+            // AI聊天功能
+            function startAIChat(questionId) {
+                console.log('🤖 启动AI聊天:', questionId);
+                
+                // 获取题目内容
+                const questionCard = document.querySelector(`[data-question-id="${questionId}"]`) || document.querySelector('.interview-card');
+                if (!questionCard) {
+                    console.error('未找到题目卡片');
+                    return;
+                }
+                
+                const questionText = questionCard.querySelector('.interview-question').textContent;
+                const questionTags = Array.from(questionCard.querySelectorAll('.interview-tag')).map(tag => tag.textContent).join(', ');
+                
+                // 构建聊天内容
+                const chatContent = `面试题目：${questionText}\n\n题目标签：${questionTags}\n\n请帮我分析这道面试题，并提供详细的解答思路和参考答案。`;
+                
+                // 发送消息到AI助手
+                sendMessageToAI(chatContent);
+                
+                // 显示反馈
+                console.log('✅ 已将题目发送到AI助手');
+            }
+            
+            // 发送消息到AI助手的函数
+            function sendMessageToAI(message) {
+                // 获取AI助手的聊天区域
+                const chatMessages = document.querySelector('.chat-messages');
+                const chatInput = document.querySelector('.chat-input');
+                
+                if (chatInput) {
+                    // 将消息填入输入框
+                    chatInput.value = message;
+                    chatInput.focus();
+                    
+                    // 模拟发送操作
+                    const sendBtn = document.querySelector('.send-btn');
+                    if (sendBtn && !sendBtn.disabled) {
+                        // 触发发送按钮点击事件
+                        setTimeout(() => {
+                            sendBtn.click();
+                        }, 100);
+                    }
+                }
+                
+                // 如果AI助手被最小化，就恢复它
+                const aiAssistant = document.querySelector('.ai-assistant');
+                if (aiAssistant && aiAssistant.classList.contains('minimized')) {
+                    aiAssistant.classList.remove('minimized');
+                }
+            }
+            
+            // 生成答案内容的函数
+            function generateAnswerContent(questionId) {
+                return `
+                    <div class="answer-title">
+                        <i class="fas fa-check-circle"></i>
+                        参考答案
+                    </div>
+                    <div class="answer-content">
+                        <h4>标准答案要点</h4>
+                        <p>这里会显示该面试题的详细参考答案，包括核心概念、实际应用、代码示例等内容。</p>
+                        
+                        <h4>评分标准</h4>
+                        <ul>
+                            <li><strong>基础概念理解</strong>：能够准确说出核心定义</li>
+                            <li><strong>原理阐述</strong>：能够解释工作机制和原理</li>
+                            <li><strong>实际应用</strong>：能够举出具体的应用场景</li>
+                            <li><strong>代码示例</strong>：能够提供相关的代码演示</li>
+                        </ul>
+                        
+                        <h4>加分项</h4>
+                        <ul>
+                            <li>主动提及相关的扩展知识点</li>
+                            <li>分析可能的优缺点或注意事项</li>
+                            <li>展示实际项目经验</li>
+                        </ul>
+                    </div>
+                `;
+            }
+            
             // 示例解题思路数据
             const solutionData = {
                 'js-closure': {
@@ -5236,7 +5582,7 @@ console.log(counter()); // 2</code></pre>
                             answerBtn.className = 'interview-btn secondary';
                             answerBtn.style.flex = '1';
                             answerBtn.innerHTML = '<i class="fas fa-eye"></i>查看答案';
-                            answerBtn.onclick = () => alert('查看答案功能开发中...');
+                            answerBtn.onclick = () => showAnswer(questionId);
                             
                             helperActionsDiv.appendChild(solutionBtn);
                             helperActionsDiv.appendChild(answerBtn);
@@ -5269,11 +5615,110 @@ console.log(counter()); // 2</code></pre>
                 console.log('✅ 解题思路功能初始化完成');
             }
             
-            // 全局暴露showSolution函数
+            // 知识点AI聊天功能
+            function startAIKnowledgeChat(knowledgeId) {
+                console.log('🤖 启动知识点AI聊天:', knowledgeId);
+                
+                // 尝试多种方式获取知识点内容
+                let knowledgeItem = null;
+                
+                // 方法1：通过onclick属性查找
+                const clickButtons = document.querySelectorAll('[onclick*="startAIKnowledgeChat"]');
+                for (let btn of clickButtons) {
+                    if (btn.onclick && btn.onclick.toString().includes(knowledgeId)) {
+                        knowledgeItem = btn.closest('.knowledge-item');
+                        break;
+                    }
+                }
+                
+                // 方法2：直接查找最近的知识点容器
+                if (!knowledgeItem) {
+                    knowledgeItem = document.querySelector('.knowledge-item');
+                }
+                
+                if (!knowledgeItem) {
+                    console.error('未找到知识点卡片');
+                    alert('未找到知识点内容，请刷新页面重试');
+                    return;
+                }
+                
+                console.log('✅ 找到知识点元素:', knowledgeItem);
+                
+                // 获取知识点标题
+                const knowledgeTitleElement = knowledgeItem.querySelector('.knowledge-title');
+                const knowledgeTitle = knowledgeTitleElement ? knowledgeTitleElement.textContent : '未知知识点';
+                
+                // 获取知识点内容
+                const knowledgeTextElement = knowledgeItem.querySelector('.knowledge-text');
+                let knowledgeContent = '';
+                
+                if (knowledgeTextElement) {
+                    // 提取知识点的文本内容，去掉HTML标签
+                    knowledgeContent = knowledgeTextElement.textContent || knowledgeTextElement.innerText || '';
+                }
+                
+                console.log('📖 知识点标题:', knowledgeTitle);
+                console.log('📄 知识点内容预览:', knowledgeContent.substring(0, 100) + '...');
+                
+                // 构建聊天内容
+                const chatContent = `知识点：${knowledgeTitle}\n\n知识点内容：\n${knowledgeContent}\n\n请帮我深入学习这个知识点，包括相关概念解释、实际应用场景、学习建议等。`;
+                
+                // 发送消息到AI助手
+                sendMessageToAI(chatContent);
+                
+                // 显示反馈
+                console.log('✅ 已将知识点发送到AI助手');
+                
+                // 显示用户反馈
+                alert('知识点内容已发送到AI助手！');
+            }
+            
+            // 全局暴露函数
             window.showSolution = showSolution;
+            window.showAnswer = showAnswer;
+            window.startAIChat = startAIChat;
+            window.startAIKnowledgeChat = startAIKnowledgeChat;
+            window.sendMessageToAI = sendMessageToAI;
             
             // 初始化解题思路功能
             initSolutionFeature();
+            
+            // 调试信息：验证函数是否正确暴露
+            console.log('🔍 验证全局函数:', {
+                showSolution: typeof window.showSolution,
+                showAnswer: typeof window.showAnswer, 
+                startAIChat: typeof window.startAIChat,
+                startAIKnowledgeChat: typeof window.startAIKnowledgeChat,
+                sendMessageToAI: typeof window.sendMessageToAI
+            });
+            
+            // 测试AI机器人图标的点击事件
+            const aiChatBtns = document.querySelectorAll('.ai-chat-btn');
+            console.log('🤖 找到AI聊天按钮数量:', aiChatBtns.length);
+            
+            aiChatBtns.forEach((btn, index) => {
+                console.log(`🔘 AI按钮 ${index + 1}:`, {
+                    onclick: btn.onclick,
+                    onclickStr: btn.getAttribute('onclick'),
+                    element: btn
+                });
+                
+                // 为每个按钮添加额外的点击事件监听器作为备用
+                btn.addEventListener('click', function(e) {
+                    console.log('💆 AI按钮被点击:', this);
+                    
+                    // 如果是知识点的AI按钮
+                    if (this.getAttribute('onclick') && this.getAttribute('onclick').includes('startAIKnowledgeChat')) {
+                        e.preventDefault();
+                        const match = this.getAttribute('onclick').match(/startAIKnowledgeChat\('([^']+)'\)/);
+                        if (match) {
+                            const knowledgeId = match[1];
+                            console.log('🔄 手动调用 startAIKnowledgeChat:', knowledgeId);
+                            startAIKnowledgeChat(knowledgeId);
+                        }
+                    }
+                });
+            });
             
         });
     </script>
