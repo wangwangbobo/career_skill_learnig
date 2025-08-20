@@ -4936,25 +4936,9 @@ console.log(person.getAge()); // 25</code></pre>
                 // 查看答案
                 if (checkAnswerBtn) {
                     checkAnswerBtn.addEventListener('click', function() {
-                        const questionTitle = document.querySelector('.interview-question').textContent;
-                        // 将问题添加到AI助手输入框并发送
-                        const chatInput = document.getElementById('chatInput');
-                        const sendBtn = document.getElementById('sendBtn');
-                        
-                        if (chatInput && sendBtn && !sendBtn.disabled) {
-                            // 确保输入框先清空，再设置新内容
-                            chatInput.value = '';
-                            // 使用setTimeout确保清空操作完成
-                            setTimeout(() => {
-                                chatInput.value = `请给我详细解答这个面试题：${questionTitle}`;
-                                // 延迟发送，确保设置完成
-                                setTimeout(() => {
-                                    if (chatInput.value.trim()) {
-                                        sendBtn.click();
-                                    }
-                                }, 50);
-                            }, 50);
-                        }
+                        // 直接调用showAnswer函数显示答案内容
+                        const questionId = 'js-closure'; // 或者动态获取题目ID
+                        showAnswer(questionId);
                     });
                 }
                 
@@ -5608,6 +5592,29 @@ console.log(counter()); // 2</code></pre>
                             } else {
                                 helperActionsDiv.parentNode.appendChild(solutionDiv);
                             }
+                        }
+                    }
+                    
+                    // 添加答案显示区域
+                    const existingAnswerArea = card.querySelector(`#answer-${questionId}`);
+                    if (!existingAnswerArea) {
+                        const answerDiv = document.createElement('div');
+                        answerDiv.id = `answer-${questionId}`;
+                        answerDiv.className = 'answer-area';
+                        answerDiv.innerHTML = generateAnswerContent(questionId);
+                        
+                        // 插入到解题思路区域之后，答案输入框之前
+                        const solutionArea = card.querySelector(`#solution-${questionId}`);
+                        const answerInput = card.querySelector('.interview-answer-input');
+                        
+                        if (solutionArea && answerInput) {
+                            answerInput.parentNode.insertBefore(answerDiv, answerInput);
+                        } else if (answerInput) {
+                            answerInput.parentNode.insertBefore(answerDiv, answerInput);
+                        } else if (helperActionsDiv.nextSibling) {
+                            helperActionsDiv.parentNode.insertBefore(answerDiv, helperActionsDiv.nextSibling);
+                        } else {
+                            helperActionsDiv.parentNode.appendChild(answerDiv);
                         }
                     }
                 });
