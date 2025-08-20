@@ -10,6 +10,129 @@ import { MarkmapAgent } from './markmap-agent.js';
 // ==================== 核心Agent实现 ====================
 
 /**
+ * 职位技能分析Agent - 根据职位信息生成所需技能列表
+ */
+class JobSkillAnalyzerAgent extends Agent {
+    constructor() {
+        super({
+            name: "JobSkillAnalyzerAgent",
+            description: "根据职位信息分析并生成该职位所需的核心技能列表",
+            systemPrompt: `你是一个专业的职位技能分析专家，能够根据职位描述分析出该职位所需的核心技能。
+你的任务是分析用户提供的职位信息，提取并生成该职位所需的关键技能列表。
+
+输入示例1：
+职位名称: "AI Agent工程师"
+职位描述: "负责设计和开发基于大语言模型的AI Agent系统，包括提示工程、工具调用、多Agent协作等技术。需要熟悉LLM应用开发、Agent设计模式、任务规划等技术。"
+
+输出示例1：
+{
+  "skills": [
+    "大语言模型（LLM）应用",
+    "提示工程（Prompt Engineering）",
+    "Agent设计模式",
+    "工具调用（Function Calling/Tools）",
+    "多Agent协作",
+    "任务规划与执行",
+    "自然语言处理",
+    "Python编程"
+  ]
+}
+
+输入示例2：
+职位名称: "前端开发工程师"
+职位描述: "负责Web前端开发工作，需要熟练掌握HTML/CSS/JavaScript，熟悉Vue或React框架，了解前端工程化和性能优化。"
+
+输出示例2：
+{
+  "skills": [
+    "HTML/CSS",
+    "JavaScript",
+    "Vue框架",
+    "React框架",
+    "前端工程化",
+    "性能优化",
+    "响应式设计",
+    "浏览器调试"
+  ]
+}`
+        });
+    }
+
+    setupTools() {
+        this.addTool({
+            name: "analyze_job_skills",
+            description: "分析职位信息并生成技能列表",
+            parameters: {
+                type: "object",
+                properties: {
+                    jobTitle: { type: "string", description: "职位名称" },
+                    jobDescription: { type: "string", description: "职位描述" }
+                },
+                required: ["jobTitle"]
+            },
+            execute: async (args, context) => {
+                const { jobTitle, jobDescription = "" } = args;
+                
+                console.log(`🔍 分析"${jobTitle}"职位所需技能...`);
+                
+                const prompt = `请分析以下职位信息，生成该职位所需的核心技能列表：
+职位名称: "${jobTitle}"
+职位描述: "${jobDescription}"
+
+请严格按照以下JSON格式输出技能列表：
+{
+  "skills": ["技能1", "技能2", "技能3", ...]
+}
+
+确保输出是可解析的JSON格式，不包含其他内容。技能列表应该包含8-12个核心技能。`;
+
+                try {
+                    const response = await this.llm.generate(prompt, {
+                        temperature: 0.5,
+                        maxTokens: 500,
+                        responseFormat: { type: "json_object" }
+                    });
+
+                    let skillsData;
+                    try {
+                        skillsData = JSON.parse(response);
+                    } catch (parseError) {
+                        // 如果解析失败，使用默认格式
+                        skillsData = {
+                            skills: [`${jobTitle}相关技能1`, `${jobTitle}相关技能2`, `${jobTitle}相关技能3`]
+                        };
+                    }
+                    
+                    context.variables.set('analyzedJobSkills', skillsData.skills);
+                    
+                    return {
+                        content: [{
+                            type: "text",
+                            text: `✅ 已分析"${jobTitle}"职位，生成${skillsData.skills.length}项核心技能`
+                        }],
+                        skills: skillsData.skills
+                    };
+                    
+                } catch (error) {
+                    console.error(`❌ 分析"${jobTitle}"职位技能时出错:`, error);
+                    // 出错时使用默认技能列表
+                    const defaultSkills = [`${jobTitle}基础技能`, `${jobTitle}核心技能`, `${jobTitle}进阶技能`];
+                    context.variables.set('analyzedJobSkills', defaultSkills);
+                    
+                    return {
+                        content: [{
+                            type: "text",
+                            text: `⚠️ 无法分析"${jobTitle}"职位技能，使用默认技能列表`
+                        }],
+                        skills: defaultSkills
+                    };
+                }
+            }
+        });
+    }
+}
+
+/**
  * 课程搜索Agent - 搜索和推荐在线课程
  */
 class CourseSearchAgent extends Agent {
@@ -439,6 +562,26 @@ class ExerciseGeneratorAgent extends Agent {
                   }
                 ]`
         });
+        
+        // 确保tools数组被初始化
+        if (!this.tools) {
+            this.tools = [];
+        }
+        
+        // 初始化LLM配置
+        if (process.env.ALIBABA_DASHSCOPE_API_KEY) {
+            this.apiKey = process.env.ALIBABA_DASHSCOPE_API_KEY;
+        }
+    }
+    
+    async initializeLLM() {
+        if (!this.llmConfig && this.apiKey) {
+            const { createQwenMaxConfig } = await import('./packages/eko-core/dist/index.esm.js');
+            this.llmConfig = createQwenMaxConfig(this.apiKey, {
+                temperature: 0.7,
+                maxTokens: 2000
+            });
+        }
     }
 
     setupTools() {
@@ -463,6 +606,9 @@ class ExerciseGeneratorAgent extends Agent {
                 
                 console.log(`📝 为"${jobTitle || '未指定职位'}"生成${count}道面试题...`);
                 
+                // 初始化LLM
+                await this.initializeLLM();
+                
                 // 生成面试题
                 const exercises = [];
                 
@@ -479,18 +625,39 @@ class ExerciseGeneratorAgent extends Agent {
 确保输出是可解析的JSON格式，不包含其他内容。生成${Math.min(count, 5)}道题目。`;
 
                     try {
-                        const response = await this.llm.generate(prompt, {
-                            temperature: 0.7,
-                            maxTokens: 2000,
-                            responseFormat: { type: "json_object" }
+                        if (!this.llmConfig) {
+                            throw new Error('LLM配置未初始化');
+                        }
+                        
+                        // 使用直接的fetch调用替代this.llm.generate()
+                        const response = await fetch(this.llmConfig.config.baseURL + '/chat/completions', {
+                            method: 'POST',
+                            headers: this.llmConfig.config.headers,
+                            body: JSON.stringify({
+                                model: this.llmConfig.model,
+                                messages: [
+                                    { role: 'user', content: prompt }
+                                ],
+                                temperature: this.llmConfig.config.temperature,
+                                max_tokens: this.llmConfig.config.maxTokens,
+                                response_format: { type: "json_object" }
+                            })
                         });
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP错误! 状态: ${response.status}`);
+                        }
+                        
+                        const data = await response.json();
+                        const content = data.choices[0].message.content;
 
                         let questions;
                         try {
-                            questions = JSON.parse(response);
+                            questions = JSON.parse(content);
                             // 确保只取需要的数量
                             questions = questions.slice(0, Math.min(count, questions.length));
                         } catch (parseError) {
+                            console.error('解析LLM响应失败:', parseError);
                             // 如果解析失败，使用默认格式
                             questions = [{
                                 question: `${skill}相关的面试题`,
@@ -570,6 +737,26 @@ class KnowledgePointGeneratorAgent extends Agent {
                   }
                 ]`
         });
+        
+        // 确保tools数组被初始化
+        if (!this.tools) {
+            this.tools = [];
+        }
+        
+        // 初始化LLM配置
+        if (process.env.ALIBABA_DASHSCOPE_API_KEY) {
+            this.apiKey = process.env.ALIBABA_DASHSCOPE_API_KEY;
+        }
+    }
+
+    async initializeLLM() {
+        if (!this.llmConfig && this.apiKey) {
+            const { createQwenMaxConfig } = await import('./packages/eko-core/dist/index.esm.js');
+            this.llmConfig = createQwenMaxConfig(this.apiKey, {
+                temperature: 0.7,
+                maxTokens: 1500
+            });
+        }
     }
 
     setupTools() {
@@ -593,6 +780,9 @@ class KnowledgePointGeneratorAgent extends Agent {
                 
                 console.log(`📘 为"${jobTitle}"职位生成知识点内容...`);
                 
+                // 初始化LLM
+                await this.initializeLLM();
+                
                 // 为每个技能生成知识点
                 const knowledgePoints = [];
                 
@@ -607,16 +797,37 @@ class KnowledgePointGeneratorAgent extends Agent {
 确保输出是可解析的JSON格式，不包含其他内容。`;
 
                     try {
-                        const response = await this.llm.generate(prompt, {
-                            temperature: 0.7,
-                            maxTokens: 1500,
-                            responseFormat: { type: "json_object" }
+                        if (!this.llmConfig) {
+                            throw new Error('LLM配置未初始化');
+                        }
+                        
+                        // 使用直接的fetch调用替代this.llm.generate()
+                        const response = await fetch(this.llmConfig.config.baseURL + '/chat/completions', {
+                            method: 'POST',
+                            headers: this.llmConfig.config.headers,
+                            body: JSON.stringify({
+                                model: this.llmConfig.model,
+                                messages: [
+                                    { role: 'user', content: prompt }
+                                ],
+                                temperature: this.llmConfig.config.temperature,
+                                max_tokens: this.llmConfig.config.maxTokens,
+                                response_format: { type: "json_object" }
+                            })
                         });
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP错误! 状态: ${response.status}`);
+                        }
+                        
+                        const data = await response.json();
+                        const content = data.choices[0].message.content;
 
                         let knowledgePoint;
                         try {
-                            knowledgePoint = JSON.parse(response);
+                            knowledgePoint = JSON.parse(content);
                         } catch (parseError) {
+                            console.error('解析LLM响应失败:', parseError);
                             // 如果解析失败，使用默认格式
                             knowledgePoint = {
                                 title: `${jobTitle}核心技能: ${skill}`,
@@ -697,12 +908,13 @@ class IntelligentLearningCompanion {
 
     setupAgents() {
         this.agents = [
+            new JobSkillAnalyzerAgent(),
+            new KnowledgePointGeneratorAgent(),
+            new MarkmapAgent(),
+            new ExerciseGeneratorAgent(),
             new BrowserAgent(),
             new CourseSearchAgent(),
-            new NoteOrganizerAgent(), 
-            new ExerciseGeneratorAgent(),
-            new MarkmapAgent(),
-            new KnowledgePointGeneratorAgent()
+            new NoteOrganizerAgent()
         ];
     }
 
@@ -715,12 +927,13 @@ class IntelligentLearningCompanion {
         try {
             const result = await this.eko.run(`
                 我想了解"${learningGoal}"职位，请帮我：
-                1. 根据职位信息生成该职位所需的技能信息
-                2. 根据生成的技能信息生成这些技能的核心知识点
-                3. 根据生成的技能信息生成这些技能的高频面试题
-                4. 根据生成的技能信息转换成思维导图
-                5. 根据生成的技能信息搜索相关的优质课程并推荐
-                请各个Agent协作完成这个完整的职业技能学习资料生成的流程。
+                1. 分析该职位所需的核心技能列表
+                2. 根据技能列表生成详细的知识点内容
+                3. 根据技能列表生成高频面试题
+                4. 将技能列表转换成思维导图
+                5. 根据技能列表搜索相关的优质课程并推荐
+                
+                请各个Agent协作完成这个完整的职位技能分析和学习资料生成流程。
             `);
             
             console.log('\n✅ 职途会话完成!');
@@ -782,4 +995,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     main();
 }
 
-export { IntelligentLearningCompanion };
+export { IntelligentLearningCompanion, 
+         JobSkillAnalyzerAgent, 
+         ExerciseGeneratorAgent,
+         KnowledgePointGeneratorAgent };
