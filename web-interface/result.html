@@ -3430,7 +3430,7 @@
                 <div class="sidebar-section">
                     <h4 class="sidebar-section-title" id="sidebarJobTitle">后端工程师</h4>
                     <ul class="content-nav-list">
-                        <li class="nav-item" data-target="mindmap">
+                        <li class="nav-item active" data-target="mindmap">
                             <i class="fas fa-project-diagram"></i>
                             <span>思维导图</span>
                             <i class="fas fa-chevron-right nav-arrow"></i>
@@ -3441,7 +3441,7 @@
                             <span class="item-count" id="knowledgeCount">(20)</span>
                             <i class="fas fa-chevron-right nav-arrow"></i>
                         </li>
-                        <li class="nav-item active" data-target="interview">
+                        <li class="nav-item" data-target="interview">
                             <i class="fas fa-question-circle"></i>
                             <span>高频面试题</span>
                             <span class="item-count" id="interviewCount">(15)</span>
@@ -3471,8 +3471,8 @@
 
             <!-- 中间内容区域 -->
             <main class="content-main">
-                <!-- 思维导图区域 -->
-                <div class="content-section" id="mindmapSection">
+                <!-- 思维导图区域默认显示 -->
+                <div class="content-section active" id="mindmapSection">
                     <div class="section-header">
                         <h2>
                             <i class="fas fa-project-diagram"></i>
@@ -3514,8 +3514,8 @@
                     </div>
                 </div>
                 
-                <!-- 面试题内容默认显示 -->
-                <div class="content-section active" id="interviewSection">
+                <!-- 面试题内容 -->
+                <div class="content-section" id="interviewSection">
                     <div class="section-header">
                         <h2>
                             <i class="fas fa-question-circle"></i>
@@ -4286,7 +4286,7 @@ person.setAge(25);</code></pre>
             // 初始化内容区域
             console.log('🔔 初始化页面内容');
             const urlSection = new URLSearchParams(window.location.search).get('section');
-            let activeSection = urlSection || 'interview';
+            let activeSection = urlSection || 'mindmap';
             
             // 激活导航项
             navItems.forEach(nav => {
