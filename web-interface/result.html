@@ -3428,7 +3428,7 @@
                 
                 <!-- 主内容目录 -->
                 <div class="sidebar-section">
-                    <h4 class="sidebar-section-title" id="sidebarJobTitle">后端工程师</h4>
+                    
                     <ul class="content-nav-list">
                         <li class="nav-item active" data-target="mindmap">
                             <i class="fas fa-project-diagram"></i>
@@ -3526,8 +3526,8 @@
                         <!-- 面试题卡片 -->
                         <div class="interview-card">
                             <div class="interview-question-container" style="position: relative; margin-bottom: 1rem;">
-                                <h3 class="interview-question">解释JavaScript中的闭包概念，并举例说明其应用场景</h3>
-                                <button class="ai-chat-btn" onclick="startAIChat('js-closure')" title="与AI助手讨论此题目" style="
+                                <h3 class="interview-question">什么是Spring Boot的自动配置机制？请说明其工作原理和优势</h3>
+                                <button class="ai-chat-btn" onclick="startAIChat('spring-boot-auto-config')" title="与AI助手讨论此题目" style="
                                     position: absolute;
                                     top: 50%;
                                     right: -1.5rem;
@@ -3552,116 +3552,120 @@
                             </div>
                             <div class="interview-tags">
                                 <span class="interview-tag primary">中等</span>
-                                <span class="interview-tag tech">JavaScript</span>
-                                <span class="interview-tag secondary">前端开发</span>
+                                <span class="interview-tag tech">Spring Boot</span>
+                                <span class="interview-tag secondary">后端开发</span>
                             </div>
                                                     
                             <!-- 解题思路和答案按钮区域 -->
                             <div class="interview-helper-actions" style="display: flex; gap: 0.75rem; margin: 1.5rem 0;">
-                                <button class="interview-btn solution" onclick="showSolution('js-closure')" style="flex: 1;">
+                                <button class="interview-btn solution" onclick="showSolution('spring-boot-auto-config')" style="flex: 1;">
                                     <i class="fas fa-lightbulb"></i>
                                     解题思路
                                 </button>
-                                <button class="interview-btn secondary" onclick="showAnswer('js-closure')" style="flex: 1;">
+                                <button class="interview-btn secondary" onclick="showAnswer('spring-boot-auto-config')" style="flex: 1;">
                                     <i class="fas fa-eye"></i>
                                     查看答案
                                 </button>
                             </div>
                             
                             <!-- 解题思路区域 -->
-                            <div class="solution-area" id="solution-js-closure">
+                            <div class="solution-area" id="solution-spring-boot-auto-config">
                                 <div class="solution-title">
                                     <i class="fas fa-lightbulb"></i>
-                                    JavaScript闭包解题思路
+                                    Spring Boot自动配置解题思路
                                 </div>
                                 <div class="solution-content">
                                     <h4>1. 理解题目要求</h4>
-                                    <p>面试官想了解你对闭包概念的掌握程度，包括：</p>
+                                    <p>面试官想了解你对Spring Boot自动配置机制的理解程度，包括：</p>
                                     <ul>
-                                        <li>闭包的定义和原理</li>
-                                        <li>闭包的实际应用场景</li>
-                                        <li>闭包可能带来的问题</li>
+                                        <li>自动配置的核心原理和实现方式</li>
+                                        <li>@EnableAutoConfiguration注解的作用</li>
+                                        <li>条件注解（@Conditional）的使用</li>
+                                        <li>自定义自动配置类的方法</li>
                                     </ul>
                                     
                                     <h4>2. 回答要点</h4>
                                     <ul>
-                                        <li><strong>定义：</strong>闭包是指有权访问另一个函数作用域中变量的函数</li>
-                                        <li><strong>原理：</strong>内部函数引用外部函数的变量，即使外部函数执行完毕，这些变量仍然被保存在内存中</li>
-                                        <li><strong>应用：</strong>模块化编程、私有变量、回调函数等</li>
+                                        <li><strong>核心机制：</strong>基于@EnableAutoConfiguration注解和spring.factories文件</li>
+                                        <li><strong>工作原理：</strong>通过条件注解判断类路径和配置来决定是否启用某个配置</li>
+                                        <li><strong>优势：</strong>零配置启动、约定大于配置、提高开发效率</li>
                                     </ul>
                                     
                                     <h4>3. 示例代码</h4>
-                                    <p>准备一个简单的闭包示例：</p>
-                                    <pre style="background: #f8f9fa; padding: 1rem; border-radius: 6px; overflow-x: auto;"><code>function createCounter() {
-    let count = 0;
-    return function() {
-        return ++count;
-    };
-}
-const counter = createCounter();
-console.log(counter()); // 1
-console.log(counter()); // 2</code></pre>
+                                    <p>准备一个自动配置的示例：</p>
+                                    <pre style="background: #f8f9fa; padding: 1rem; border-radius: 6px; overflow-x: auto;"><code>@Configuration
+@ConditionalOnClass(DataSource.class)
+@EnableConfigurationProperties(DataSourceProperties.class)
+public class DataSourceAutoConfiguration {
+    
+    @Bean
+    @ConditionalOnMissingBean
+    public DataSource dataSource(DataSourceProperties properties) {
+        return properties.initializeDataSourceBuilder().build();
+    }
+}</code></pre>
                                     
                                     <h4>4. 注意事项</h4>
                                     <ul>
-                                        <li>提到内存泄漏的风险</li>
-                                        <li>说明如何避免闭包陷阱</li>
-                                        <li>强调合理使用的重要性</li>
+                                        <li>说明@ConditionalOnClass等条件注解的作用</li>
+                                        <li>解释spring.factories文件的配置方式</li>
+                                        <li>强调自动配置与手动配置的优先级</li>
                                     </ul>
                                 </div>
                             </div>
                             
 
                             <!-- 答案显示区域 -->
-                            <div class="answer-area" id="answer-js-closure">
+                            <div class="answer-area" id="answer-spring-boot-auto-config">
                                 <div class="answer-title">
                                     <i class="fas fa-check-circle"></i>
                                     参考答案
                                 </div>
                                 <div class="answer-content">
-                                    <h4>闭包的定义和原理</h4>
-                                    <p><strong>定义：</strong>闭包是指有权访问另一个函数作用域中变量的函数。即使外部函数已经返回，闭包仍然能够访问到那些变量。</p>
+                                    <h4>Spring Boot自动配置的定义和原理</h4>
+                                    <p><strong>定义：</strong>Spring Boot自动配置是一种基于条件的配置机制，能够根据类路径、属性文件和已有的Bean来自动配置Spring应用程序。</p>
                                     
-                                    <p><strong>工作原理：</strong>当一个内部函数被定义在另一个函数内部时，内部函数可以访问外部函数的变量。即使外部函数执行完毕，这些变量仍然会被保留在内存中，供内部函数使用。</p>
+                                    <p><strong>工作原理：</strong>通过@EnableAutoConfiguration注解启动自动配置，Spring Boot会扫描META-INF/spring.factories文件中的配置类，并根据@Conditional系列注解的条件来决定是否加载对应的配置类。</p>
                                     
-                                    <h4>实际应用场景</h4>
+                                    <h4>核心组件和应用场景</h4>
                                     <ul>
-                                        <li><strong>模块化编程：</strong>创建私有作用域，防止变量污染全局命名空间</li>
-                                        <li><strong>回调函数：</strong>在事件处理、定时器中保持对外部变量的引用</li>
-                                        <li><strong>函数工厂：</strong>创建具有特定功能的函数</li>
-                                        <li><strong>数据隐藏：</strong>实现类似私有属性的效果</li>
+                                        <li><strong>数据源配置：</strong>自动配置DataSource、JPA、MyBatis等数据层组件</li>
+                                        <li><strong>Web配置：</strong>自动配置SpringMVC、嵌入式容器、静态资源处理</li>
+                                        <li><strong>安全配置：</strong>自动配置Spring Security的基本安全策略</li>
+                                        <li><strong>缓存配置：</strong>自动配置Redis、Ehcache等缓存方案</li>
+                                        <li><strong>消息队列：</strong>自动配置RabbitMQ、Kafka等消息中间件</li>
                                     </ul>
                                     
                                     <h4>代码示例</h4>
-                                    <pre style="background: #f8f9fa; padding: 1rem; border-radius: 6px; overflow-x: auto;"><code>// 示例1：计数器
-function createCounter() {
-    let count = 0;
-    return function() {
-        return ++count;
-    };
+                                    <pre style="background: #f8f9fa; padding: 1rem; border-radius: 6px; overflow-x: auto;"><code>// 示例1：自定义自动配置类
+@Configuration
+@ConditionalOnClass(RedisTemplate.class)
+@EnableConfigurationProperties(RedisProperties.class)
+public class MyRedisAutoConfiguration {
+    
+    @Bean
+    @ConditionalOnMissingBean(name = "redisTemplate")
+    public RedisTemplate<String, Object> redisTemplate(
+            RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+        return template;
+    }
 }
-const counter = createCounter();
-console.log(counter()); // 1
-console.log(counter()); // 2
 
-// 示例2：私有变量
-function createPerson(name) {
-    let age = 0;
-    return {
-        getName: function() { return name; },
-        getAge: function() { return age; },
-        setAge: function(newAge) { age = newAge; },
-        growUp: function() { age++; }
-    };
-}
-const person = createPerson('Alice');
-person.setAge(25);</code></pre>
+// 示例2：条件注解的使用
+@Configuration
+@ConditionalOnProperty(name = "app.feature.enabled", havingValue = "true")
+public class FeatureConfiguration {
+    // 只有当配置项app.feature.enabled=true时才会加载此配置
+}</code></pre>
                                     
-                                    <h4>注意事项和陷阱</h4>
+                                    <h4>优势和注意事项</h4>
                                     <ul>
-                                        <li><strong>内存泄漏：</strong>闭包会防止垃圾回收，如果不正确使用可能导致内存泄漏</li>
-                                        <li><strong>性能影响：</strong>过度使用闭包可能影响性能</li>
-                                        <li><strong>循环引用：</strong>需要注意在循环中创建闭包的问题</li>
+                                        <li><strong>优势：</strong>零配置启动、约定大于配置、快速搭建项目原型</li>
+                                        <li><strong>自定义配置：</strong>可以通过application.properties覆盖默认配置</li>
+                                        <li><strong>排除自动配置：</strong>使用@EnableAutoConfiguration(exclude={...})排除不需要的配置</li>
+                                        <li><strong>优先级：</strong>用户自定义的Bean会覆盖自动配置的Bean</li>
                                     </ul>
                                 </div>
                             </div>
