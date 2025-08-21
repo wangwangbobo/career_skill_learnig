@@ -770,6 +770,8 @@
         .assistant-message {
             margin-right: 10px; /* 给右侧留少量边距，避免贴边 */
             max-width: 95%; /* AI助手消息使用更多宽度 */
+            flex-direction: column; /* 改为垂直排列 */
+            align-items: flex-start; /* 左对齐 */
         }
         
         .message-avatar {
@@ -782,7 +784,12 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            margin: 0 0.75rem;
+            margin: 0 0 0.5rem 0; /* 调整为底部边距，适配垂直布局 */
+        }
+        
+        /* 用户消息中的头像依然保持水平布局 */
+        .user-message .message-avatar {
+            margin: 0 0.75rem; /* 用户消息保持原样式 */
         }
         
         .message-content {
@@ -793,8 +800,8 @@
             line-height: 1.4; /* 减小行高 */
             color: #4b5563;
             max-width: 100%; /* AI消息最大宽度 - 调整为全宽度 */
-            width: fit-content !important; /* 强制让容器宽度自适应内容 */
-            display: inline-block !important; /* 确保容器为inline-block */
+            width: 100%; /* 在垂直布局下占满容器宽度 */
+            display: block; /* 改为block布局 */
             word-wrap: break-word; /* 强制换行 */
             word-break: break-word; /* 兼容性设置 */
             overflow-wrap: break-word; /* 现代浏览器支持 */
@@ -917,9 +924,9 @@
             border-radius: 12px !important;
             font-size: 0.875rem !important;
             line-height: 1.2 !important; /* 稍微放宽行高 */
-            display: inline-flex !important; /* 使用flex布局 */
+            display: inline-flex !important; /* 用户消息保持inline-flex布局 */
             align-items: center !important; /* 垂直居中 */
-            width: auto !important;
+            width: auto !important; /* 用户消息宽度自适应 */
             max-width: 220px !important;
             min-width: auto !important;
             height: auto !important; /* 完全自适应高度 */
@@ -2124,8 +2131,8 @@
                 height: calc(100vh - 120px); /* 保持高度限制 */
             }
             
-            .message-content {
-                max-width: 95%; /* AI消息适应较小屏幕的宽度 */
+            .assistant-message .message-content {
+                width: 100%; /* AI消息在垂直布局下占满宽度 */
             }
             
             .user-message .message-content {
@@ -2156,8 +2163,8 @@
                 max-height: calc(450px - 130px); /* 适应新的高度 */
             }
             
-            .message-content {
-                max-width: 80%; /* AI消息移动端调整消息宽度 - 从70%调整为80% */
+            .assistant-message .message-content {
+                width: 100%; /* AI消息移动端占满容器宽度 */
             }
             
             .user-message .message-content {
