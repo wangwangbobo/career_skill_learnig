@@ -873,17 +873,15 @@
         }
 
         .interview-question {
-            font-size: 1.375rem; /* 增大字体 */
-            font-weight: 700; /* 加粗 */
-            color: #1f2937;
-            margin: 0; /* 重置默认margin */
-            line-height: 1.4;
-            letter-spacing: -0.025em; /* 细微调整字符间距 */
-            background: linear-gradient(135deg, #6366f1, #8b5cf6); /* 恢复蓝色背景 */
-            color: white; /* 改为白色文字 */
-            padding: 1.5rem 2rem; /* 增加内边距 */
-            border-radius: 12px; /* 圆角 */
-            margin-bottom: 0; /* 移除下边距 */
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+            margin: -2rem -2rem 0 -2rem; /* 负边距抵消父容器的padding */
+            line-height: 1.3;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            padding: 1.2rem 1.5rem;
+            border-radius: 12px 12px 0 0; /* 只保留上方圆角 */
+            text-align: center;
         }
 
         .interview-tags {
@@ -2942,6 +2940,9 @@
                 
                 console.log('🎉 思维导图初始化完成！已自动适配显示全部内容');
                 
+                // 为思维导图节点添加点击事件，可以发送到AI助手
+                addMindmapNodeClickEvents();
+                
                 // 修复最常见的SVG transform错误
                 const fixSvgTransformErrors = () => {
                     console.log('🔧 尝试修复SVG transform错误...');
@@ -3094,6 +3095,93 @@
                     </style>
                 `;
             }
+        }
+        
+        // 为思维导图节点添加点击事件的函数
+        function addMindmapNodeClickEvents() {
+            console.log('🖱️ 为思维导图节点添加点击事件...');
+            
+            // 获取思维导图容器
+            const mindmapContent = document.getElementById('mindmapContent');
+            if (!mindmapContent) {
+                console.warn('⚠️ 未找到思维导图容器');
+                return;
+            }
+            
+            // 等待SVG元素完全加载
+            const waitForSvgElements = () => {
+                const svg = mindmapContent.querySelector('svg');
+                if (!svg) {
+                    console.warn('⚠️ SVG元素尚未生成，等待中...');
+                    setTimeout(waitForSvgElements, 500);
+                    return;
+                }
+                
+                // 查找所有文本节点（包括 foreignObject 中的文本）
+                const textElements = svg.querySelectorAll('text, foreignObject div');
+                console.log(`🔍 找到 ${textElements.length} 个可点击的节点`);
+                
+                textElements.forEach((element, index) => {
+                    // 为每个文本节点添加点击事件
+                    element.style.cursor = 'pointer';
+                    element.style.userSelect = 'none';
+                    
+                    // 添加悬停效果
+                    element.addEventListener('mouseenter', function() {
+                        this.style.opacity = '0.7';
+                        this.style.transform = 'scale(1.05)';
+                    });
+                    
+                    element.addEventListener('mouseleave', function() {
+                        this.style.opacity = '1';
+                        this.style.transform = 'scale(1)';
+                    });
+                    
+                    // 添加点击事件
+                    element.addEventListener('click', function(e) {
+                        e.stopPropagation(); // 阻止事件冒泡
+                        
+                        // 获取节点文本内容
+                        const nodeText = this.textContent || this.innerText || '';
+                        
+                        if (nodeText.trim()) {
+                            console.log('💬 点击了思维导图节点:', nodeText);
+                            
+                            // 构建发送到AI助手的消息
+                            const aiMessage = `请帮我详细介绍一下「${nodeText}」这个技术领域的学习路线和关键知识点。
+
+请包括以下内容：
+1. 核心概念和原理
+2. 学习顺序和前置知识
+3. 实际应用场景和项目实践
+4. 学习资源和参考资料
+5. 常见问题和注意事项
+
+请给出详细和实用的学习指导。`;
+                            
+                            // 发送消息到AI助手
+                            sendMessageToAI(aiMessage);
+                            
+                            // 给用户视觉反馈
+                            this.style.backgroundColor = 'rgba(99, 102, 241, 0.1)';
+                            this.style.border = '2px solid #6366f1';
+                            
+                            // 1.5秒后恢复样式
+                            setTimeout(() => {
+                                this.style.backgroundColor = '';
+                                this.style.border = '';
+                            }, 1500);
+                            
+                            console.log('✅ 已将节点内容发送到AI助手');
+                        }
+                    });
+                });
+                
+                console.log(`✅ 成功为 ${textElements.length} 个节点添加了点击事件`);
+            };
+            
+            // 开始等待SVG元素
+            waitForSvgElements();
         }
     </script>
 </head>
@@ -3251,7 +3339,7 @@
                                 <button class="ai-chat-btn" onclick="startAIChat('js-closure')" title="与AI助手讨论此题目" style="
                                     position: absolute;
                                     top: 50%;
-                                    right: 12px;
+                                    right: -1.5rem;
                                     transform: translateY(-50%);
                                     width: 36px;
                                     height: 36px;
@@ -4003,7 +4091,7 @@ console.log(person.getAge()); // 25</code></pre>
             </main>
 
             <!-- 右侧AI助手 -->
-            <aside class="ai-assistant">
+            <aside class="ai-assistant minimized">
                 <div class="assistant-header">
                     <h3 class="assistant-title">
                         <i class="fas fa-robot"></i>
@@ -4016,8 +4104,8 @@ console.log(person.getAge()); // 25</code></pre>
                         <button class="assistant-btn" id="downloadChatBtn" title="下载聊天记录">
                             <i class="fas fa-download"></i>
                         </button>
-                        <button class="assistant-btn" id="minimizeAssistantBtn" title="缩小面板">
-                            <i class="fas fa-compress"></i>
+                        <button class="assistant-btn" id="minimizeAssistantBtn" title="扩大面板">
+                            <i class="fas fa-expand"></i>
                         </button>
                     </div>
                 </div>
@@ -4740,20 +4828,20 @@ console.log(person.getAge()); // 25</code></pre>
                 
                 console.log('🤖 根据页面类型控制AI助手:', sectionType);
                 
-                if (sectionType === 'mindmap') {
-                    // 思维导图页面：自动缩小
-                    if (!aiAssistant.classList.contains('minimized')) {
-                        aiAssistant.classList.add('minimized');
-                        if (icon) {
-                            icon.className = 'fas fa-expand';
-                        }
-                        if (minimizeBtn) {
-                            minimizeBtn.title = '扩大面板';
-                        }
-                        console.log('🔎 AI助手自动缩小（思维导图模式）');
+                // 所有页面：默认自动缩小AI助手
+                if (!aiAssistant.classList.contains('minimized')) {
+                    aiAssistant.classList.add('minimized');
+                    if (icon) {
+                        icon.className = 'fas fa-expand';
                     }
-                    
-                    // 触发思维导图的自动适配，确保内容可见
+                    if (minimizeBtn) {
+                        minimizeBtn.title = '扩大面板';
+                    }
+                    console.log('🔎 AI助手自动缩小（所有界面默认状态）');
+                }
+                
+                // 如果是思维导图页面，触发自动适配
+                if (sectionType === 'mindmap') {
                     setTimeout(() => {
                         const mindmapContent = document.getElementById('mindmapContent');
                         const svg = mindmapContent ? mindmapContent.querySelector('svg') : null;
@@ -4770,18 +4858,6 @@ console.log(person.getAge()); // 25</code></pre>
                             }
                         }
                     }, 300);
-                } else {
-                    // 其他页面：自动展开
-                    if (aiAssistant.classList.contains('minimized')) {
-                        aiAssistant.classList.remove('minimized');
-                        if (icon) {
-                            icon.className = 'fas fa-compress';
-                        }
-                        if (minimizeBtn) {
-                            minimizeBtn.title = '缩小面板';
-                        }
-                        console.log('🔍 AI助手自动展开（非思维导图模式）');
-                    }
                 }
             }
             
