@@ -3409,10 +3409,49 @@ function generateAnswerContent(questionId) {
     `;
 }
 
-// 全局暴露新函数
+// 全局暴露函数，确保onclick可以访问到
 window.showAnswer = showAnswer;
 window.startAIChat = startAIChat;
 window.sendMessageToAI = sendMessageToAI;
+            
+// 页面加载完成后的初始化和测试
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('📄 页面DOM加载完成');
+                
+    // 🔧 强制重置答案区域状态 - 确保初始为隐藏状态
+    const answerArea = document.getElementById('answer-js-closure');
+    if (answerArea) {
+        console.log('🔧 重置答案区域状态');
+        console.log('  - 重置前类名:', answerArea.className);
+        console.log('  - 重置前显示状态:', window.getComputedStyle(answerArea).display);
+                    
+        // 强制移除show类，确保初始隐藏
+        answerArea.classList.remove('show');
+                    
+        console.log('  - 重置后类名:', answerArea.className);
+        console.log('  - 重置后显示状态:', window.getComputedStyle(answerArea).display);
+    }
+                
+    // 测试函数是否在全局作用域中可用
+    console.log('🧪 测试全局函数可用性:');
+    console.log('  - window.showAnswer:', typeof window.showAnswer);
+    console.log('  - showAnswer:', typeof showAnswer);
+                
+    // 检查按钮是否存在
+    const answerBtn = document.querySelector('[onclick*="showAnswer"]');
+    console.log('🔍 按钮元素检查:');
+    console.log('  - 查看答案按钮:', answerBtn);
+                
+    if (answerBtn) {
+        console.log('  - 查看答案按钮onclick属性:', answerBtn.getAttribute('onclick'));
+        // 确保按钮文字正确
+        if (answerArea && !answerArea.classList.contains('show')) {
+            answerBtn.innerHTML = '<i class="fas fa-eye"></i>查看答案';
+        }
+    }
+                
+    console.log('✅ 页面初始化检查完成');
+});
 
 // 更新initSolutionFeature函数，同时初始化答案功能
 console.log(person.getAge()); // 25</code></pre>
@@ -4907,7 +4946,9 @@ console.log(person.getAge()); // 25</code></pre>
                     });
                 }
                 
-                // 查看答案
+                // 查看答案 - 已在HTML中使用onclick属性，不需要重复绑定
+                // 注释掉重复的事件绑定，避免同一个按钮被触发两次
+                /*
                 if (checkAnswerBtn) {
                     checkAnswerBtn.addEventListener('click', function() {
                         // 直接调用showAnswer函数显示答案内容
@@ -4915,6 +4956,7 @@ console.log(person.getAge()); // 25</code></pre>
                         showAnswer(questionId);
                     });
                 }
+                */
                 
                 // 我会了按钮
                 if (learnedBtn) {
@@ -4936,38 +4978,24 @@ console.log(person.getAge()); // 25</code></pre>
                             const updatedList = learnedInterviews.filter(title => title !== questionTitle);
                             localStorage.setItem('learnedInterviews', JSON.stringify(updatedList));
                             
-                            // 恢复样式
-                            if (interviewCard) {
-                                interviewCard.style.opacity = '1';
-                                interviewCard.style.background = 'white';
-                                interviewCard.style.border = '1px solid #f1f5f9';
-                            }
+                            // 保持原始样式（不需要恢复）
                             
                             // 恢复按钮状态
                             learnedBtn.innerHTML = '<i class="fas fa-check"></i> 我会了';
                             learnedBtn.style.backgroundColor = '#4f46e5';
                             learnedBtn.disabled = false;
                             
-                            // 显示提示
-                            alert(`已取消「${questionTitle}」的已掌握标记。`);
+                            // 静默取消掌握状态
                         } else {
                             // 添加掌握状态
                             learnedInterviews.push(questionTitle);
                             localStorage.setItem('learnedInterviews', JSON.stringify(learnedInterviews));
                             
-                            // 添加已掌握的视觉反馈
-                            if (interviewCard) {
-                                interviewCard.style.opacity = '0.6';
-                                interviewCard.style.background = '#f0f9ff';
-                                interviewCard.style.border = '2px solid #22c55e';
-                            }
-                            
-                            // 更新按钮状态
+                            // 更新按钮状态（不改变页面外观）
                             learnedBtn.innerHTML = '<i class="fas fa-check"></i> 已掌握';
                             learnedBtn.style.backgroundColor = '#22c55e';
                             
-                            // 显示成功消息
-                            alert(`太棒了！您已掌握「${questionTitle}」面试题。我们会记录您的学习进度。`);
+                            // 静默设置掌握状态
                         }
                     });
                 }
@@ -5004,7 +5032,7 @@ console.log(person.getAge()); // 25</code></pre>
                                 }
                             }
                             
-                            alert(`已取消「${questionTitle}」的收藏状态。`);
+                            // 静默取消收藏状态
                         } else {
                             // 聚焦到笔记输入框
                             const notesInput = document.querySelector('.interview-notes-input');
@@ -5019,7 +5047,7 @@ console.log(person.getAge()); // 25</code></pre>
                             noteBtn.style.borderColor = '#f59e0b';
                             noteBtn.classList.add('bookmarked');
                             
-                            alert(`面试题「${questionTitle}」已添加到您的学习笔记中，您可以稍后复习。`);
+                            // 静默添加到学习笔记
                         }
                     });
                 }
@@ -5033,14 +5061,8 @@ console.log(person.getAge()); // 25</code></pre>
             const currentQuestionTitle = document.querySelector('.interview-question');
             if (currentQuestionTitle && learnedInterviews.includes(currentQuestionTitle.textContent)) {
                 const learnedBtn = document.querySelector('.interview-btn.primary');
-                const interviewCard = document.querySelector('.interview-card');
                 
-                if (interviewCard) {
-                    interviewCard.style.opacity = '0.6';
-                    interviewCard.style.background = '#f0f9ff';
-                    interviewCard.style.border = '2px solid #22c55e';
-                }
-                
+                // 只更新按钮状态，不改变页面外观
                 if (learnedBtn) {
                     learnedBtn.innerHTML = '<i class="fas fa-check"></i> 已掌握';
                     learnedBtn.style.backgroundColor = '#22c55e';
@@ -5165,34 +5187,24 @@ console.log(person.getAge()); // 25</code></pre>
                                 const updatedList = learnedKnowledge.filter(title => title !== knowledgeTitle);
                                 localStorage.setItem('learnedKnowledge', JSON.stringify(updatedList));
                                 
-                                // 恢复样式
-                                item.style.opacity = '1';
-                                item.style.background = 'white';
-                                item.style.border = '1px solid #e5e7eb';
+                                // 保持原始样式（不需要恢复）
                                 
                                 // 恢复按钮状态
                                 learnedBtn.innerHTML = '<i class="fas fa-check"></i> 我会了';
                                 learnedBtn.style.backgroundColor = '#4f46e5';
                                 learnedBtn.disabled = false;
                                 
-                                // 显示提示
-                                alert(`已取消「${knowledgeTitle}」的已掌握标记。`);
+                                // 静默取消掌握状态
                             } else {
                                 // 添加掌握状态
                                 learnedKnowledge.push(knowledgeTitle);
                                 localStorage.setItem('learnedKnowledge', JSON.stringify(learnedKnowledge));
                                 
-                                // 添加已掌握的视觉反馈
-                                item.style.opacity = '0.6';
-                                item.style.background = '#f0f9ff';
-                                item.style.border = '2px solid #22c55e';
-                                
-                                // 更新按钮状态
+                                // 更新按钮状态（不改变页面外观）
                                 learnedBtn.innerHTML = '<i class="fas fa-check"></i> 已掌握';
                                 learnedBtn.style.backgroundColor = '#22c55e';
                                 
-                                // 显示成功消息
-                                alert(`太棒了！您已掌握「${knowledgeTitle}」知识点。我们会记录您的学习进度。`);
+                                // 静默设置掌握状态
                             }
                         });
                     }
@@ -5225,7 +5237,7 @@ console.log(person.getAge()); // 25</code></pre>
                                     }
                                 }
                                 
-                                alert(`已取消「${knowledgeTitle}」的收藏状态。`);
+                                // 静默取消收藏状态
                             } else {
                                 // 聚焦到笔记输入框
                                 const notesInput = item.querySelector('.knowledge-notes-input');
@@ -5240,7 +5252,7 @@ console.log(person.getAge()); // 25</code></pre>
                                 noteBtn.style.borderColor = '#f59e0b';
                                 noteBtn.classList.add('bookmarked');
                                 
-                                alert(`知识点「${knowledgeTitle}」已添加到您的学习笔记中，您可以稍后复习。`);
+                                // 静默添加到学习笔记
                             }
                         });
                     }
@@ -5253,9 +5265,7 @@ console.log(person.getAge()); // 25</code></pre>
                     const learnedBtn = item.querySelector('.knowledge-btn.primary');
                     
                     if (learnedKnowledge.includes(title) && learnedBtn) {
-                        item.style.opacity = '0.6';
-                        item.style.background = '#f0f9ff';
-                        item.style.border = '2px solid #22c55e';
+                        // 只更新按钮状态，不改变页面外观
                         learnedBtn.innerHTML = '<i class="fas fa-check"></i> 已掌握';
                         learnedBtn.style.backgroundColor = '#22c55e';
                     }
@@ -5306,36 +5316,52 @@ console.log(person.getAge()); // 25</code></pre>
                 }
             }
             
-            // 查看答案功能
+            // 查看答案功能 - 简洁版本（带防重复调用）
+            let showAnswerLock = false; // 防重复调用锁
             function showAnswer(questionId) {
-                console.log('📝 显示答案:', questionId);
-                
-                // 获取对应的答案区域
-                const answerArea = document.getElementById(`answer-${questionId}`);
-                const answerBtn = document.querySelector(`[onclick="showAnswer('${questionId}')"]`);
-                
-                console.log('🔍 查找答案区域:', `answer-${questionId}`, answerArea);
-                console.log('🔍 查找答案按钮:', answerBtn);
-                
-                if (!answerArea) {
-                    console.error('未找到答案区域');
-                    alert('未找到答案区域，请检查页面结构');
+                // 防重复调用检查
+                if (showAnswerLock) {
+                    console.log('🔒 showAnswer被锁定，忽略重复调用');
                     return;
                 }
                 
-                // 切换显示状态
-                if (answerArea.classList.contains('show')) {
-                    console.log('🙈 隐藏答案');
-                    answerArea.classList.remove('show');
-                    if (answerBtn) {
-                        answerBtn.innerHTML = '<i class="fas fa-eye"></i>查看答案';
+                showAnswerLock = true;
+                console.log('🔍 showAnswer called with questionId:', questionId);
+                
+                try {
+                    // 获取对应的答案区域
+                    const answerAreaId = `answer-${questionId}`;
+                    const answerArea = document.getElementById(answerAreaId);
+                    
+                    if (!answerArea) {
+                        console.error('❌ 未找到答案区域:', answerAreaId);
+                        return;
                     }
-                } else {
-                    console.log('👀 显示答案');
-                    answerArea.classList.add('show');
-                    if (answerBtn) {
-                        answerBtn.innerHTML = '<i class="fas fa-eye-slash"></i>隐藏答案';
+                    
+                    // 查找按钮
+                    const answerBtn = document.querySelector(`[onclick*="showAnswer('${questionId}')"]`);
+                    
+                    // 切换显示状态
+                    if (answerArea.classList.contains('show')) {
+                        // 当前显示中，切换为隐藏
+                        answerArea.classList.remove('show');
+                        if (answerBtn) {
+                            answerBtn.innerHTML = '<i class="fas fa-eye"></i>查看答案';
+                        }
+                        console.log('✅ 已隐藏答案');
+                    } else {
+                        // 当前隐藏中，切换为显示
+                        answerArea.classList.add('show');
+                        if (answerBtn) {
+                            answerBtn.innerHTML = '<i class="fas fa-eye-slash"></i>隐藏答案';
+                        }
+                        console.log('✅ 已显示答案');
                     }
+                } finally {
+                    // 解锁，允许下次调用
+                    setTimeout(() => {
+                        showAnswerLock = false;
+                    }, 200); // 200ms后解锁
                 }
             }
             
@@ -5546,7 +5572,8 @@ console.log(counter()); // 2</code></pre>
                             answerBtn.className = 'interview-btn secondary';
                             answerBtn.style.flex = '1';
                             answerBtn.innerHTML = '<i class="fas fa-eye"></i>查看答案';
-                            answerBtn.onclick = () => showAnswer(questionId);
+                            // 使用setAttribute设置onclick属性，避免重复绑定
+                            answerBtn.setAttribute('onclick', `showAnswer('${questionId}')`);
                             
                             helperActionsDiv.appendChild(solutionBtn);
                             helperActionsDiv.appendChild(answerBtn);
@@ -5656,8 +5683,7 @@ console.log(counter()); // 2</code></pre>
                 // 显示反馈
                 console.log('✅ 已将知识点发送到AI助手');
                 
-                // 显示用户反馈
-                alert('知识点内容已发送到AI助手！');
+                // 静默发送到AI助手
             }
             
             // 全局暴露函数
@@ -5667,17 +5693,41 @@ console.log(counter()); // 2</code></pre>
             window.startAIKnowledgeChat = startAIKnowledgeChat;
             window.sendMessageToAI = sendMessageToAI;
             
-            // 初始化解题思路功能
-            initSolutionFeature();
-            
-            // 调试信息：验证函数是否正确暴露
-            console.log('🔍 验证全局函数:', {
+            // 验证函数是否正确暴露
+            console.log('🔍 验证全局函数暴露:', {
                 showSolution: typeof window.showSolution,
                 showAnswer: typeof window.showAnswer, 
                 startAIChat: typeof window.startAIChat,
                 startAIKnowledgeChat: typeof window.startAIKnowledgeChat,
                 sendMessageToAI: typeof window.sendMessageToAI
             });
+            
+            // 测试直接调用
+            console.log('🧪 测试直接调用 showAnswer:');
+            try {
+                console.log('✅ showAnswer 函数存在，可以调用');
+            } catch (e) {
+                console.error('❌ showAnswer 函数调用失败:', e);
+            }
+            
+            // 初始化解题思路功能 - 暂时注释掉避免重复按钮创建
+            // initSolutionFeature();
+            
+            // 页面加载完成后的验证
+            setTimeout(() => {
+                console.log('🔍 页面加载完成，验证元素和函数:');
+                console.log('答案区域:', document.getElementById('answer-js-closure'));
+                console.log('答案按钮:', document.querySelector('[onclick*="showAnswer"]'));
+                console.log('showAnswer函数:', window.showAnswer);
+                
+                // 手动测试调用
+                console.log('🧪 手动测试调用 showAnswer:');
+                if (window.showAnswer) {
+                    console.log('✅ 可以手动调用 showAnswer');
+                } else {
+                    console.error('❌ 无法手动调用 showAnswer');
+                }
+            }, 1000);
             
             // 测试AI机器人图标的点击事件
             const aiChatBtns = document.querySelectorAll('.ai-chat-btn');
