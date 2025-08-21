@@ -88,7 +88,7 @@
         .results-container {
             display: flex;
             flex: 1;
-            padding: 0.5rem 1rem 1rem 1rem; /* 减小上边距 */
+            padding: 0.25rem 1rem 1rem 1rem; /* 进一步减小上边距 */
             gap: 1rem;
             position: relative;
             overflow: hidden;
@@ -98,12 +98,12 @@
         .results-header {
             background: white;
             border-bottom: 1px solid #e5e7eb;
-            padding: 0.1rem 1rem; /* 减小到极小值 */
+            padding: 0.25rem 1rem; /* 进一步减小内边距 */
             display: flex;
             align-items: center;
             justify-content: space-between;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            min-height: 2.5rem; /* 设置最小高度 */
+            min-height: 2rem; /* 减小最小高度 */
             position: relative;
         }
         
@@ -113,8 +113,8 @@
             left: 1rem;
             top: 50%;
             transform: translateY(-50%);
-            width: 32px;
-            height: 32px;
+            width: 28px; /* 减小按钮大小 */
+            height: 28px;
             border: none;
             background: #f3f4f6;
             border-radius: 6px;
@@ -124,7 +124,7 @@
             align-items: center;
             justify-content: center;
             transition: all 0.3s ease;
-            font-size: 0.875rem;
+            font-size: 0.8rem; /* 减小字体大小 */
             z-index: 100;
         }
         
@@ -139,7 +139,7 @@
         .results-title {
             display: flex;
             align-items: center;
-            font-size: 1rem; /* 进一步减小字体大小 */
+            font-size: 0.9rem; /* 进一步减小字体大小 */
             font-weight: 600;
             color: #111827;
             margin: 0;
@@ -147,8 +147,9 @@
         }
         
         .results-title i {
-            margin-right: 0.5rem; /* 减小图标间距 */
+            margin-right: 0.3rem; /* 进一步减小图标间距 */
             color: #6366f1;
+            font-size: 0.85rem; /* 减小图标大小 */
         }
         
         .results-meta {
@@ -173,11 +174,11 @@
         }
         
         .result-action-btn {
-            padding: 0.2rem 0.6rem; /* 进一步减小按钮内边距 */
+            padding: 0.15rem 0.5rem; /* 进一步减小按钮内边距 */
             border-radius: 6px;
             border: 1px solid #e5e7eb;
             background: white;
-            font-size: 0.75rem; /* 减小字体 */
+            font-size: 0.7rem; /* 进一步减小字体 */
             color: #6b7280;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -712,16 +713,22 @@
             border-top: 1px solid #e5e7eb;
             display: flex;
             gap: 0.75rem;
+            align-items: center; /* 改为垂直居中对齐 */
         }
         
         .chat-input {
             flex: 1;
-            padding: 0.75rem 1rem;
+            padding: 0.6rem 1rem; /* 调整内边距以更好对齐 */
             border-radius: 8px;
             border: 1px solid #e5e7eb;
             font-size: 0.875rem;
             resize: none;
             transition: border-color 0.3s ease;
+            min-height: 40px; /* 设置最小高度与按钮保持一致 */
+            height: 40px; /* 固定高度，防止高度变化影响对齐 */
+            line-height: 1.3; /* 调整行高使文本垂直居中 */
+            display: flex; /* 使用flex布局 */
+            align-items: center; /* 文本垂直居中 */
         }
         
         .chat-input:focus {
@@ -742,7 +749,8 @@
             justify-content: center;
             cursor: pointer;
             transition: background 0.3s ease;
-            align-self: flex-end;
+            flex-shrink: 0; /* 防止按钮被压缩 */
+            margin: 0; /* 清除默认边距 */
         }
         
         .send-btn:hover {
@@ -2209,7 +2217,7 @@
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 0.5rem; /* 减小间距 */
-                padding: 0.1rem 1rem; /* 保持与主样式一致的小内边距 */
+                padding: 0.25rem 1rem; /* 保持与主样式一致的小内边距 */
                 min-height: auto; /* 移动端取消最小高度限制 */
             }
             
@@ -5642,29 +5650,72 @@ console.log(person.getAge()); // 25</code></pre>
             
             // 发送消息到AI助手的函数
             function sendMessageToAI(message) {
-                // 获取AI助手的聊天区域
-                const chatMessages = document.querySelector('.chat-messages');
-                const chatInput = document.querySelector('.chat-input');
+                console.log('📤 直接发送消息到AI助手:', message);
                 
-                if (chatInput) {
-                    // 将消息填入输入框
-                    chatInput.value = message;
-                    chatInput.focus();
-                    
-                    // 模拟发送操作
-                    const sendBtn = document.querySelector('.send-btn');
-                    if (sendBtn && !sendBtn.disabled) {
-                        // 触发发送按钮点击事件
-                        setTimeout(() => {
-                            sendBtn.click();
-                        }, 100);
-                    }
+                // 获取发送按钮和输入框
+                const chatInput = document.querySelector('.chat-input');
+                const sendBtn = document.querySelector('.send-btn');
+                
+                if (!chatInput || !sendBtn) {
+                    console.error('❌ 未找到聊天组件');
+                    return;
                 }
+                
+                // 检查发送按钮是否可用
+                if (sendBtn.disabled) {
+                    console.warn('⚠️ 发送按钮当前不可用，稍后重试');
+                    setTimeout(() => sendMessageToAI(message), 500);
+                    return;
+                }
+                
+                // 确保输入框为空（符合交互规范）
+                chatInput.value = '';
+                
+                // 直接调用发送逻辑，不通过输入框
+                console.log('📝 发送消息:', message);
+                
+                // 禁用发送按钮防止重复点击
+                sendBtn.disabled = true;
+                
+                // 添加用户消息
+                addUserMessage(message);
+                
+                // 创建流式消息容器
+                const aiMessageContent = addAssistantMessageStreaming();
+                
+                // 调用流式API
+                callDashScopeAPIStream(message, (content) => {
+                    updateStreamingMessage(aiMessageContent, content);
+                }).then(() => {
+                    // 移除streaming类
+                    if (aiMessageContent) {
+                        aiMessageContent.classList.remove('streaming');
+                    }
+                }).catch(error => {
+                    console.error('❌ 聊天API调用失败:', error);
+                    if (aiMessageContent) {
+                        aiMessageContent.innerHTML = '<p>⚠️ 抱歉，我遇到了一些问题。请检查API配置或稍后再试。</p>';
+                        aiMessageContent.classList.remove('streaming');
+                    }
+                }).finally(() => {
+                    // 恢复发送按钮状态
+                    sendBtn.disabled = false;
+                    // 保持焦点在输入框（符合交互规范）
+                    chatInput.focus();
+                });
                 
                 // 如果AI助手被最小化，就恢复它
                 const aiAssistant = document.querySelector('.ai-assistant');
                 if (aiAssistant && aiAssistant.classList.contains('minimized')) {
                     aiAssistant.classList.remove('minimized');
+                    const minimizeBtn = document.getElementById('minimizeAssistantBtn');
+                    const icon = minimizeBtn ? minimizeBtn.querySelector('i') : null;
+                    if (icon) {
+                        icon.className = 'fas fa-compress';
+                    }
+                    if (minimizeBtn) {
+                        minimizeBtn.title = '缩小面板';
+                    }
                 }
             }
             
