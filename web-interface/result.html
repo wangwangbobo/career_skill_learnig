@@ -74,12 +74,23 @@
     </script>
     <!-- 页面专用样式 -->
     <style>
-        /* 结果页面专用样式 */
-        body {
+        /* 全局重置样式 */
+        * {
+            box-sizing: border-box;
+        }
+        
+        html {
             margin: 0;
             padding: 0;
+            height: 100%;
+        }
+        
+        /* 结果页面专用样式 */
+        body {
+            margin: 0 !important;
+            padding: 0 !important;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-            background: #f3f4f6;
+            background: #f3f4f6 !important;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -88,7 +99,7 @@
         .results-container {
             display: flex;
             flex: 1;
-            padding: 0.25rem 1rem 1rem 1rem; /* 进一步减小上边距 */
+            padding: 0.8rem 1rem 1rem 1rem; /* 增大上边距，让标题栏下面有更多间距 */
             gap: 1rem;
             position: relative;
             overflow: hidden;
@@ -98,13 +109,15 @@
         .results-header {
             background: white;
             border-bottom: 1px solid #e5e7eb;
-            padding: 0.25rem 1rem; /* 进一步减小内边距 */
+            padding: 0.4rem 1rem !important; /* 适当增大内边距 */
             display: flex;
             align-items: center;
             justify-content: space-between;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            min-height: 2rem; /* 减小最小高度 */
+            min-height: 2.5rem !important; /* 适当增大最小高度 */
             position: relative;
+            margin-bottom: 0 !important; /* 强制去除外部CSS的margin-bottom */
+            border-radius: 0 !important; /* 强制去除外部CSS的border-radius */
         }
         
         /* 返回箭头按钮 */
@@ -139,7 +152,7 @@
         .results-title {
             display: flex;
             align-items: center;
-            font-size: 0.9rem; /* 进一步减小字体大小 */
+            font-size: 1.2rem; /* 增大标题字体大小 */
             font-weight: 600;
             color: #111827;
             margin: 0;
@@ -147,9 +160,9 @@
         }
         
         .results-title i {
-            margin-right: 0.3rem; /* 进一步减小图标间距 */
+            margin-right: 0.5rem; /* 增大图标间距 */
             color: #6366f1;
-            font-size: 0.85rem; /* 减小图标大小 */
+            font-size: 1.1rem; /* 增大图标大小 */
         }
         
         .results-meta {
@@ -174,11 +187,11 @@
         }
         
         .result-action-btn {
-            padding: 0.15rem 0.5rem; /* 进一步减小按钮内边距 */
+            padding: 0.4rem 0.8rem; /* 增大按钮内边距 */
             border-radius: 6px;
             border: 1px solid #e5e7eb;
             background: white;
-            font-size: 0.7rem; /* 进一步减小字体 */
+            font-size: 0.8rem; /* 增大字体大小 */
             color: #6b7280;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -1154,12 +1167,19 @@
         .interview-actions {
             display: flex;
             gap: 1rem; /* 增加间距 */
-            justify-content: space-between;
+            justify-content: flex-end; /* 改为右对齐，与知识点界面一致 */
             margin-top: 1.5rem; /* 增加上边距 */
+            padding-top: 1rem; /* 添加上内边距 */
+            border-top: 1px solid #f3f4f6; /* 添加上边框，与知识点界面一致 */
+        }
+        
+        /* 隐藏原来在按钮组中的AI评分按钮 */
+        .interview-actions .interview-btn.ai-score {
+            display: none;
         }
 
         .interview-btn {
-            padding: 0.75rem 1rem;
+            padding: 0.6rem 1.2rem; /* 与知识点按钮一致的内边距 */
             border-radius: 8px;
             font-weight: 500;
             font-size: 0.875rem;
@@ -1168,7 +1188,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            flex: 1;
+            min-width: 100px; /* 与知识点按钮一致的最小宽度 */
+            /* 移除 flex: 1 属性，让按钮不再拉伸 */
         }
 
         .interview-btn i {
@@ -1183,6 +1204,7 @@
 
         .interview-btn.primary:hover {
             background-color: #4338ca;
+            transform: translateY(-1px); /* 添加与知识点按钮一致的悬停效果 */
         }
 
         .interview-btn.secondary {
@@ -1194,6 +1216,7 @@
         .interview-btn.secondary:hover {
             background-color: #f9fafb;
             color: #111827;
+            transform: translateY(-1px); /* 添加与知识点按钮一致的悬停效果 */
         }
 
         .interview-btn.outline {
@@ -1204,6 +1227,7 @@
 
         .interview-btn.outline:hover {
             background-color: #f5f3ff;
+            transform: translateY(-1px); /* 添加与知识点按钮一致的悬停效果 */
         }
 
         .interview-btn.ai-score {
@@ -1220,16 +1244,23 @@
         }
                                 
         .interview-btn.solution {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            border: none;
+            background-color: white; /* 与查看答案按钮一致的背景色 */
+            color: #4b5563; /* 与查看答案按钮一致的文本颜色 */
+            border: 1px solid #e5e7eb; /* 与查看答案按钮一致的边框 */
             position: relative;
         }
                                 
         .interview-btn.solution:hover {
-            background: linear-gradient(135deg, #059669, #047857);
+            background-color: #f9fafb; /* 与查看答案按钮一致的悬停背景色 */
+            color: #111827; /* 与查看答案按钮一致的悬停文本颜色 */
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        /* 面试题答案输入框容器样式 */
+        .interview-answer-container {
+            position: relative;
+            width: 100%;
+            margin: 0 0 1.5rem 0;
         }
         
         /* 面试题答案输入框样式优化 */
@@ -1237,7 +1268,7 @@
             width: 100%;
             min-height: 150px; /* 增加最小高度 */
             height: auto;
-            padding: 1rem; /* 增加内边距 */
+            padding: 1rem 120px 1rem 1rem; /* 右侧留出空间给AI评分按钮 */
             border: 2px solid #e5e7eb;
             border-radius: 12px; /* 增加圆角 */
             font-size: 0.95rem;
@@ -1247,7 +1278,57 @@
             font-family: inherit;
             background: #fafafa;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-            margin: 0 0 1.5rem 0; /* 修改上边距，因为上方已经有按钮区域 */
+            margin: 0;
+        }
+        
+        /* AI评分按钮在输入框内的样式 */
+        .interview-answer-ai-btn {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            border: none;
+            z-index: 10;
+        }
+        
+        .interview-answer-ai-btn:hover {
+            background: linear-gradient(135deg, #d97706, #b45309);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+        
+        .interview-answer-ai-btn i {
+            margin-right: 0.4rem;
+            font-size: 0.75rem;
+        }
+        
+        /* 移动端适配 */
+        @media (max-width: 640px) {
+            .interview-answer-input {
+                padding: 1rem 100px 1rem 1rem; /* 缩小右侧留空 */
+            }
+            
+            .interview-answer-ai-btn {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.75rem;
+                bottom: 10px;
+                right: 10px;
+            }
+            
+            .interview-answer-ai-btn i {
+                margin-right: 0.3rem;
+                font-size: 0.7rem;
+            }
         }
         
         .interview-answer-input:focus {
@@ -1357,9 +1438,9 @@
         .solution-area {
             margin: 0 0 1.5rem 0; /* 调整上下边距，与新布局协调 */
             padding: 1.5rem;
-            background: linear-gradient(135deg, #ecfdf5, #f0fdf4);
+            background: linear-gradient(135deg, #ecfdf5, #f0fdf4); /* 恢复绿色渐变背景 */
             border-radius: 12px;
-            border-left: 4px solid #10b981;
+            border-left: 4px solid #10b981; /* 恢复绿色边框 */
             display: none;
             transition: all 0.3s ease;
         }
@@ -1383,7 +1464,7 @@
         .solution-title {
             font-weight: 600;
             font-size: 1rem;
-            color: #065f46;
+            color: #065f46; /* 恢复绿色标题 */
             margin-bottom: 1rem;
             display: flex;
             align-items: center;
@@ -1391,7 +1472,7 @@
                                 
         .solution-title i {
             margin-right: 0.5rem;
-            color: #10b981;
+            color: #10b981; /* 恢复绿色图标 */
         }
                                 
         .solution-content {
@@ -3315,13 +3396,6 @@
             <span id="jobTitleDisplay">后端工程师</span>
         </h1>
         
-        <div class="results-meta">
-            <div class="generation-time">
-                <i class="fas fa-clock"></i>
-                <span id="generationTimeDisplay">2025/08/17 16:20:14</span>
-            </div>
-        </div>
-        
         <div class="results-actions">
 <button class="result-action-btn" id="configApiBtn" onclick="openApiConfigModal(); console.log('🛠️ 内联事件被触发');">
     <i class="fas fa-cog"></i>
@@ -3364,7 +3438,7 @@
                         <li class="nav-item" data-target="knowledge">
                             <i class="fas fa-lightbulb"></i>
                             <span>知识点</span>
-                            <span class="item-count" id="knowledgeCount">(1)</span>
+                            <span class="item-count" id="knowledgeCount">(20)</span>
                             <i class="fas fa-chevron-right nav-arrow"></i>
                         </li>
                         <li class="nav-item active" data-target="interview">
@@ -3581,85 +3655,7 @@ function createPerson(name) {
     };
 }
 const person = createPerson('Alice');
-person.setAge(25);
-</`
-
-// 生成答案内容的函数
-function generateAnswerContent(questionId) {
-    // 根据题目ID返回对应的答案，这里提供一个默认的答案格式
-    return `
-        <div class="answer-title">
-            <i class="fas fa-check-circle"></i>
-            参考答案
-        </div>
-        <div class="answer-content">
-            <h4>标准答案要点</h4>
-            <p>这里会显示该面试题的详细参考答案，包括核心概念、实际应用、代码示例等内容。</p>
-            
-            <h4>评分标准</h4>
-            <ul>
-                <li><strong>基础概念理解</strong>：能够准确说出核心定义</li>
-                <li><strong>原理阐述</strong>：能够解释工作机制和原理</li>
-                <li><strong>实际应用</strong>：能够举出具体的应用场景</li>
-                <li><strong>代码示例</strong>：能够提供相关的代码演示</li>
-            </ul>
-            
-            <h4>加分项</h4>
-            <ul>
-                <li>主动提及相关的扩展知识点</li>
-                <li>分析可能的优缺点或注意事项</li>
-                <li>展示实际项目经验</li>
-            </ul>
-        </div>
-    `;
-}
-
-// 全局暴露函数，确保onclick可以访问到
-window.showAnswer = showAnswer;
-window.startAIChat = startAIChat;
-window.sendMessageToAI = sendMessageToAI;
-            
-// 页面加载完成后的初始化和测试
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('📄 页面DOM加载完成');
-                
-    // 🔧 强制重置答案区域状态 - 确保初始为隐藏状态
-    const answerArea = document.getElementById('answer-js-closure');
-    if (answerArea) {
-        console.log('🔧 重置答案区域状态');
-        console.log('  - 重置前类名:', answerArea.className);
-        console.log('  - 重置前显示状态:', window.getComputedStyle(answerArea).display);
-                    
-        // 强制移除show类，确保初始隐藏
-        answerArea.classList.remove('show');
-                    
-        console.log('  - 重置后类名:', answerArea.className);
-        console.log('  - 重置后显示状态:', window.getComputedStyle(answerArea).display);
-    }
-                
-    // 测试函数是否在全局作用域中可用
-    console.log('🧪 测试全局函数可用性:');
-    console.log('  - window.showAnswer:', typeof window.showAnswer);
-    console.log('  - showAnswer:', typeof showAnswer);
-                
-    // 检查按钮是否存在
-    const answerBtn = document.querySelector('[onclick*="showAnswer"]');
-    console.log('🔍 按钮元素检查:');
-    console.log('  - 查看答案按钮:', answerBtn);
-                
-    if (answerBtn) {
-        console.log('  - 查看答案按钮onclick属性:', answerBtn.getAttribute('onclick'));
-        // 确保按钮文字正确
-        if (answerArea && !answerArea.classList.contains('show')) {
-            answerBtn.innerHTML = '<i class="fas fa-eye"></i>查看答案';
-        }
-    }
-                
-    console.log('✅ 页面初始化检查完成');
-});
-
-// 更新initSolutionFeature函数，同时初始化答案功能
-console.log(person.getAge()); // 25</code></pre>
+person.setAge(25);</code></pre>
                                     
                                     <h4>注意事项和陷阱</h4>
                                     <ul>
@@ -3670,7 +3666,13 @@ console.log(person.getAge()); // 25</code></pre>
                                 </div>
                             </div>
                                                     
-                            <textarea class="interview-answer-input" placeholder="请输入您的答案..."></textarea>
+                            <div class="interview-answer-container">
+                                <textarea class="interview-answer-input" placeholder="请输入您的答案..."></textarea>
+                                <button class="interview-answer-ai-btn">
+                                    <i class="fas fa-star"></i>
+                                    AI评分
+                                </button>
+                            </div>
                             <div class="interview-notes">
                                 <textarea class="interview-notes-input" placeholder="在此添加您的笔记..."></textarea>
                             </div>
@@ -3678,6 +3680,10 @@ console.log(person.getAge()); // 25</code></pre>
                                 <button class="interview-btn ai-score">
                                     <i class="fas fa-star"></i>
                                     AI评分
+                                </button>
+                                <button class="interview-btn secondary">
+                                    <i class="fas fa-forward"></i>
+                                    下一题
                                 </button>
                                 <button class="interview-btn primary">
                                     <i class="fas fa-check"></i>
@@ -3698,7 +3704,6 @@ console.log(person.getAge()); // 25</code></pre>
                         <h2>
                             <i class="fas fa-lightbulb"></i>
                             知识点
-                            <span class="section-count">(1)</span>
                         </h2>
                     </div>
                     <div class="section-content">
@@ -3775,7 +3780,6 @@ console.log(person.getAge()); // 25</code></pre>
                         <h2>
                             <i class="fas fa-book"></i>
                             推荐书籍
-                            <span class="section-count">(8)</span>
                         </h2>
                     </div>
                     <div class="section-content">
@@ -3914,7 +3918,6 @@ console.log(person.getAge()); // 25</code></pre>
                         <h2>
                             <i class="fas fa-certificate"></i>
                             证书
-                            <span class="section-count">(5)</span>
                         </h2>
                     </div>
                     <div class="section-content">
@@ -4029,7 +4032,6 @@ console.log(person.getAge()); // 25</code></pre>
                         <h2>
                             <i class="fas fa-graduation-cap"></i>
                             推荐课程
-                            <span class="section-count">(12)</span>
                         </h2>
                     </div>
                     <div class="section-content">
@@ -5153,9 +5155,11 @@ console.log(person.getAge()); // 25</code></pre>
                 const interviewListItems = document.querySelectorAll('.interview-list-item');
                 const refreshQuestionBtn = document.getElementById('refreshQuestion');
                 const interviewAnswerInput = document.querySelector('.interview-answer-input');
-                const checkAnswerBtn = document.querySelector('.interview-btn.secondary');
+                const nextQuestionBtn = document.querySelector('.interview-actions .interview-btn.secondary'); // 面试题下一题按钮
+                const checkAnswerBtn = document.querySelector('.interview-helper-actions .interview-btn.secondary'); // 查看答案按钮
                 const learnedBtn = document.querySelector('.interview-btn.primary');
                 const noteBtn = document.querySelector('.interview-btn.outline');
+                const aiScoreBtn = document.querySelector('.interview-answer-ai-btn'); // 新增AI评分按钮
                 
                 // 切换面试题
                 if (interviewListItems) {
@@ -5308,6 +5312,97 @@ console.log(person.getAge()); // 25</code></pre>
                             
                             // 静默添加到学习笔记
                         }
+                    });
+                }
+                
+                // AI评分按钮事件处理
+                if (aiScoreBtn) {
+                    aiScoreBtn.addEventListener('click', function() {
+                        // 获取当前题目标题
+                        const questionTitleElement = document.querySelector('.interview-question');
+                        const answerInput = document.querySelector('.interview-answer-input');
+                        
+                        if (!questionTitleElement || !answerInput) {
+                            alert('请先选择面试题并输入答案');
+                            return;
+                        }
+                        
+                        const questionTitle = questionTitleElement.textContent;
+                        const userAnswer = answerInput.value.trim();
+                        
+                        if (!userAnswer) {
+                            alert('请先输入您的答案');
+                            answerInput.focus();
+                            return;
+                        }
+                        
+                        // 构建评分提示词
+                        const aiPrompt = `请帮我评分这道面试题的答案，并给出详细的改进建议：\n\n题目：${questionTitle}\n\n我的答案：\n${userAnswer}\n\n请从以下方面进行评分：\n1. 知识点掌握情况（10分）\n2. 答题逻辑清晰度（10分）\n3. 代码正确性（如有，10分）\n4. 表达能力（10分）\n5. 综合评价和改进建议`;
+                        
+                        // 将提示词发送给AI助手
+                        const chatInput = document.getElementById('chatInput');
+                        const sendBtn = document.getElementById('sendBtn');
+                        
+                        if (chatInput && sendBtn) {
+                            chatInput.value = aiPrompt;
+                            sendBtn.click();
+                            
+                            // 添加点击反馈效果
+                            aiScoreBtn.style.transform = 'scale(0.95)';
+                            setTimeout(() => {
+                                aiScoreBtn.style.transform = 'scale(1)';
+                            }, 150);
+                            
+                            // 显示成功提示
+                            const originalText = aiScoreBtn.innerHTML;
+                            aiScoreBtn.innerHTML = '<i class="fas fa-check"></i> 已发送';
+                            aiScoreBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                            
+                            setTimeout(() => {
+                                aiScoreBtn.innerHTML = originalText;
+                                aiScoreBtn.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+                            }, 2000);
+                        } else {
+                            alert('AI助手不可用，请稍后再试');
+                        }
+                    });
+                }
+                
+                // 下一题按钮事件处理
+                if (nextQuestionBtn) {
+                    nextQuestionBtn.addEventListener('click', function() {
+                        // 获取所有面试题列表项
+                        const interviewItems = document.querySelectorAll('.interview-list-item');
+                        if (interviewItems.length === 0) {
+                            alert('暂无更多面试题');
+                            return;
+                        }
+                        
+                        // 获取当前激活的题目（如果有）或者随机选择一个
+                        let currentIndex = -1;
+                        interviewItems.forEach((item, index) => {
+                            if (item.classList.contains('active')) {
+                                currentIndex = index;
+                            }
+                        });
+                        
+                        // 如果没有当前激活的项，从第一个开始；否则切换到下一个
+                        const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % interviewItems.length;
+                        
+                        // 移除所有激活状态
+                        interviewItems.forEach(item => item.classList.remove('active'));
+                        
+                        // 激活下一个项并点击
+                        interviewItems[nextIndex].classList.add('active');
+                        interviewItems[nextIndex].click();
+                        
+                        // 添加点击反馈效果
+                        nextQuestionBtn.style.transform = 'scale(0.95)';
+                        setTimeout(() => {
+                            nextQuestionBtn.style.transform = 'scale(1)';
+                        }, 150);
+                        
+                        console.log(`🔄 已切换到第${nextIndex + 1}题`);
                     });
                 }
             }

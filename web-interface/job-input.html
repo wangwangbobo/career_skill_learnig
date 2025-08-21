@@ -151,34 +151,34 @@
         /* 欢迎区域 */
         .welcome-section {
             text-align: center;
-            padding: 3rem 2rem 2rem;
+            padding: 2rem 2rem 1.5rem;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
         
         .robot-avatar {
-            font-size: 4rem;
-            margin-bottom: 1rem;
+            font-size: 3rem;
+            margin-bottom: 0.75rem;
             display: inline-block;
         }
         
         .welcome-title {
-            font-size: 2.5rem;
+            font-size: 2rem;
             font-weight: 700;
-            margin: 0 0 0.5rem 0;
+            margin: 0 0 0.25rem 0;
         }
         
         .welcome-subtitle {
-            font-size: 1.75rem;
+            font-size: 1.5rem;
             font-weight: 500;
-            margin: 0 0 1rem 0;
+            margin: 0 0 0.75rem 0;
         }
         
         .welcome-description {
-            font-size: 1.1rem;
+            font-size: 1rem;
             max-width: 800px;
-            margin: 0 auto 1.5rem;
-            line-height: 1.5;
+            margin: 0 auto 1rem;
+            line-height: 1.4;
         }
         
         /* 职位选择区域 */
@@ -753,6 +753,294 @@
             background: #6366f1;
             color: white;
         }
+        
+        /* 内容选择模态框样式 - 与index.html完全一致 */
+        .content-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 10001;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .content-modal.show {
+            display: flex;
+        }
+        
+        .content-modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .content-modal-content {
+            position: relative;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            width: 100%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow: hidden;
+            animation: slideUp 0.3s ease;
+        }
+        
+        .content-header {
+            padding: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .content-header h3 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .content-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+        }
+        
+        .content-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .content-body {
+            padding: 2rem;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        
+        .content-description {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .content-description p {
+            color: #6b7280;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .content-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 1.2rem;
+            max-height: 400px;
+        }
+        
+        /* 第5个选项（推荐课程）在第二排居中显示 */
+        .content-option:nth-child(5) {
+            grid-column: 2 / 3;
+            grid-row: 2;
+        }
+        
+        .content-option {
+            cursor: pointer;
+            display: block;
+            position: relative;
+        }
+        
+        .content-option input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .option-card {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .option-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1;
+        }
+        
+        /* 选中状态的对勾标志 */
+        .option-card::after {
+            content: '\2713';
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            width: 24px;
+            height: 24px;
+            background: #10b981;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.2s ease;
+            z-index: 3;
+        }
+        
+        .content-option input:checked + .option-card {
+            border-color: #6366f1;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.2);
+        }
+        
+        .content-option input:checked + .option-card::before {
+            opacity: 0.1;
+        }
+        
+        /* 显示选中状态的对勾 */
+        .content-option input:checked + .option-card::after {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .option-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .option-card i {
+            font-size: 2rem;
+            color: #6366f1;
+            margin-bottom: 0.75rem;
+            display: block;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .option-card h4 {
+            margin: 0 0 0.4rem 0;
+            font-size: 1.1rem;
+            color: #111827;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .option-card p {
+            margin: 0;
+            color: #6b7280;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .content-footer {
+            padding: 2rem;
+            background: #f9fafb;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+        
+        .content-btn {
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .content-btn-cancel {
+            background: white;
+            color: #6b7280;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .content-btn-cancel:hover {
+            background: #f9fafb;
+            color: #111827;
+        }
+        
+        .content-btn-confirm {
+            background: #6366f1;
+            color: white;
+        }
+        
+        .content-btn-confirm:hover {
+            background: #4f46e5;
+        }
+        
+        .content-btn-confirm:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+        }
+        
+        /* 动画效果 */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
 
         /* 响应式设计 */
         @media (max-width: 768px) {
@@ -765,15 +1053,15 @@
             }
             
             .welcome-section {
-                padding: 2rem 1rem;
+                padding: 1.5rem 1rem 1rem;
             }
             
             .welcome-title {
-                font-size: 2rem;
+                font-size: 1.75rem;
             }
             
             .welcome-subtitle {
-                font-size: 1.5rem;
+                font-size: 1.25rem;
             }
             
             .job-selection {
@@ -787,6 +1075,62 @@
             .top-toolbar {
                 top: 0.5rem;
                 right: 0.5rem;
+            }
+            
+            /* 内容选择模态框移动端适配 */
+            .content-modal {
+                padding: 1rem;
+            }
+            
+            .content-modal-content {
+                max-width: 100%;
+            }
+            
+            .content-header {
+                padding: 1.5rem;
+            }
+            
+            .content-body {
+                padding: 1.5rem;
+            }
+            
+            .content-options {
+                grid-template-columns: repeat(2, 1fr); /* 移动端显示2列 */
+                grid-template-rows: repeat(3, 1fr); /* 3行，最后一行只有1个 */
+                gap: 1rem;
+                max-height: 500px;
+            }
+            
+            .content-footer {
+                padding: 1rem;
+                flex-direction: column;
+            }
+            
+            .content-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .content-header {
+                padding: 1rem;
+            }
+            
+            .content-header h3 {
+                font-size: 1.125rem;
+            }
+            
+            .content-body {
+                padding: 1rem;
+            }
+            
+            .content-footer {
+                padding: 1rem;
+                flex-direction: column;
+            }
+            
+            .content-btn {
+                width: 100%;
+                justify-content: center;
             }
         }
     </style>
@@ -807,9 +1151,9 @@
                 <div class="robot-avatar">
                     🤖
                 </div>
-                <h1 class="welcome-title">职途助手</h1>
-                <h2 class="welcome-subtitle">Hi 同学！</h2>
-                <p class="welcome-description">根据职位描述为你制定专属学习路线，提供从岗位分析到面试准备的全方位支持，轻松拿下offer~</p>
+                <h1 class="welcome-title">职途伴侣</h1>
+                <p class="welcome-description">我是你的职业技能提升伴侣，我可以根据你提供的职位信息为你制定专属学习路线，
+                    根据你的学习情况动态调整学习内容，提供从岗位分析到面试准备的全方位支持，助力你迅速提升职业技能，轻松拿下offer~</p>
             </div>
             
             <!-- 职位选择区域 -->
@@ -1160,15 +1504,8 @@
             generateBtn.addEventListener('click', function() {
                 if (generateBtn.disabled) return;
                 
-                // 保存当前选择到本地存储
-                localStorage.setItem('currentJob', selectedJob);
-                
-                if (currentChoice === 'has-target' && textInputTab.classList.contains('active')) {
-                    localStorage.setItem('jobDescription', jobDescription.value.trim());
-                }
-                
-                // 显示加载进度界面
-                window.location.href = 'progress.html?job=' + encodeURIComponent(selectedJob);
+                // 显示内容选择模态框
+                showContentModal();
             });
             
             // 初始化设置
@@ -1176,6 +1513,121 @@
             
             // 检查并更新API配置按钮状态
             updateApiConfigButtonState();
+            
+            // 初始化内容选择模态框
+            initContentModal();
+            
+            // 显示内容选择模态框的函数
+            function showContentModal() {
+                const contentModal = document.getElementById('contentModal');
+                if (contentModal) {
+                    contentModal.classList.add('show');
+                    updateContentConfirmButton();
+                    console.log('📝 内容选择模态框已显示');
+                }
+            }
+            
+            // 隐藏内容选择模态框的函数
+            function hideContentModal() {
+                const contentModal = document.getElementById('contentModal');
+                if (contentModal) {
+                    contentModal.classList.remove('show');
+                    console.log('❌ 内容选择模态框已隐藏');
+                }
+            }
+            
+            // 更新确认按钮状态
+            function updateContentConfirmButton() {
+                const contentOptions = document.querySelectorAll('input[name="contentType"]');
+                const contentConfirm = document.getElementById('contentConfirm');
+                
+                if (contentOptions && contentConfirm) {
+                    const checkedOptions = Array.from(contentOptions).filter(cb => cb.checked);
+                    contentConfirm.disabled = checkedOptions.length === 0;
+                    
+                    if (checkedOptions.length === 0) {
+                        contentConfirm.style.opacity = '0.6';
+                        contentConfirm.style.cursor = 'not-allowed';
+                    } else {
+                        contentConfirm.style.opacity = '1';
+                        contentConfirm.style.cursor = 'pointer';
+                    }
+                }
+            }
+            
+            // 初始化内容选择模态框
+            function initContentModal() {
+                const contentModal = document.getElementById('contentModal');
+                const contentOverlay = document.getElementById('contentOverlay');
+                const contentClose = document.getElementById('contentClose');
+                const contentCancel = document.getElementById('contentCancel');
+                const contentConfirm = document.getElementById('contentConfirm');
+                const contentOptions = document.querySelectorAll('input[name="contentType"]');
+                
+                // 点击遮罩层关闭模态框
+                if (contentOverlay) {
+                    contentOverlay.addEventListener('click', hideContentModal);
+                }
+                
+                // 点击关闭按钮
+                if (contentClose) {
+                    contentClose.addEventListener('click', hideContentModal);
+                }
+                
+                // 点击取消按钮
+                if (contentCancel) {
+                    contentCancel.addEventListener('click', hideContentModal);
+                }
+                
+                // 监听复选框变化
+                contentOptions.forEach(option => {
+                    option.addEventListener('change', updateContentConfirmButton);
+                });
+                
+                // 点击确认按钮
+                if (contentConfirm) {
+                    contentConfirm.addEventListener('click', function() {
+                        if (this.disabled) return;
+                        
+                        // 获取选中的内容类型
+                        const selectedTypes = Array.from(contentOptions)
+                            .filter(cb => cb.checked)
+                            .map(cb => cb.value);
+                        
+                        console.log('🔍 用户选择的内容类型:', selectedTypes);
+                        
+                        // 保存选择到本地存储
+                        localStorage.setItem('selectedContentTypes', JSON.stringify(selectedTypes));
+                        localStorage.setItem('currentJob', selectedJob);
+                        
+                        if (currentChoice === 'has-target' && textInputTab.classList.contains('active')) {
+                            localStorage.setItem('jobDescription', jobDescription.value.trim());
+                        }
+                        
+                        // 隐藏模态框
+                        hideContentModal();
+                        
+                        // 显示加载进度界面
+                        const contentTypesStr = selectedTypes.map(type => {
+                            const typeNames = {
+                                'knowledge': '知识点',
+                                'interview': '面试题',
+                                'books': '书籍',
+                                'certificates': '证书',
+                                'courses': '课程'
+                            };
+                            return typeNames[type] || type;
+                        }).join(',');
+                        
+                        const url = `progress.html?job=${encodeURIComponent(selectedJob)}&types=${encodeURIComponent(contentTypesStr)}`;
+                        console.log('🚀 跳转到进度页面:', url);
+                        
+                        window.location.href = url;
+                    });
+                }
+                
+                console.log('✅ 内容选择模态框初始化完成');
+            }
             
             // API配置相关事件处理
             setTimeout(() => {
@@ -1545,6 +1997,73 @@
         });
     </script>
     
+    <!-- 内容类型选择模态框 -->
+    <div class="content-modal" id="contentModal">
+        <div class="content-modal-overlay" id="contentOverlay"></div>
+        <div class="content-modal-content">
+            <div class="content-header">
+                <h3>
+                    <i class="fas fa-list-check"></i>
+                    选择生成内容
+                </h3>
+                <button class="content-close" id="contentClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="content-body">
+                <div class="content-description">
+                    <p>请选择您希望生成的学习资料类型：</p>
+                </div>
+                <div class="content-options">
+                    <label class="content-option">
+                        <input type="checkbox" name="contentType" value="knowledge" checked>
+                        <div class="option-card">
+                            <i class="fas fa-lightbulb"></i>
+                            <h4>知识点</h4>
+                            <p>核心技能和知识点清单</p>
+                        </div>
+                    </label>
+                    <label class="content-option">
+                        <input type="checkbox" name="contentType" value="interview" checked>
+                        <div class="option-card">
+                            <i class="fas fa-question-circle"></i>
+                            <h4>高频面试题</h4>
+                            <p>常见面试问题和参考答案</p>
+                        </div>
+                    </label>
+                    <label class="content-option">
+                        <input type="checkbox" name="contentType" value="books">
+                        <div class="option-card">
+                            <i class="fas fa-book"></i>
+                            <h4>推荐书籍</h4>
+                            <p>相关领域专业书籍推荐</p>
+                        </div>
+                    </label>
+                    <label class="content-option">
+                        <input type="checkbox" name="contentType" value="certificates">
+                        <div class="option-card">
+                            <i class="fas fa-certificate"></i>
+                            <h4>证书</h4>
+                            <p>职业相关证书和认证</p>
+                        </div>
+                    </label>
+                    <label class="content-option">
+                        <input type="checkbox" name="contentType" value="courses">
+                        <div class="option-card">
+                            <i class="fas fa-graduation-cap"></i>
+                            <h4>推荐课程</h4>
+                            <p>在线学习课程推荐</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+            <div class="content-footer">
+                <button class="content-btn content-btn-cancel" id="contentCancel">取消</button>
+                <button class="content-btn content-btn-confirm" id="contentConfirm">生成学习路线</button>
+            </div>
+        </div>
+    </div>
+
     <!-- API配置模态框 -->
     <div class="modal" id="apiConfigModal">
         <div class="modal-overlay"></div>
