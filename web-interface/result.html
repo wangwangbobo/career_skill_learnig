@@ -790,7 +790,7 @@
             font-size: 0.875rem;
             line-height: 1.4; /* 减小行高 */
             color: #4b5563;
-            max-width: 280px; /* AI消息最大宽度 */
+            max-width: 420px; /* AI消息最大宽度 - 调整为更大宽度 */
             width: fit-content !important; /* 强制让容器宽度自适应内容 */
             display: inline-block !important; /* 确保容器为inline-block */
             word-wrap: break-word; /* 强制换行 */
@@ -2118,16 +2118,16 @@
         /* 响应式设计 */
         @media (max-width: 1400px) {
             .ai-assistant {
-                width: 320px;
+                width: 380px; /* 调整AI助手面板宽度 */
                 height: calc(100vh - 120px); /* 保持高度限制 */
             }
             
             .message-content {
-                max-width: 240px; /* AI消息适应较小的宽度 */
+                max-width: 320px; /* AI消息适应较小的宽度 - 从240px调整为320px */
             }
             
             .user-message .message-content {
-                max-width: 200px; /* 用户消息适中的宽度 */
+                max-width: 280px; /* 用户消息适中的宽度 - 从200px调整为280px */
             }
         }
         
@@ -2155,11 +2155,11 @@
             }
             
             .message-content {
-                max-width: 70%; /* AI消息移动端调整消息宽度 */
+                max-width: 80%; /* AI消息移动端调整消息宽度 - 从70%调整为80% */
             }
             
             .user-message .message-content {
-                max-width: 70%; /* 用户消息适中紧凑 */
+                max-width: 75%; /* 用户消息适中紧凑 - 从70%调整为75% */
             }
             
             .mindmap-content {
