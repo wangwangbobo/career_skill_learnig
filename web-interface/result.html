@@ -758,16 +758,18 @@
         .message {
             display: flex;
             margin-bottom: 0.75rem; /* 减小消息间距 */
-            max-width: 90%;
+            max-width: 100%; /* 允许消息使用全部宽度 */
         }
         
         .user-message {
             margin-left: auto;
             flex-direction: row-reverse;
+            max-width: 85%; /* 用户消息稍微限制宽度 */
         }
         
         .assistant-message {
-            margin-right: auto;
+            margin-right: 10px; /* 给右侧留少量边距，避免贴边 */
+            max-width: 95%; /* AI助手消息使用更多宽度 */
         }
         
         .message-avatar {
@@ -790,7 +792,7 @@
             font-size: 0.875rem;
             line-height: 1.4; /* 减小行高 */
             color: #4b5563;
-            max-width: 420px; /* AI消息最大宽度 - 调整为更大宽度 */
+            max-width: 100%; /* AI消息最大宽度 - 调整为全宽度 */
             width: fit-content !important; /* 强制让容器宽度自适应内容 */
             display: inline-block !important; /* 确保容器为inline-block */
             word-wrap: break-word; /* 强制换行 */
@@ -2123,7 +2125,7 @@
             }
             
             .message-content {
-                max-width: 320px; /* AI消息适应较小的宽度 - 从240px调整为320px */
+                max-width: 95%; /* AI消息适应较小屏幕的宽度 */
             }
             
             .user-message .message-content {
