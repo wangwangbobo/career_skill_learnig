@@ -630,7 +630,7 @@
             border-radius: 50% !important;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
             z-index: 1000 !important;
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+            background: rgba(99, 102, 241, 0.8) !important;
             cursor: pointer !important;
             transition: all 0.3s ease !important;
             overflow: hidden !important;
@@ -639,7 +639,8 @@
         
         .ai-assistant.minimized:hover {
             transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
+            background: rgba(99, 102, 241, 0.9) !important;
         }
         
         .ai-assistant.minimized .assistant-header {
@@ -672,11 +673,13 @@
         
         /* 缩小后的机器人图标 */
         .ai-assistant.minimized::before {
-            content: "\f544";
-            font-family: "Font Awesome 6 Free";
-            font-weight: 900;
-            font-size: 28px;
-            color: white;
+            content: '';
+            background-image: url('images/robot.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            width: 40px;
+            height: 40px;
             position: absolute;
             top: 50%;
             left: 50%;
@@ -718,6 +721,23 @@
         
         .assistant-title i {
             margin-right: 0.75rem;
+        }
+        
+        .robot-title-icon {
+            width: 36px;
+            height: 36px;
+            margin-right: 0.75rem;
+            object-fit: contain;
+        }
+        
+        .robot-message-icon {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+        }
+        
+        .robot-welcome-icon {
+            display: none !important;
         }
         
         .assistant-actions {
@@ -795,16 +815,26 @@
         }
         
         .assistant-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: #6366f1;
+            width: 200px;
+            height: 200px;
+            background: transparent;
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 2rem;
             margin-bottom: 1rem;
+            position: relative;
+            background-image: url('images/robot.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        
+        /* 隐藏AI助手头像中的子元素 */
+        .assistant-avatar img,
+        .assistant-avatar i {
+            display: none !important;
         }
         
         .welcome-title {
@@ -899,8 +929,7 @@
         .message-avatar {
             width: 36px;
             height: 36px;
-            border-radius: 50%;
-            background: #6366f1;
+            background: transparent;
             color: white;
             display: flex;
             align-items: center;
@@ -4125,7 +4154,7 @@
                                     backdrop-filter: blur(4px);
                                     z-index: 10;
                                 ">
-                                    <i class="fas fa-robot" style="font-size: 16px;"></i>
+                                    <img src="images/robot-logo.png" alt="AI机器人" class="robot-chat-icon" style="width: 24px; height: 24px; object-fit: contain;">
                                 </button>
                             </div>
                             <div class="interview-tags">
@@ -4313,7 +4342,7 @@ public class FeatureConfiguration {
                                         backdrop-filter: blur(4px);
                                         z-index: 10;
                                     ">
-                                        <i class="fas fa-robot" style="font-size: 16px;"></i>
+                                        <img src="images/robot-logo.png" alt="AI机器人" class="robot-chat-icon" style="width: 24px; height: 24px; object-fit: contain;">
                                     </button>
                                 </div>
                                 <div class="knowledge-content">
@@ -4835,7 +4864,7 @@ public class FeatureConfiguration {
                 
                 <div class="assistant-header">
                     <h3 class="assistant-title">
-                        <i class="fas fa-robot"></i>
+                        <img src="images/robot-logo.png" alt="AI机器人" class="robot-title-icon">
                         AI 学习助手
                     </h3>
                     <div class="assistant-actions">
@@ -5682,7 +5711,7 @@ public class FeatureConfiguration {
                 messageElement.className = 'message assistant-message';
                 messageElement.innerHTML = `
                     <div class="message-avatar">
-                        <i class="fas fa-robot"></i>
+                        <img src="images/robot-logo.png" alt="AI机器人" class="robot-message-icon">
                     </div>
                     <div class="message-content streaming">
                         <p>🤔 正在思考中...</p>
@@ -6095,7 +6124,7 @@ public class FeatureConfiguration {
                         chatMessages.innerHTML = `
                             <div class="welcome-message">
                                 <div class="assistant-avatar">
-                                    <i class="fas fa-robot"></i>
+                                    <img src="images/robot-logo.png" alt="AI机器人" class="robot-welcome-icon">
                                 </div>
                                 <h3 class="welcome-title">您好！我是AI学习助手</h3>
                                 <p class="welcome-text">我可以回答您关于职业发展、技能提升的问题。请在下方输入您的问题！</p>
