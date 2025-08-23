@@ -885,7 +885,8 @@
         .user-message {
             margin-left: auto;
             flex-direction: row-reverse;
-            max-width: 85%; /* 用户消息稍微限制宽度 */
+            max-width: calc(100% - 20px); /* 与AI消息保持一致的最大宽度 */
+            margin-right: 10px; /* 与AI消息保持一致的右边距 */
         }
         
         .assistant-message {
@@ -1038,36 +1039,72 @@
             border: 1px solid rgba(99, 102, 241, 0.2);
         }
         
+        /* 流式容器样式 */
+        .stream-container {
+            transition: all 0.1s ease; /* 添加平滑过渡 */
+        }
+        
+        .stream-container p {
+            margin: 0 0 0.5rem 0;
+            line-height: 1.6;
+        }
+        
+        .stream-container p:last-child {
+            margin-bottom: 0;
+        }
+        
         .user-message .message-content {
             background: #6366f1 !important;
             color: white !important;
-            padding: 0.35rem 0.6rem !important; /* 适中的内边距，接近机器人消息样式 */
+            padding: 0.5rem 0.75rem !important; /* 与AI消息保持一致的内边距 */
             border-radius: 12px !important;
             font-size: 0.875rem !important;
-            line-height: 1.2 !important; /* 稍微放宽行高 */
-            display: inline-flex !important; /* 用户消息保持inline-flex布局 */
-            align-items: center !important; /* 垂直居中 */
-            width: auto !important; /* 用户消息宽度自适应 */
-            max-width: 220px !important;
+            line-height: 1.4 !important; /* 与AI消息保持一致的行高 */
+            display: inline-block !important; /* 改为inline-block，既能控制宽度又不会产生多余空行 */
+            width: 100% !important; /* 与AI消息一样宽 */
+            max-width: 100% !important; /* 移除宽度限制 */
             min-width: auto !important;
-            height: auto !important; /* 完全自适应高度 */
             word-wrap: break-word !important;
             word-break: break-word !important;
             overflow-wrap: break-word !important;
             box-sizing: border-box !important;
+            margin: 0 !important; /* 移除任何默认边距 */
+            vertical-align: top !important; /* 防止基线对齐造成的空间 */
+            white-space: normal !important; /* 正常处理空格和换行 */
         }
         
         /* 增加一个更具体的选择器以确保优先级 */
         .ai-assistant .chat-messages .message.user-message .message-content {
-            max-width: 220px !important;
-            width: fit-content !important;
-            min-width: 20px !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            min-width: auto !important;
         }
         
         .message-content p {
             margin: 0 !important;
             padding: 0 !important; /* 确保段落没有额外的内边距 */
             line-height: inherit !important; /* 继承父元素的行高 */
+        }
+        
+        /* 针对用户消息的段落特别处理 */
+        .user-message .message-content p {
+            margin: 0 !important;
+            padding: 0 !important;
+            line-height: inherit !important;
+            display: inline !important; /* 确保段落内联显示，不产生换行 */
+        }
+        
+        /* 用户消息中的所有文本元素都不产生额外间距 */
+        .user-message .message-content * {
+            margin: 0 !important;
+            padding: 0 !important;
+            vertical-align: baseline !important;
+        }
+        
+        /* 用户消息的直接文本节点处理 */
+        .user-message .message-content:before,
+        .user-message .message-content:after {
+            content: none !important;
         }
         
 
@@ -2495,7 +2532,7 @@
             }
             
             .user-message .message-content {
-                max-width: 280px; /* 用户消息适中的宽度 - 从200px调整为280px */
+                max-width: 100%; /* 用户消息与AI消息保持一致的宽度 */
             }
         }
         
@@ -2527,7 +2564,7 @@
             }
             
             .user-message .message-content {
-                max-width: 75%; /* 用户消息适中紧凑 - 从70%调整为75% */
+                max-width: 100%; /* 用户消息与AI消息保持一致的宽度 */
             }
             
             .mindmap-content {
@@ -2622,7 +2659,7 @@
             }
             
             .user-message .message-content {
-                max-width: 80%; /* 用户消息小屏幕下保持合理宽度 */
+                max-width: 100%; /* 用户消息与AI消息保持一致的宽度 */
             }
         }
         
@@ -5411,9 +5448,7 @@ public class FeatureConfiguration {
                 const messageElement = document.createElement('div');
                 messageElement.className = 'message user-message';
                 messageElement.innerHTML = `
-                    <div class="message-content">
-                        <p>${message}</p>
-                    </div>
+                    <div class="message-content">${message}</div>
                 `;
                 
                 chatMessages.appendChild(messageElement);
@@ -5538,9 +5573,42 @@ public class FeatureConfiguration {
             // 更新流式消息内容
             function updateStreamingMessage(contentElement, content) {
                 if (contentElement) {
-                    // 使用Markdown渲染
-                    const renderedContent = renderMarkdown(content);
-                    contentElement.innerHTML = renderedContent;
+                    // 为了实现真正的流式显示，我们使用一个更温和的方式
+                    // 检查是否已经有了流式容器元素
+                    let streamContainer = contentElement.querySelector('.stream-container');
+                    
+                    if (!streamContainer) {
+                        // 初次创建流式容器
+                        streamContainer = document.createElement('div');
+                        streamContainer.className = 'stream-container';
+                        contentElement.innerHTML = '';
+                        contentElement.appendChild(streamContainer);
+                        // 初始化上次的内容
+                        streamContainer.lastContent = '';
+                    }
+                    
+                    // 检查内容是否发生了变化
+                    if (streamContainer.lastContent === content) {
+                        return; // 内容没有变化，不需要更新
+                    }
+                    
+                    // 使用简化的渲染，避免复杂的Markdown解析
+                    const processedContent = content
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // 粗体
+                        .replace(/\*(.*?)\*/g, '<em>$1</em>') // 斜体
+                        .replace(/`(.*?)`/g, '<code>$1</code>') // 行内代码
+                        .replace(/\n\n/g, '</p><p>') // 段落分隔
+                        .replace(/\n/g, '<br>'); // 单行换行
+                    
+                    // 包装在段落中
+                    const finalContent = '<p>' + processedContent + '</p>';
+                    
+                    // 使用平滑的更新
+                    streamContainer.innerHTML = finalContent;
+                    
+                    // 记录当前内容以便下次比较
+                    streamContainer.lastContent = content;
+                    
                     scrollChatToBottom(); // 每次更新都滚动到底部
                 }
             }
@@ -6558,10 +6626,9 @@ public class FeatureConfiguration {
                     return;
                 }
                 
-                // 检查发送按钮是否可用
+                // 检查发送按钮是否可用，如果不可用就放弃此次调用
                 if (sendBtn.disabled) {
-                    console.warn('⚠️ 发送按钮当前不可用，稍后重试');
-                    setTimeout(() => sendMessageToAI(message), 500);
+                    console.warn('⚠️ 发送按钮当前不可用，放弃此次调用以避免冲突');
                     return;
                 }
                 
