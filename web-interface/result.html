@@ -2095,6 +2095,176 @@
             background: #f1f5f9;
             color: #dc2626;
         }
+        
+        /* 笔记样式 */
+        .notes-container {
+            width: 100%;
+        }
+        
+        .empty-notes-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 2rem;
+            text-align: center;
+            color: #9ca3af;
+        }
+        
+        .empty-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .empty-icon i {
+            font-size: 2rem;
+            color: #d1d5db;
+        }
+        
+        .empty-notes-state h3 {
+            margin: 0 0 0.75rem 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #6b7280;
+        }
+        
+        .empty-notes-state p {
+            margin: 0 0 2rem 0;
+            font-size: 0.9375rem;
+            line-height: 1.5;
+            max-width: 400px;
+        }
+        
+        .add-first-note-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            background: #6366f1;
+            color: white;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .add-first-note-btn:hover {
+            background: #4f46e5;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+        
+        .note-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+            border: 1px solid #e5e7eb;
+            position: relative;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-color: #d1d5db;
+        }
+        
+        .note-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        
+        .note-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #111827;
+            margin: 0;
+            line-height: 1.4;
+            flex: 1;
+        }
+        
+        .note-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-left: 1rem;
+        }
+        
+        .note-action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+        }
+        
+        .note-action-btn:hover {
+            border-color: #6366f1;
+            color: #6366f1;
+        }
+        
+        .note-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.8125rem;
+            color: #6b7280;
+        }
+        
+        .note-date {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .note-category {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .note-content {
+            font-size: 0.9375rem;
+            line-height: 1.6;
+            color: #4b5563;
+            margin: 0;
+            white-space: pre-wrap;
+        }
+        
+        .note-tags {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .note-tag {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            background: #f3f4f6;
+            color: #6b7280;
+        }
 
         .interview-refresh {
             position: absolute;
@@ -3524,6 +3694,12 @@
                             <span class="item-count" id="coursesCount">(12)</span>
                             <i class="fas fa-chevron-right nav-arrow"></i>
                         </li>
+                        <li class="nav-item" data-target="notes">
+                            <i class="fas fa-sticky-note"></i>
+                            <span>我的笔记</span>
+                            <span class="item-count" id="notesCount">(0)</span>
+                            <i class="fas fa-chevron-right nav-arrow"></i>
+                        </li>
                     </ul>
                 </div>
             </aside>
@@ -4270,6 +4446,43 @@ public class FeatureConfiguration {
                         </div>
                     </div>
                 </div>
+                
+                <!-- 我的笔记内容 -->
+                <div class="content-section" id="notesSection">
+                    <div class="section-header">
+                        <h2>
+                            <i class="fas fa-sticky-note"></i>
+                            我的笔记
+                            <span class="section-count" id="notesSectionCount">(0)</span>
+                        </h2>
+                        <div>
+                            <button class="expand-all-btn" id="addNoteBtn">
+                                <i class="fas fa-plus"></i>
+                                新增笔记
+                            </button>
+                            <button class="expand-all-btn" id="exportNotesBtn">
+                                <i class="fas fa-download"></i>
+                                导出笔记
+                            </button>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        <div class="notes-container" id="notesContainer">
+                            <!-- 笔记内容将动态生成 -->
+                            <div class="empty-notes-state">
+                                <div class="empty-icon">
+                                    <i class="fas fa-sticky-note"></i>
+                                </div>
+                                <h3>还没有笔记</h3>
+                                <p>您可以在学习过程中记录重要的知识点和心得体会</p>
+                                <button class="add-first-note-btn" onclick="showAddNoteModal()">
+                                    <i class="fas fa-plus"></i>
+                                    创建第一个笔记
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </main>
 
             <!-- 右侧AI助手 -->
@@ -4594,6 +4807,246 @@ public class FeatureConfiguration {
                     alert('已保存到本地存储');
                 });
             }
+            
+            // 笔记功能相关代码
+            initializeNotesFeature();
+            
+            // 初始化笔记功能
+            function initializeNotesFeature() {
+                console.log('📝 初始化笔记功能...');
+                
+                // 加载笔记数据
+                loadNotes();
+                
+                // 绑定新增笔记按钮事件
+                const addNoteBtn = document.getElementById('addNoteBtn');
+                if (addNoteBtn) {
+                    addNoteBtn.addEventListener('click', showAddNoteModal);
+                }
+                
+                // 绑定导出笔记按钮事件
+                const exportNotesBtn = document.getElementById('exportNotesBtn');
+                if (exportNotesBtn) {
+                    exportNotesBtn.addEventListener('click', exportNotes);
+                }
+            }
+            
+            // 加载笔记数据
+            function loadNotes() {
+                const notes = getNotesFromStorage();
+                const notesContainer = document.getElementById('notesContainer');
+                const notesCount = document.getElementById('notesCount');
+                const notesSectionCount = document.getElementById('notesSectionCount');
+                
+                if (!notesContainer) return;
+                
+                // 更新计数
+                if (notesCount) notesCount.textContent = `(${notes.length})`;
+                if (notesSectionCount) notesSectionCount.textContent = `(${notes.length})`;
+                
+                if (notes.length === 0) {
+                    // 显示空状态
+                    notesContainer.innerHTML = `
+                        <div class="empty-notes-state">
+                            <div class="empty-icon">
+                                <i class="fas fa-sticky-note"></i>
+                            </div>
+                            <h3>还没有笔记</h3>
+                            <p>您可以在学习过程中记录重要的知识点和心得体会</p>
+                            <button class="add-first-note-btn" onclick="showAddNoteModal()">
+                                <i class="fas fa-plus"></i>
+                                创建第一个笔记
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    // 显示笔记列表
+                    const notesHtml = notes.map(note => createNoteCardHtml(note)).join('');
+                    notesContainer.innerHTML = notesHtml;
+                }
+            }
+            
+            // 从本地存储获取笔记
+            function getNotesFromStorage() {
+                try {
+                    const notes = localStorage.getItem('learning_notes');
+                    return notes ? JSON.parse(notes) : [];
+                } catch (error) {
+                    console.error('加载笔记数据失败:', error);
+                    return [];
+                }
+            }
+            
+            // 保存笔记到本地存储
+            function saveNotesToStorage(notes) {
+                try {
+                    localStorage.setItem('learning_notes', JSON.stringify(notes));
+                    return true;
+                } catch (error) {
+                    console.error('保存笔记数据失败:', error);
+                    return false;
+                }
+            }
+            
+            // 创建笔记卡片HTML
+            function createNoteCardHtml(note) {
+                const formattedDate = new Date(note.createdAt).toLocaleDateString('zh-CN', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                const tagsHtml = note.tags && note.tags.length > 0 
+                    ? `<div class="note-tags">${note.tags.map(tag => `<span class="note-tag">${tag}</span>`).join('')}</div>`
+                    : '';
+                
+                return `
+                    <div class="note-card" data-note-id="${note.id}">
+                        <div class="note-header">
+                            <h3 class="note-title">${note.title}</h3>
+                            <div class="note-actions">
+                                <button class="note-action-btn" onclick="editNote('${note.id}')" title="编辑">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="note-action-btn" onclick="deleteNote('${note.id}')" title="删除">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="note-meta">
+                            <div class="note-date">
+                                <i class="fas fa-calendar"></i>
+                                ${formattedDate}
+                            </div>
+                            ${note.category ? `<div class="note-category"><i class="fas fa-tag"></i>${note.category}</div>` : ''}
+                        </div>
+                        <div class="note-content">${note.content}</div>
+                        ${tagsHtml}
+                    </div>
+                `;
+            }
+            
+            // 显示新增笔记模态框
+            function showAddNoteModal() {
+                const title = prompt('请输入笔记标题:');
+                if (!title || !title.trim()) return;
+                
+                const content = prompt('请输入笔记内容:');
+                if (!content || !content.trim()) return;
+                
+                const category = prompt('请输入分类(可选):') || '其他';
+                
+                const note = {
+                    id: generateNoteId(),
+                    title: title.trim(),
+                    content: content.trim(),
+                    category: category.trim(),
+                    tags: [],
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+                
+                addNote(note);
+            }
+            
+            // 生成笔记ID
+            function generateNoteId() {
+                return 'note_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            }
+            
+            // 添加笔记
+            function addNote(note) {
+                const notes = getNotesFromStorage();
+                notes.unshift(note); // 添加到列表首位
+                
+                if (saveNotesToStorage(notes)) {
+                    loadNotes(); // 重新加载显示
+                    console.log('✅ 笔记添加成功');
+                } else {
+                    alert('保存笔记失败，请重试');
+                }
+            }
+            
+            // 编辑笔记
+            function editNote(noteId) {
+                const notes = getNotesFromStorage();
+                const note = notes.find(n => n.id === noteId);
+                
+                if (!note) {
+                    alert('找不到指定的笔记');
+                    return;
+                }
+                
+                const newTitle = prompt('请修改标题:', note.title);
+                if (newTitle === null) return; // 用户取消
+                
+                const newContent = prompt('请修改内容:', note.content);
+                if (newContent === null) return; // 用户取消
+                
+                const newCategory = prompt('请修改分类:', note.category);
+                if (newCategory === null) return; // 用户取消
+                
+                // 更新笔记
+                note.title = newTitle.trim() || note.title;
+                note.content = newContent.trim() || note.content;
+                note.category = newCategory.trim() || note.category;
+                note.updatedAt = new Date().toISOString();
+                
+                if (saveNotesToStorage(notes)) {
+                    loadNotes(); // 重新加载显示
+                    console.log('✅ 笔记更新成功');
+                } else {
+                    alert('保存笔记失败，请重试');
+                }
+            }
+            
+            // 删除笔记
+            function deleteNote(noteId) {
+                if (!confirm('确定要删除这个笔记吗？')) return;
+                
+                const notes = getNotesFromStorage();
+                const filteredNotes = notes.filter(n => n.id !== noteId);
+                
+                if (saveNotesToStorage(filteredNotes)) {
+                    loadNotes(); // 重新加载显示
+                    console.log('✅ 笔记删除成功');
+                } else {
+                    alert('删除笔记失败，请重试');
+                }
+            }
+            
+            // 导出笔记
+            function exportNotes() {
+                const notes = getNotesFromStorage();
+                
+                if (notes.length === 0) {
+                    alert('没有笔记可导出');
+                    return;
+                }
+                
+                const exportData = {
+                    exportTime: new Date().toISOString(),
+                    notes: notes
+                };
+                
+                const dataStr = JSON.stringify(exportData, null, 2);
+                const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(dataBlob);
+                link.download = `学习笔记_${new Date().toISOString().split('T')[0]}.json`;
+                link.click();
+                
+                console.log('✅ 笔记导出成功');
+            }
+            
+            // 将函数暴露到全局作用域，以便在HTML中调用
+            window.showAddNoteModal = showAddNoteModal;
+            window.editNote = editNote;
+            window.deleteNote = deleteNote;
+            window.exportNotes = exportNotes;
             
             // 处理思维导图切换
             const mindmapToggleBtn = document.getElementById('mindmapToggleBtn');

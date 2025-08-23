@@ -659,7 +659,7 @@
             loadJobInfo() {
                 // 从URL参数或localStorage加载职位信息
                 const urlParams = new URLSearchParams(window.location.search);
-                const jobTitle = urlParams.get('job') || localStorage.getItem('currentJob') || '前端工程师';
+                const jobTitle = urlParams.get('job') || localStorage.getItem('currentJob') || '后端工程师';
                 const contentTypes = urlParams.get('types') || localStorage.getItem('contentTypes') || '知识点,面试题';
                 
                 this.jobTitleEl.textContent = jobTitle;
@@ -679,30 +679,30 @@
                             { level: 'processing', message: '🔍 正在分析职位描述...', delay: 500 },
                             { level: 'info', message: '📋 职位信息: 后端工程师', delay: 1000 },
                             { level: 'info', message: '📝 选择内容: 知识点, 面试题, 推荐书籍, 证书, 课程', delay: 1500 },
-                            { level: 'processing', message: '🔍 正在分析职位描述...', delay: 2000 },
-                            { level: 'success', message: '✅ 识别到前端开发相关技能要求', delay: 2500 }
+                            { level: 'processing', message: '🔍 正在提取核心技能要求...', delay: 2000 },
+                            { level: 'success', message: '✅ 识别到后端开发相关技能要求', delay: 2500 }
                         ]
                     },
                     { 
                         step: 2, 
                         duration: 4000, 
                         logs: [
-                            { level: 'info', message: '📚 提取关键技术栈: React, JavaScript, CSS, HTML', delay: 500 },
-                            { level: 'processing', message: '🎨 构建技能知识图谱...', delay: 1500 },
-                            { level: 'success', message: '✅ 生成Web前端开发技能树', delay: 2500 },
-                            { level: 'success', message: '✅ 生成JavaScript核心技术分支', delay: 3000 },
-                            { level: 'success', message: '✅ 生成React框架技能分支', delay: 3500 }
+                            { level: 'info', message: '📚 提取关键技术栈: Java, Spring Boot, MySQL, Redis', delay: 500 },
+                            { level: 'processing', message: '🏨 构建技能知识图谱...', delay: 1500 },
+                            { level: 'success', message: '✅ 生成后端开发技能树', delay: 2500 },
+                            { level: 'success', message: '✅ 生成Java核心技术分支', delay: 3000 },
+                            { level: 'success', message: '✅ 生成Spring框架技能分支', delay: 3500 }
                         ]
                     },
                     { 
                         step: 3, 
                         duration: 6000, 
                         logs: [
-                            { level: 'success', message: '✅ 生成开发工具与工程化分支', delay: 500 },
+                            { level: 'success', message: '✅ 生成数据库与中间件技能分支', delay: 500 },
                             { level: 'processing', message: '📖 开始生成学习内容...', delay: 1000 },
                             { level: 'info', message: '📚 生成知识点内容...', delay: 2000 },
                             { level: 'success', message: '✅ 知识点内容生成完成 (20项)', delay: 4000 },
-                            { level: 'error', message: '❓ 生成面试题内容...', delay: 5000 }
+                            { level: 'processing', message: '⚡ 生成面试题内容...', delay: 5000 }
                         ]
                     },
                     { 
