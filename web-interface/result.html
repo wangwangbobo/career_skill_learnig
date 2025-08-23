@@ -2774,6 +2774,17 @@
                     // 移除自定义间距和尺寸参数，让autoFit自动处理最佳显示效果
                 }, validatedRoot);
                 
+                // 🔧 关键修复：监听Markmap的节点点击事件，在节点展开/折叠后重新绑定事件
+                if (markmapInstance && markmapInstance.svg) {
+                    markmapInstance.svg.on('click', function() {
+                        console.log('🔄 检测到Markmap节点被点击，延迟重新绑定事件...');
+                        // 延迟重新绑定事件，等待DOM更新完成
+                        setTimeout(() => {
+                            addMindmapNodeClickEvents();
+                        }, 300);
+                    });
+                }
+                
                 // 添加额外处理，防止初始化过程中的错误
                 if (markmapInstance && typeof markmapInstance.setData === 'function') {
                     // 尝试为MarkmapInstance添加错误处理函数
@@ -3065,11 +3076,21 @@
                                 // 重新渲染现有实例
                                 markmapInstance.setData(rootData);
                                 
+                                // 🔧 关键修复：重新绑定事件
+                                setTimeout(() => {
+                                    addMindmapNodeClickEvents();
+                                }, 500);
+                                
                                 console.log('✅ 展开所有节点成功');
                             } else if (markmapInstance && typeof markmapInstance.fit === 'function') {
                                 // 备用方案：重新适配视图
                                 console.log('⚠️ 使用备用方案：重新适配视图');
                                 markmapInstance.fit();
+                                
+                                // 🔧 关键修复：重新绑定事件
+                                setTimeout(() => {
+                                    addMindmapNodeClickEvents();
+                                }, 500);
                             } else {
                                 console.warn('⚠️ Markmap实例或相关方法不可用');
                             }
@@ -3103,11 +3124,21 @@
                                 // 重新渲染现有实例
                                 markmapInstance.setData(rootData);
                                 
+                                // 🔧 关键修复：重新绑定事件
+                                setTimeout(() => {
+                                    addMindmapNodeClickEvents();
+                                }, 500);
+                                
                                 console.log('✅ 折叠所有节点成功');
                             } else if (markmapInstance && typeof markmapInstance.fit === 'function') {
                                 // 备用方案：如果没有state数据，就简单重新适配
                                 console.log('⚠️ 使用备用方案：重新适配视图');
                                 markmapInstance.fit();
+                                
+                                // 🔧 关键修复：重新绑定事件
+                                setTimeout(() => {
+                                    addMindmapNodeClickEvents();
+                                }, 500);
                             } else {
                                 console.warn('⚠️ Markmap实例或相关方法不可用');
                             }
@@ -3306,7 +3337,65 @@
                 return;
             }
             
-            // 等待SVG元素完全加载
+            // 🔧 改进：移除旧的事件监听器，避免重复绑定
+            if (mindmapContent._mindmapClickHandlerAdded) {
+                console.log('🔄 清理旧的事件监听器...');
+                // 标记已存在，需要重新绑定
+            }
+            
+            // 🔧 新增：使用事件委托模式处理动态生成的节点
+            const handleNodeClick = (e) => {
+                // 检查点击的元素是否是文本节点或foreignObject中的div
+                const target = e.target;
+                const isTextNode = target.tagName === 'text' || 
+                                 (target.tagName === 'DIV' && target.closest('foreignObject'));
+                
+                if (!isTextNode) return;
+                
+                e.stopPropagation(); // 阻止事件冒泡
+                
+                // 获取节点文本内容
+                const nodeText = target.textContent || target.innerText || '';
+                
+                if (nodeText.trim()) {
+                    console.log('💬 点击了思维导图节点:', nodeText);
+                    
+                    // 构建发送到AI助手的消息
+                    const aiMessage = `请帮我详细介绍一下「${nodeText}」这个技术领域的学习路线和关键知识点。
+
+请包括以下内容：
+1. 核心概念和原理
+2. 学习顺序和前置知识
+3. 实际应用场景和项目实践
+4. 学习资源和参考资料
+5. 常见问题和注意事项
+
+请给出详细和实用的学习指导。`;
+                    
+                    // 发送消息到AI助手
+                    sendMessageToAI(aiMessage);
+                    
+                    // 给用户视觉反馈
+                    target.style.backgroundColor = 'rgba(99, 102, 241, 0.1)';
+                    target.style.border = '2px solid #6366f1';
+                    
+                    // 1.5秒后恢复样式
+                    setTimeout(() => {
+                        target.style.backgroundColor = '';
+                        target.style.border = '';
+                    }, 1500);
+                    
+                    console.log('✅ 已将节点内容发送到AI助手');
+                }
+            };
+            
+            // 🔧 改进：使用事件委托，一次性为整个SVG容器添加点击监听
+            mindmapContent.addEventListener('click', handleNodeClick);
+            mindmapContent._mindmapClickHandlerAdded = true;
+            
+            console.log('🎯 已使用事件委托模式为思维导图容器添加点击事件');
+            
+            // 等待SVG元素完全加载，为所有节点添加样式
             const waitForSvgElements = () => {
                 const svg = mindmapContent.querySelector('svg');
                 if (!svg) {
@@ -3320,9 +3409,15 @@
                 console.log(`🔍 找到 ${textElements.length} 个可点击的节点`);
                 
                 textElements.forEach((element, index) => {
-                    // 为每个文本节点添加点击事件
+                    // 🔧 改进：检查是否已经添加过样式，避免重复设置
+                    if (element._mindmapStylesAdded) {
+                        return; // 跳过已经处理过的元素
+                    }
+                    
+                    // 为每个文本节点添加样式
                     element.style.cursor = 'pointer';
                     element.style.userSelect = 'none';
+                    element.style.transition = 'all 0.2s ease'; // 添加过渡效果
                     
                     // 添加悬停效果
                     element.addEventListener('mouseenter', function() {
@@ -3335,47 +3430,11 @@
                         this.style.transform = 'scale(1)';
                     });
                     
-                    // 添加点击事件
-                    element.addEventListener('click', function(e) {
-                        e.stopPropagation(); // 阻止事件冒泡
-                        
-                        // 获取节点文本内容
-                        const nodeText = this.textContent || this.innerText || '';
-                        
-                        if (nodeText.trim()) {
-                            console.log('💬 点击了思维导图节点:', nodeText);
-                            
-                            // 构建发送到AI助手的消息
-                            const aiMessage = `请帮我详细介绍一下「${nodeText}」这个技术领域的学习路线和关键知识点。
-
-请包括以下内容：
-1. 核心概念和原理
-2. 学习顺序和前置知识
-3. 实际应用场景和项目实践
-4. 学习资源和参考资料
-5. 常见问题和注意事项
-
-请给出详细和实用的学习指导。`;
-                            
-                            // 发送消息到AI助手
-                            sendMessageToAI(aiMessage);
-                            
-                            // 给用户视觉反馈
-                            this.style.backgroundColor = 'rgba(99, 102, 241, 0.1)';
-                            this.style.border = '2px solid #6366f1';
-                            
-                            // 1.5秒后恢复样式
-                            setTimeout(() => {
-                                this.style.backgroundColor = '';
-                                this.style.border = '';
-                            }, 1500);
-                            
-                            console.log('✅ 已将节点内容发送到AI助手');
-                        }
-                    });
+                    // 标记已处理
+                    element._mindmapStylesAdded = true;
                 });
                 
-                console.log(`✅ 成功为 ${textElements.length} 个节点添加了点击事件`);
+                console.log(`✅ 成功为 ${textElements.length} 个节点添加了样式和事件委托`);
             };
             
             // 开始等待SVG元素
