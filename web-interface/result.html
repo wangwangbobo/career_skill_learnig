@@ -933,7 +933,10 @@
         /* Markdown内容样式 */
         .message-content h1,
         .message-content h2,
-        .message-content h3 {
+        .message-content h3,
+        .message-content h4,
+        .message-content h5,
+        .message-content h6 {
             margin: 0.5rem 0 0.25rem 0;
             font-weight: 600;
             color: #1f2937;
@@ -954,6 +957,21 @@
         .message-content h3 {
             font-size: 0.9rem;
             color: #4338ca;
+        }
+        
+        .message-content h4 {
+            font-size: 0.85rem;
+            color: #5b21b6;
+        }
+        
+        .message-content h5 {
+            font-size: 0.8rem;
+            color: #7c2d12;
+        }
+        
+        .message-content h6 {
+            font-size: 0.75rem;
+            color: #92400e;
         }
         
         .message-content ul,
@@ -1019,6 +1037,7 @@
             border: 1px solid #d1d5db;
             background: white;
             border-spacing: 0;
+            table-layout: auto;
         }
         
         .message-content th,
@@ -1029,6 +1048,10 @@
             vertical-align: top;
             line-height: 1.4;
             margin: 0;
+            white-space: normal;
+            word-break: keep-all;
+            overflow-wrap: normal;
+            min-width: 0;
         }
         
         .message-content th {
@@ -1036,10 +1059,15 @@
             font-weight: 600;
             color: #374151;
             border-bottom: 2px solid #d1d5db;
+            white-space: nowrap;
         }
         
         .message-content td {
             color: #4b5563;
+        }
+        
+        .message-content thead {
+            background: #f8fafc;
         }
         
         .message-content tbody tr:nth-child(even) {
@@ -1050,8 +1078,40 @@
             background: #f1f5f9;
         }
         
-        .message-content thead tr {
-            background: #f8fafc;
+        /* 表格布局优化 - 支持两列和三列 */
+        .message-content table th:first-child,
+        .message-content table td:first-child {
+            width: 25%;
+            min-width: 100px;
+            white-space: nowrap;
+        }
+        
+        /* 两列表格的最后一列 */
+        .message-content table th:last-child,
+        .message-content table td:last-child {
+            white-space: normal;
+            word-break: normal;
+            overflow-wrap: anywhere;
+            hyphens: auto;
+        }
+        
+        /* 三列表格特殊处理 */
+        .message-content table th:nth-child(2),
+        .message-content table td:nth-child(2) {
+            width: 35%;
+            white-space: normal;
+            word-break: normal;
+            overflow-wrap: anywhere;
+            hyphens: auto;
+        }
+        
+        .message-content table th:nth-child(3),
+        .message-content table td:nth-child(3) {
+            width: 40%;
+            white-space: normal;
+            word-break: normal;
+            overflow-wrap: anywhere;
+            hyphens: auto;
         }
         
         .message-content td {
@@ -1093,7 +1153,10 @@
         
         .stream-container h1,
         .stream-container h2,
-        .stream-container h3 {
+        .stream-container h3,
+        .stream-container h4,
+        .stream-container h5,
+        .stream-container h6 {
             margin: 0.5rem 0 0.25rem 0;
             font-weight: 600;
             color: #1f2937;
@@ -1114,6 +1177,21 @@
         .stream-container h3 {
             font-size: 0.9rem;
             color: #4338ca;
+        }
+        
+        .stream-container h4 {
+            font-size: 0.85rem;
+            color: #5b21b6;
+        }
+        
+        .stream-container h5 {
+            font-size: 0.8rem;
+            color: #7c2d12;
+        }
+        
+        .stream-container h6 {
+            font-size: 0.75rem;
+            color: #92400e;
         }
         
         .stream-container ul,
@@ -5623,7 +5701,10 @@ public class FeatureConfiguration {
                     // 水平分隔线
                     .replace(/^---+$/gm, '<hr>')
                     .replace(/^\*\*\*+$/gm, '<hr>')
-                    // 标题转换
+                    // 标题转换 - 支持六级标题
+                    .replace(/^###### (.*$)/gim, '<h6>$1</h6>')
+                    .replace(/^##### (.*$)/gim, '<h5>$1</h5>')
+                    .replace(/^#### (.*$)/gim, '<h4>$1</h4>')
                     .replace(/^### (.*$)/gim, '<h3>$1</h3>')
                     .replace(/^## (.*$)/gim, '<h2>$1</h2>')
                     .replace(/^# (.*$)/gim, '<h1>$1</h1>')
@@ -5688,7 +5769,10 @@ public class FeatureConfiguration {
                             .replace(/\r\n/g, '\n')
                             .replace(/\r/g, '\n')
                             .trim()
-                            // 标题
+                            // 标题 - 支持六级标题
+                            .replace(/^###### (.*$)/gim, '<h6>$1</h6>')
+                            .replace(/^##### (.*$)/gim, '<h5>$1</h5>')
+                            .replace(/^#### (.*$)/gim, '<h4>$1</h4>')
                             .replace(/^### (.*$)/gim, '<h3>$1</h3>')
                             .replace(/^## (.*$)/gim, '<h2>$1</h2>')
                             .replace(/^# (.*$)/gim, '<h1>$1</h1>')
@@ -5725,7 +5809,34 @@ public class FeatureConfiguration {
                         
                         // 包装表格
                         html = html.replace(/(<tr>.*<\/tr>\n?)+/g, match => {
-                            return '<table>' + match.replace(/\n/g, '') + '</table>';
+                            const rows = match.trim().split('\n').filter(row => row.trim());
+                            if (rows.length === 0) return match;
+                            
+                            let tableHtml = '<table>';
+                            
+                            // 智能识别表头：如果第一行包含较短的中文或英文关键词，则作为表头
+                            const firstRow = rows[0];
+                            const firstRowText = firstRow.replace(/<\/?[^>]+(>|$)/g, '').trim();
+                            const isHeader = rows.length > 1 && (
+                                /^[一-龥]{1,8}$/.test(firstRowText.split(/[|\s]+/)[0]) || // 第一列是1-8个中文字符
+                                /^[A-Z][a-z]{2,10}$/.test(firstRowText.split(/[|\s]+/)[0]) || // 或英文单词
+                                /(问题|项目|建议|说明|方法|类型)/.test(firstRowText) // 或包含常见表头关键词
+                            );
+                            
+                            if (isHeader) {
+                                // 有表头
+                                const headerRow = firstRow.replace(/<td>/g, '<th>').replace(/<\/td>/g, '</th>');
+                                tableHtml += '<thead>' + headerRow + '</thead>';
+                                if (rows.length > 1) {
+                                    tableHtml += '<tbody>' + rows.slice(1).join('') + '</tbody>';
+                                }
+                            } else {
+                                // 没有表头
+                                tableHtml += '<tbody>' + rows.join('') + '</tbody>';
+                            }
+                            
+                            tableHtml += '</table>';
+                            return tableHtml;
                         });
                         
                         // 处理换行 - 简化处理
