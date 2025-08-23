@@ -1015,6 +1015,43 @@
             border-collapse: collapse;
             margin: 0.5rem 0;
             width: 100%;
+            font-size: 0.875rem;
+            border: 1px solid #d1d5db;
+            background: white;
+            border-spacing: 0;
+        }
+        
+        .message-content th,
+        .message-content td {
+            border: 1px solid #d1d5db;
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+            vertical-align: top;
+            line-height: 1.4;
+            margin: 0;
+        }
+        
+        .message-content th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #d1d5db;
+        }
+        
+        .message-content td {
+            color: #4b5563;
+        }
+        
+        .message-content tbody tr:nth-child(even) {
+            background: #f9fafb;
+        }
+        
+        .message-content tbody tr:hover {
+            background: #f1f5f9;
+        }
+        
+        .message-content thead tr {
+            background: #f8fafc;
         }
         
         .message-content td {
@@ -5642,14 +5679,82 @@ public class FeatureConfiguration {
                 return html;
             }
 
-            // 更新流式消息内容 - 最简单版本
+            // 更新流式消息内容 - 极简Markdown格式化
             function updateStreamingMessage(contentElement, content) {
                 if (contentElement && content) {
-                    // 直接替换内容，不做任何复杂处理
-                    contentElement.innerHTML = content.replace(/\n/g, '<br>');
-                    scrollChatToBottom();
+                    try {
+                        // 直接使用简单的正则表达式处理
+                        let html = content
+                            .replace(/\r\n/g, '\n')
+                            .replace(/\r/g, '\n')
+                            .trim()
+                            // 标题
+                            .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+                            .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                            .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                            // 粗体和斜体
+                            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                            .replace(/\*([^*\n]+)\*/g, '<em>$1</em>')
+                            // 行内代码
+                            .replace(/`([^`\n]+)`/g, '<code>$1</code>')
+                            // 代码块
+                            .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+                            // 水平线
+                            .replace(/^---+$/gm, '<hr>')
+                            // 列表项 - 简单处理
+                            .replace(/^[\s]*[-*] (.+)$/gm, '<li>$1</li>')
+                            .replace(/^[\s]*\d+\. (.+)$/gm, '<li data-ol>$1</li>')
+                            // 表格
+                            .replace(/^\|(.+)\|$/gm, (match, content) => {
+                                const cells = content.split('|').map(c => c.trim()).filter(c => c);
+                                if (cells.length && !cells.every(c => /^[-:\s]+$/.test(c))) {
+                                    return '<tr>' + cells.map(c => `<td>${c}</td>`).join('') + '</tr>';
+                                }
+                                return '';
+                            });
+                        
+                        // 包装连续的列表项
+                        html = html.replace(/(<li>.*<\/li>\n?)+/g, match => {
+                            if (match.includes('data-ol')) return match;
+                            return '<ul>' + match.replace(/\n/g, '') + '</ul>';
+                        });
+                        
+                        html = html.replace(/(<li data-ol>.*<\/li>\n?)+/g, match => {
+                            return '<ol>' + match.replace(/data-ol/g, '').replace(/\n/g, '') + '</ol>';
+                        });
+                        
+                        // 包装表格
+                        html = html.replace(/(<tr>.*<\/tr>\n?)+/g, match => {
+                            return '<table>' + match.replace(/\n/g, '') + '</table>';
+                        });
+                        
+                        // 处理换行 - 简化处理
+                        html = html
+                            .replace(/\n\n+/g, '</p><p>')
+                            .replace(/\n/g, '<br>')
+                            .replace(/<\/p><p>/g, '</p>\n<p>')
+                            // 清理标签前后的br
+                            .replace(/<br>(<\/?(?:h[1-6]|ul|ol|table|hr|pre))/g, '$1')
+                            .replace(/(<\/?(?:h[1-6]|ul|ol|table|hr|pre)>)<br>/g, '$1')
+                            .replace(/<\/p>(<(?:ul|ol|table|hr|pre))/g, '$1')
+                            .replace(/(<\/(?:ul|ol|table|hr|pre)>)<p>/g, '$1');
+                        
+                        // 添加p标签包装
+                        if (!html.startsWith('<')) {
+                            html = '<p>' + html + '</p>';
+                        }
+                        
+                        contentElement.innerHTML = html;
+                        scrollChatToBottom();
+                        
+                    } catch (error) {
+                        console.warn('⚠️ Markdown处理失败:', error);
+                        contentElement.innerHTML = '<p>' + content.replace(/\n/g, '<br>') + '</p>';
+                        scrollChatToBottom();
+                    }
                 }
             }
+
             
             // 获取存储的API密钥
             function getStoredApiKey() {
