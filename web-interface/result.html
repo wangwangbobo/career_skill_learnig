@@ -250,6 +250,68 @@
             color: #111827;
         }
         
+        /* 折叠按钮样式 */
+        .sidebar-toggle-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #f3f4f6;
+            color: #6b7280;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+        }
+        
+        .sidebar-toggle-btn:hover {
+            background: #e5e7eb;
+            color: #374151;
+        }
+        
+        /* 折叠状态下的样式 */
+        .content-sidebar.collapsed {
+            width: 60px;
+            overflow: hidden;
+            transition: width 0.3s ease;
+        }
+        
+        .content-sidebar.collapsed .sidebar-header h3 {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+            white-space: nowrap;
+            transition: opacity 0.2s ease, width 0.3s ease;
+        }
+        
+        .content-sidebar.collapsed .sidebar-section {
+            opacity: 0;
+            height: 0;
+            overflow: hidden;
+            padding: 0;
+            margin: 0;
+            transition: opacity 0.2s ease, height 0.3s ease;
+        }
+        
+        .content-sidebar.collapsed .sidebar-toggle-btn {
+            transform: rotate(180deg);
+        }
+        
+        /* 添加过渡动画 */
+        .content-sidebar {
+            transition: width 0.3s ease;
+        }
+        
+        .sidebar-header h3 {
+            transition: opacity 0.2s ease, width 0.3s ease;
+        }
+        
+        .sidebar-section {
+            transition: opacity 0.2s ease, height 0.3s ease;
+        }
+        
 
         .sidebar-section {
             margin-bottom: 1rem;
@@ -2486,6 +2548,14 @@
                 margin-bottom: 1rem;
             }
             
+            /* 移动端折叠状态下的特殊处理 */
+            .content-sidebar.collapsed {
+                width: 100%;
+                height: 60px;
+                min-height: 60px;
+                overflow: hidden;
+            }
+            
             .content-main {
                 width: 100%;
             }
@@ -3653,6 +3723,9 @@
             <aside class="content-sidebar">
                 <div class="sidebar-header">
                     <h3>目录</h3>
+                    <button class="sidebar-toggle-btn" id="sidebarToggleBtn" title="折叠/展开目录">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
                 </div>
                 
                 <!-- 主内容目录 -->
@@ -4811,6 +4884,9 @@ public class FeatureConfiguration {
             // 笔记功能相关代码
             initializeNotesFeature();
             
+            // 初始化目录折叠功能
+            initializeSidebarToggle();
+            
             // 初始化笔记功能
             function initializeNotesFeature() {
                 console.log('📝 初始化笔记功能...');
@@ -5047,6 +5123,49 @@ public class FeatureConfiguration {
             window.editNote = editNote;
             window.deleteNote = deleteNote;
             window.exportNotes = exportNotes;
+            
+            // 初始化目录折叠功能
+            function initializeSidebarToggle() {
+                console.log('📜 初始化目录折叠功能...');
+                
+                const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+                const contentSidebar = document.querySelector('.content-sidebar');
+                
+                if (!sidebarToggleBtn || !contentSidebar) {
+                    console.warn('⚠️ 未找到目录折叠相关元素');
+                    return;
+                }
+                
+                // 绑定折叠按钮事件
+                sidebarToggleBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const isCollapsed = contentSidebar.classList.contains('collapsed');
+                    
+                    if (isCollapsed) {
+                        // 展开目录
+                        contentSidebar.classList.remove('collapsed');
+                        sidebarToggleBtn.title = '折叠目录';
+                        console.log('✅ 目录已展开');
+                    } else {
+                        // 折叠目录
+                        contentSidebar.classList.add('collapsed');
+                        sidebarToggleBtn.title = '展开目录';
+                        console.log('✅ 目录已折叠');
+                    }
+                });
+                
+                // 键盘快捷键支持（Ctrl+B）
+                document.addEventListener('keydown', function(e) {
+                    if (e.ctrlKey && e.key === 'b') {
+                        e.preventDefault();
+                        sidebarToggleBtn.click();
+                    }
+                });
+                
+                console.log('✅ 目录折叠功能初始化完成');
+            }
             
             // 处理思维导图切换
             const mindmapToggleBtn = document.getElementById('mindmapToggleBtn');
