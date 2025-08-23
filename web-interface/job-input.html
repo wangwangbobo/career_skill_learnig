@@ -349,6 +349,31 @@
             font-size: 0.875rem;
             color: #6b7280;
             margin-bottom: 1.5rem;
+            line-height: 1.4;
+        }
+        
+        /* 多文件列表样式 */
+        .file-list {
+            text-align: left;
+            max-height: 120px;
+            overflow-y: auto;
+            padding: 0.5rem;
+            background: #f9fafb;
+            border-radius: 6px;
+            margin-top: 0.5rem;
+        }
+        
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.25rem 0;
+            font-size: 0.75rem;
+            color: #4b5563;
+        }
+        
+        .file-item:not(:last-child) {
+            border-bottom: 1px solid #e5e7eb;
         }
         
         .upload-btn {
@@ -1206,10 +1231,10 @@
                                     <i class="fas fa-cloud-upload-alt"></i>
                                 </div>
                                 <p class="upload-text">拖拽文件到此处，或点击选择文件</p>
-                                <p class="upload-hint">支持 TXT、DOC、DOCX、PDF 格式，最大 10MB</p>
-                                <input type="file" id="fileInput" accept=".txt,.doc,.docx,.pdf,image/*" style="display: none;">
+                                <p class="upload-hint">支持 TXT、DOC、DOCX、PDF 格式，可选择多个文件，单文件最大 10MB</p>
+                                <input type="file" id="fileInput" accept=".txt,.doc,.docx,.pdf,image/*" multiple style="display: none;">
                                 <button class="upload-btn" id="uploadBtn">
-                                    选择文件
+                                    选择文件(支持多选)
                                 </button>
                             </div>
                         </div>
@@ -1309,7 +1334,7 @@
             // 当前选择状态
             let currentChoice = null;
             let selectedJob = '后端工程师';
-            let uploadedFile = null;
+            let uploadedFiles = []; // 存储多个文件
             
             // 1. 处理职位选择选项点击
             hasTargetJob.addEventListener('click', function() {
@@ -1370,8 +1395,8 @@
             
             fileInput.addEventListener('change', function(e) {
                 if (e.target.files.length > 0) {
-                    uploadedFile = e.target.files[0];
-                    handleFileUpload(uploadedFile);
+                    uploadedFiles = Array.from(e.target.files);
+                    handleFileUpload(uploadedFiles);
                 }
             });
             
@@ -1408,18 +1433,63 @@
                 const files = dt.files;
                 
                 if (files.length > 0) {
-                    uploadedFile = files[0];
-                    handleFileUpload(uploadedFile);
+                    uploadedFiles = Array.from(files);
+                    handleFileUpload(uploadedFiles);
                 }
             }
             
-            function handleFileUpload(file) {
-                // 显示文件名
+            function handleFileUpload(files) {
                 const uploadText = document.querySelector('.upload-text');
-                uploadText.textContent = `已选择文件: ${file.name}`;
+                const uploadHint = document.querySelector('.upload-hint');
                 
-                // 可以在这里添加文件类型验证等逻辑
-                console.log('文件已上传:', file.name, file.type, file.size);
+                if (files.length === 1) {
+                    // 单个文件
+                    uploadText.textContent = `已选择文件: ${files[0].name}`;
+                    uploadHint.textContent = `文件大小: ${(files[0].size / 1024 / 1024).toFixed(2)} MB`;
+                } else {
+                    // 多个文件
+                    uploadText.textContent = `已选择 ${files.length} 个文件`;
+                    const totalSize = files.reduce((sum, file) => sum + file.size, 0);
+                    uploadHint.innerHTML = `
+                        <div style="text-align: left; margin-top: 0.5rem;">
+                            <div>总大小: ${(totalSize / 1024 / 1024).toFixed(2)} MB</div>
+                            <div style="margin-top: 0.25rem; font-size: 0.75rem; color: #9ca3af;">
+                                ${files.map(file => `• ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`).join('<br>')}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // 文件类型和大小验证
+                let hasError = false;
+                const maxSize = 10 * 1024 * 1024; // 10MB
+                const allowedTypes = ['.txt', '.doc', '.docx', '.pdf'];
+                
+                for (const file of files) {
+                    // 检查文件大小
+                    if (file.size > maxSize) {
+                        alert(`文件 "${file.name}" 超过10MB限制`);
+                        hasError = true;
+                        break;
+                    }
+                    
+                    // 检查文件类型
+                    const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+                    if (!allowedTypes.includes(fileExtension) && !file.type.startsWith('image/')) {
+                        alert(`文件 "${file.name}" 格式不支持，请选择 TXT、DOC、DOCX、PDF 或图片文件`);
+                        hasError = true;
+                        break;
+                    }
+                }
+                
+                if (hasError) {
+                    uploadedFiles = [];
+                    uploadText.textContent = '拖拽文件到此处，或点击选择文件';
+                    uploadHint.textContent = '支持 TXT、DOC、DOCX、PDF 格式，最大 10MB';
+                    return;
+                }
+                
+                console.log('文件已上传:', files.map(f => ({ name: f.name, type: f.type, size: f.size })));
                 
                 // 更新生成按钮状态
                 updateGenerateButtonState();
@@ -1486,7 +1556,7 @@
                 if (currentChoice === 'has-target') {
                     if (fileUploadTab.classList.contains('active')) {
                         // 文件上传模式
-                        generateBtn.disabled = !uploadedFile;
+                        generateBtn.disabled = uploadedFiles.length === 0;
                     } else {
                         // 文本输入模式
                         generateBtn.disabled = !jobDescription.value.trim();
