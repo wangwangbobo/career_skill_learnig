@@ -6237,6 +6237,7 @@ public class FeatureConfiguration {
                 const aiAssistant = document.querySelector('.ai-assistant');
                 const minimizeBtn = document.getElementById('minimizeAssistantBtn');
                 const icon = minimizeBtn ? minimizeBtn.querySelector('i') : null;
+                const chatInput = document.getElementById('chatInput');
                 
                 if (aiAssistant) {
                     if (aiAssistant.classList.contains('minimized')) {
@@ -6249,6 +6250,15 @@ public class FeatureConfiguration {
                             minimizeBtn.title = '缩小面板';
                         }
                         console.log('🔍 AI助手面板已扩大');
+                        
+                        // 展开后自动将焦点定位到输入框
+                        if (chatInput) {
+                            // 使用setTimeout确保DOM更新完成后再设置焦点
+                            setTimeout(() => {
+                                chatInput.focus();
+                                console.log('🎯 已自动定位到输入框');
+                            }, 100);
+                        }
                     } else {
                         // 缩小
                         aiAssistant.classList.add('minimized');
@@ -6968,6 +6978,11 @@ public class FeatureConfiguration {
                     if (minimizeBtn) {
                         minimizeBtn.title = '缩小面板';
                     }
+                    // 展开后自动将焦点定位到输入框
+                    setTimeout(() => {
+                        chatInput.focus();
+                        console.log('🎯 AI助手展开后已自动定位到输入框');
+                    }, 150);
                 }
             }
             
