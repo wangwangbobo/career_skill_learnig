@@ -1044,6 +1044,7 @@
             transition: all 0.1s ease; /* 添加平滑过渡 */
         }
         
+        /* 流式容器中的Markdown元素样式 */
         .stream-container p {
             margin: 0 0 0.5rem 0;
             line-height: 1.6;
@@ -1051,6 +1052,77 @@
         
         .stream-container p:last-child {
             margin-bottom: 0;
+        }
+        
+        .stream-container h1,
+        .stream-container h2,
+        .stream-container h3 {
+            margin: 0.5rem 0 0.25rem 0;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .stream-container h1 {
+            font-size: 1rem;
+            border-bottom: 1px solid #6366f1;
+            padding-bottom: 0.25rem;
+        }
+        
+        .stream-container h2 {
+            font-size: 0.95rem;
+            border-left: 3px solid #6366f1;
+            padding-left: 0.5rem;
+        }
+        
+        .stream-container h3 {
+            font-size: 0.9rem;
+            color: #4338ca;
+        }
+        
+        .stream-container ul,
+        .stream-container ol {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+        }
+        
+        .stream-container li {
+            margin: 0.25rem 0;
+            color: #4b5563;
+        }
+        
+        .stream-container strong {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .stream-container em {
+            font-style: italic;
+            color: #6b7280;
+        }
+        
+        .stream-container code {
+            background: #e5e7eb;
+            padding: 0.125rem 0.25rem;
+            border-radius: 0.25rem;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: #dc2626;
+        }
+        
+        .stream-container pre {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            overflow-x: auto;
+        }
+        
+        .stream-container pre code {
+            background: none;
+            padding: 0;
+            color: #374151;
+            font-size: 0.8rem;
         }
         
         .user-message .message-content {
@@ -5570,46 +5642,12 @@ public class FeatureConfiguration {
                 return html;
             }
 
-            // 更新流式消息内容
+            // 更新流式消息内容 - 最简单版本
             function updateStreamingMessage(contentElement, content) {
-                if (contentElement) {
-                    // 为了实现真正的流式显示，我们使用一个更温和的方式
-                    // 检查是否已经有了流式容器元素
-                    let streamContainer = contentElement.querySelector('.stream-container');
-                    
-                    if (!streamContainer) {
-                        // 初次创建流式容器
-                        streamContainer = document.createElement('div');
-                        streamContainer.className = 'stream-container';
-                        contentElement.innerHTML = '';
-                        contentElement.appendChild(streamContainer);
-                        // 初始化上次的内容
-                        streamContainer.lastContent = '';
-                    }
-                    
-                    // 检查内容是否发生了变化
-                    if (streamContainer.lastContent === content) {
-                        return; // 内容没有变化，不需要更新
-                    }
-                    
-                    // 使用简化的渲染，避免复杂的Markdown解析
-                    const processedContent = content
-                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // 粗体
-                        .replace(/\*(.*?)\*/g, '<em>$1</em>') // 斜体
-                        .replace(/`(.*?)`/g, '<code>$1</code>') // 行内代码
-                        .replace(/\n\n/g, '</p><p>') // 段落分隔
-                        .replace(/\n/g, '<br>'); // 单行换行
-                    
-                    // 包装在段落中
-                    const finalContent = '<p>' + processedContent + '</p>';
-                    
-                    // 使用平滑的更新
-                    streamContainer.innerHTML = finalContent;
-                    
-                    // 记录当前内容以便下次比较
-                    streamContainer.lastContent = content;
-                    
-                    scrollChatToBottom(); // 每次更新都滚动到底部
+                if (contentElement && content) {
+                    // 直接替换内容，不做任何复杂处理
+                    contentElement.innerHTML = content.replace(/\n/g, '<br>');
+                    scrollChatToBottom();
                 }
             }
             
