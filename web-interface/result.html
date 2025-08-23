@@ -1248,8 +1248,8 @@
             font-size: 0.875rem !important;
             line-height: 1.4 !important; /* 与AI消息保持一致的行高 */
             display: inline-block !important; /* 改为inline-block，既能控制宽度又不会产生多余空行 */
-            width: 100% !important; /* 与AI消息一样宽 */
-            max-width: 100% !important; /* 移除宽度限制 */
+            width: auto !important; /* 改为auto，根据内容自适应宽度 */
+            max-width: 80% !important; /* 限制最大宽度为80% */
             min-width: auto !important;
             word-wrap: break-word !important;
             word-break: break-word !important;
@@ -1262,8 +1262,8 @@
         
         /* 增加一个更具体的选择器以确保优先级 */
         .ai-assistant .chat-messages .message.user-message .message-content {
-            max-width: 100% !important;
-            width: 100% !important;
+            width: auto !important; /* 改为auto，根据内容自适应 */
+            max-width: 80% !important; /* 设置最大宽度为80% */
             min-width: auto !important;
         }
         
@@ -2719,7 +2719,8 @@
             }
             
             .user-message .message-content {
-                max-width: 100%; /* 用户消息与AI消息保持一致的宽度 */
+                width: auto !important; /* 改为auto，根据内容自适应 */
+                max-width: 80% !important; /* 设置最大宽度为80% */
             }
         }
         
@@ -2751,7 +2752,8 @@
             }
             
             .user-message .message-content {
-                max-width: 100%; /* 用户消息与AI消息保持一致的宽度 */
+                width: auto !important; /* 改为auto，根据内容自适应 */
+                max-width: 80% !important; /* 设置最大宽度为80% */
             }
             
             .mindmap-content {
@@ -2846,7 +2848,8 @@
             }
             
             .user-message .message-content {
-                max-width: 100%; /* 用户消息与AI消息保持一致的宽度 */
+                width: auto !important; /* 改为auto，根据内容自适应 */
+                max-width: 80% !important; /* 设置最大宽度为80% */
             }
         }
         
@@ -4833,7 +4836,7 @@ public class FeatureConfiguration {
                 <div class="assistant-header">
                     <h3 class="assistant-title">
                         <i class="fas fa-robot"></i>
-                        AI 智能助手
+                        AI 学习助手
                     </h3>
                     <div class="assistant-actions">
                         <button class="assistant-btn" id="clearChatBtn" title="清空聊天">
@@ -5996,13 +5999,12 @@ public class FeatureConfiguration {
             if (sendBtn && chatInput) {
                 sendBtn.addEventListener('click', async function() {
                     const message = chatInput.value.trim();
-                    if (message) {
+                    if (message && !sendBtn.disabled) {
                         console.log('📝 发送消息:', message);
                         
-                        // 立即清空输入框并禁用
+                        // 立即清空输入框并禁用发送按钮
                         chatInput.value = '';
-                        // 移除blur()，保持焦点在输入框以便连续输入
-                        sendBtn.disabled = true; // 禁用发送按钮防止重复点击
+                        sendBtn.disabled = true;
                         console.log('✅ 输入框已清空');
                         
                         // 添加用户消息
@@ -6030,7 +6032,7 @@ public class FeatureConfiguration {
                         } finally {
                             // 恢复发送按钮状态
                             sendBtn.disabled = false;
-                            // 保持焦点在输入框
+                            // 保持焦点在输入框以支持连续输入
                             chatInput.focus();
                         }
                     }
@@ -6040,8 +6042,40 @@ public class FeatureConfiguration {
                     if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
                         // 确保输入框有内容才触发发送
-                        if (chatInput.value.trim() && !sendBtn.disabled) {
-                            sendBtn.click();
+                        const message = chatInput.value.trim();
+                        if (message && !sendBtn.disabled) {
+                            // 立即清空输入框（防止重复发送）
+                            chatInput.value = '';
+                            // 禁用发送按钮防止重复点击
+                            sendBtn.disabled = true;
+                            console.log('✨ 键盘发送消息:', message);
+                            console.log('✅ 输入框已清空');
+                            
+                            // 添加用户消息
+                            addUserMessage(message);
+                            
+                            // 创建流式消息容器
+                            const aiMessageContent = addAssistantMessageStreaming();
+                            
+                            // 调用流式API
+                            callDashScopeAPIStream(message, (content) => {
+                                updateStreamingMessage(aiMessageContent, content);
+                            }).then(() => {
+                                if (aiMessageContent) {
+                                    aiMessageContent.classList.remove('streaming');
+                                }
+                            }).catch(error => {
+                                console.error('❌ 聊天API调用失败:', error);
+                                if (aiMessageContent) {
+                                    aiMessageContent.innerHTML = '<p>⚠️ 抱歉，我遇到了一些问题。请检查API配置或稍后再试。</p>';
+                                    aiMessageContent.classList.remove('streaming');
+                                }
+                            }).finally(() => {
+                                // 恢复发送按钮状态
+                                sendBtn.disabled = false;
+                                // 保持焦点在输入框
+                                chatInput.focus();
+                            });
                         }
                     }
                 });
