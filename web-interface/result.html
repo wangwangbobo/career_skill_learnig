@@ -568,6 +568,8 @@
         /* 右侧AI助手 */
         .ai-assistant {
             width: 380px;
+            min-width: 300px; /* 最小宽度 */
+            max-width: 600px; /* 最大宽度 */
             height: calc(100vh - 120px); /* 减少顶部留白，更好适应屏幕 */
             max-height: 900px; /* 增加最大高度 */
             min-height: 400px; /* 设置最小高度 */
@@ -578,8 +580,40 @@
             flex-direction: column;
             flex-shrink: 0;
             overflow: hidden;
-            transition: all 0.3s ease;
+            transition: box-shadow 0.3s ease; /* 只保留必要的过渡动画 */
             z-index: 2; /* 确保AI助手始终在最上层 */
+            position: relative; /* 为拖拽边框定位 */
+        }
+        
+        /* 左侧拖拽边框 */
+        .ai-assistant-resize-handle {
+            position: absolute;
+            left: -3px;
+            top: 0;
+            width: 6px;
+            height: 100%;
+            cursor: col-resize;
+            background: transparent;
+            z-index: 10;
+            transition: background-color 0.2s ease;
+        }
+        
+        .ai-assistant-resize-handle:hover {
+            background: linear-gradient(to right, transparent, rgba(99, 102, 241, 0.3), transparent);
+        }
+        
+        .ai-assistant-resize-handle.resizing {
+            background: linear-gradient(to right, transparent, rgba(99, 102, 241, 0.5), transparent);
+        }
+        
+        /* 拖拽中的状态 */
+        .ai-assistant.resizing {
+            user-select: none;
+            pointer-events: none;
+        }
+        
+        .ai-assistant.resizing .ai-assistant-resize-handle {
+            pointer-events: auto;
         }
         
         /* AI助手缩小状态 */
@@ -629,6 +663,10 @@
         }
         
         .ai-assistant.minimized .chat-input-container {
+            display: none !important;
+        }
+        
+        .ai-assistant.minimized .ai-assistant-resize-handle {
             display: none !important;
         }
         
@@ -2566,6 +2604,11 @@
                 max-height: 400px;
                 min-height: 350px;
                 margin-top: 1rem; /* 添加上边距，与内容区域分开 */
+            }
+            
+            /* 移动端隐藏拖拽控件 */
+            .ai-assistant-resize-handle {
+                display: none !important;
             }
             
             .chat-messages {
@@ -4560,6 +4603,9 @@ public class FeatureConfiguration {
 
             <!-- 右侧AI助手 -->
             <aside class="ai-assistant minimized">
+                <!-- 左侧拖拽边框 -->
+                <div class="ai-assistant-resize-handle" id="aiResizeHandle"></div>
+                
                 <div class="assistant-header">
                     <h3 class="assistant-title">
                         <i class="fas fa-robot"></i>
@@ -4887,6 +4933,9 @@ public class FeatureConfiguration {
             // 初始化目录折叠功能
             initializeSidebarToggle();
             
+            // 初始化AI助手拖拽调整大小功能
+            initializeAIAssistantResize();
+            
             // 初始化笔记功能
             function initializeNotesFeature() {
                 console.log('📝 初始化笔记功能...');
@@ -5165,6 +5214,143 @@ public class FeatureConfiguration {
                 });
                 
                 console.log('✅ 目录折叠功能初始化完成');
+            }
+            
+            // 初始化AI助手拖拽调整大小功能
+            function initializeAIAssistantResize() {
+                console.log('🎯 初始化AI助手拖拽调整大小功能...');
+                
+                const aiAssistant = document.querySelector('.ai-assistant');
+                const resizeHandle = document.getElementById('aiResizeHandle');
+                
+                if (!aiAssistant || !resizeHandle) {
+                    console.warn('⚠️ 未找到AI助手或拖拽控件元素');
+                    return;
+                }
+                
+                let isResizing = false;
+                let startX = 0;
+                let startWidth = 0;
+                
+                // 获取AI助手当前宽度
+                function getCurrentWidth() {
+                    return parseInt(window.getComputedStyle(aiAssistant).width, 10);
+                }
+                
+                // 开始拖拽
+                function startResize(e) {
+                    // 检查AI助手是否处于缩小状态
+                    if (aiAssistant.classList.contains('minimized')) {
+                        return; // 缩小状态下不允许拖拽
+                    }
+                    
+                    isResizing = true;
+                    startX = e.clientX;
+                    startWidth = getCurrentWidth();
+                    
+                    // 添加拖拽状态样式
+                    document.body.style.cursor = 'col-resize';
+                    document.body.style.userSelect = 'none';
+                    aiAssistant.classList.add('resizing');
+                    resizeHandle.classList.add('resizing');
+                    
+                    console.log('🎯 开始拖拽调整AI助手大小', { startX, startWidth });
+                    
+                    // 阻止默认行为
+                    e.preventDefault();
+                }
+                
+                // 拖拽中
+                function doResize(e) {
+                    if (!isResizing) return;
+                    
+                    const deltaX = startX - e.clientX; // 向左拖拽为正值
+                    const newWidth = startWidth + deltaX;
+                    
+                    // 限制最小和最大宽度
+                    const minWidth = 300;
+                    const maxWidth = 600;
+                    const constrainedWidth = Math.min(Math.max(newWidth, minWidth), maxWidth);
+                    
+                    // 应用新宽度
+                    aiAssistant.style.width = constrainedWidth + 'px';
+                    
+                    console.log('🎯 拖拽中:', { deltaX, newWidth, constrainedWidth });
+                    
+                    e.preventDefault();
+                }
+                
+                // 结束拖拽
+                function stopResize() {
+                    if (!isResizing) return;
+                    
+                    isResizing = false;
+                    
+                    // 移除拖拽状态样式
+                    document.body.style.cursor = '';
+                    document.body.style.userSelect = '';
+                    aiAssistant.classList.remove('resizing');
+                    resizeHandle.classList.remove('resizing');
+                    
+                    // 保存当前宽度到本地存储
+                    const currentWidth = getCurrentWidth();
+                    localStorage.setItem('ai_assistant_width', currentWidth.toString());
+                    
+                    console.log('✅ 拖拽结束，AI助手宽度已调整为:', currentWidth + 'px');
+                }
+                
+                // 从本地存储恢复宽度
+                function restoreWidth() {
+                    const savedWidth = localStorage.getItem('ai_assistant_width');
+                    if (savedWidth) {
+                        const width = parseInt(savedWidth, 10);
+                        if (width >= 300 && width <= 600) {
+                            aiAssistant.style.width = width + 'px';
+                            console.log('✅ 已恢复AI助手宽度:', width + 'px');
+                        }
+                    }
+                }
+                
+                // 绑定事件监听器（鼠标事件）
+                resizeHandle.addEventListener('mousedown', startResize);
+                document.addEventListener('mousemove', doResize);
+                document.addEventListener('mouseup', stopResize);
+                
+                // 绑定触摸事件（移动设备支持）
+                resizeHandle.addEventListener('touchstart', function(e) {
+                    if (e.touches.length === 1) {
+                        const touch = e.touches[0];
+                        const mouseEvent = new MouseEvent('mousedown', {
+                            clientX: touch.clientX,
+                            clientY: touch.clientY
+                        });
+                        startResize(mouseEvent);
+                    }
+                    e.preventDefault();
+                });
+                
+                document.addEventListener('touchmove', function(e) {
+                    if (e.touches.length === 1 && isResizing) {
+                        const touch = e.touches[0];
+                        const mouseEvent = new MouseEvent('mousemove', {
+                            clientX: touch.clientX,
+                            clientY: touch.clientY
+                        });
+                        doResize(mouseEvent);
+                    }
+                    e.preventDefault();
+                });
+                
+                document.addEventListener('touchend', function(e) {
+                    if (isResizing) {
+                        stopResize();
+                    }
+                });
+                
+                // 恢复保存的宽度
+                restoreWidth();
+                
+                console.log('✅ AI助手拖拽调整大小功能初始化完成');
             }
             
             // 处理思维导图切换
